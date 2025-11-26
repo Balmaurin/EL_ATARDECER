@@ -1,0 +1,124 @@
+# LARGE FILES - NEVER COMMIT
+*.gguf
+*.bin
+*.safetensors
+*.h5
+*.pkl
+*.joblib
+*.model
+*.weights
+*.checkpoint
+
+# DIRECTORIES TO IGNORE
+models/
+checkpoints/
+weights/
+data/
+datasets/
+logs/
+cache/
+temp/
+
+# PYTHON
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# TESTING
+.tox/
+.coverage
+.pytest_cache/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+htmlcov/
+
+# ENTERPRISE GENERATED
+test_backups/
+audit_results/
+tests/results/
+
+# ENVIRONMENTS
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# LARGE DATA FILES
+*.csv
+*.json
+*.parquet
+*.feather
+*.hdf5
+
+# LOGS
+*.log
+*.out
+*.err
+
+# COMPRESSED
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# TEMPORARY
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# JUPYTER
+.ipynb_checkpoints
+
+# NODE (if any)
+node_modules/
+npm-debug.log*
+
+# ANY FILE > 50MB
+**/large_*
+**/big_*
+**/huge_*
