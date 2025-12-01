@@ -165,25 +165,59 @@ class ActiveAgentRegistry:
 
     async def _ping_agent_real(self, agent_id: str) -> bool:
         """
-        Hacer ping REAL a un agente.
-        Verifica si la instancia existe en memoria y si tiene atributos vitales.
+        REAL ping to agent - checks actual agent health
+        Uses actual agent methods, not memory references
         """
         try:
             agent = self._agent_instances.get(agent_id)
             if agent is None:
                 return False
             
-            # Verificar si el objeto sigue vivo en memoria
-            if sys.getrefcount(agent) <= 0:
-                return False
-                
-            # Si el agente tiene un método 'ping' o 'is_alive', usarlo
+            # REAL health check: Try to call agent methods
+            # Method 1: Check if agent has health_check method
+            if hasattr(agent, 'health_check'):
+                try:
+                    if asyncio.iscoroutinefunction(agent.health_check):
+                        health_result = await asyncio.wait_for(agent.health_check(), timeout=2.0)
+                    else:
+                        health_result = agent.health_check()
+                    
+                    # Check if health result indicates agent is alive
+                    if isinstance(health_result, dict):
+                        status = health_result.get('status', 'unknown')
+                        return status in ['operational', 'active', 'idle', 'ready']
+                    elif isinstance(health_result, bool):
+                        return health_result
+                except asyncio.TimeoutError:
+                    self.logger.warning(f"Health check timeout for agent {agent_id}")
+                    return False
+                except Exception as e:
+                    self.logger.debug(f"Health check error for agent {agent_id}: {e}")
+            
+            # Method 2: Check is_active attribute
             if hasattr(agent, 'is_active'):
-                return getattr(agent, 'is_active', False)
-                
+                is_active = getattr(agent, 'is_active', False)
+                if callable(is_active):
+                    return is_active()
+                return bool(is_active)
+            
+            # Method 3: Check status attribute
+            if hasattr(agent, 'status'):
+                status = getattr(agent, 'status', None)
+                if hasattr(status, 'value'):
+                    status = status.value
+                return status not in ['error', 'shutdown', 'offline', 'dead']
+            
+            # Method 4: Try to access agent_id (basic existence check)
+            if hasattr(agent, 'agent_id'):
+                return getattr(agent, 'agent_id') == agent_id
+            
+            # If we can access the agent object, assume it's alive
+            # This is a last resort - better than getrefcount
             return True
 
-        except Exception:
+        except Exception as e:
+            self.logger.debug(f"Error pinging agent {agent_id}: {e}")
             return False
 
     def _calculate_health_score(self, health_status: AgentHealthStatus) -> float:

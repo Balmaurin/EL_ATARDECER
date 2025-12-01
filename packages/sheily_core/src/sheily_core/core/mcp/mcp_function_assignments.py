@@ -484,7 +484,8 @@ if __name__ == "__main__":
         print("=" * 80)
         print(f"📊 Functions analyzed: {results['overview']['total_functions']}")
         print(f"🤖 Functions assigned: {results['overview']['assigned_functions']}")
-        print(".1f"        print(f"🎯 Agent categories: {results['overview']['capabilitity_categories']}")
+        print(f"   Coverage: {results['overview']['coverage_percentage']:.1f}%")
+        print(f"🎯 Agent categories: {results['overview']['capabilitity_categories']}")
 
         # Show sample assignments - expanded
         sample_assignments = list(results['assignments'].items())[:15]
@@ -492,7 +493,7 @@ if __name__ == "__main__":
             print("\n📋 DETAILED ASSIGNMENT VALIDATION:")
             print("-" * 80)
             for i, (func_path, assignment) in enumerate(sample_assignments, 1):
-                print("2d"
+                print(f"   {i:2d}. {func_path} -> {assignment['primary_agent']}")
         # Analyze assignment quality
         assignment_analysis = await analyze_assignment_quality(orchestrator.agent_assignments)
         print(f"\n🎯 ASSIGNMENT QUALITY ANALYSIS:")
@@ -510,7 +511,7 @@ if __name__ == "__main__":
 
         for agent, count in sorted(agent_count.items(), key=lambda x: x[1], reverse=True)[:10]:
             pct = (count / results['overview']['total_functions']) * 100
-            print("25")
+            print(f"   - {agent}: {count} ({pct:.1f}%)")
 
         # Quality validation
         print(f"\n✅ ASSIGNMENT QUALITY VALIDATION:")

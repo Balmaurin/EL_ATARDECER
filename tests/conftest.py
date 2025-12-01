@@ -12,9 +12,9 @@ from pathlib import Path
 import pytest
 from collections import defaultdict
 
-# ===========================
+# ====================================================================
 # PATH CONFIGURATION
-# ===========================
+# ====================================================================
 
 # Agregar el directorio raíz al PYTHONPATH
 ROOT_DIR = Path(__file__).parent.parent
@@ -26,12 +26,12 @@ sys.path.insert(0, str(ROOT_DIR / "tools"))
 # Configurar PYTHONPATH en el entorno
 os.environ["PYTHONPATH"] = f"{ROOT_DIR};{ROOT_DIR / 'apps'};{ROOT_DIR / 'packages'};{ROOT_DIR / 'tools'}"
 
-print(f"✅ PYTHONPATH configurado: {ROOT_DIR}")
+print(f"[OK] PYTHONPATH configurado: {ROOT_DIR}")
 
 
-# ===========================
+# ====================================================================
 # PYTEST CONFIGURATION HOOKS
-# ===========================
+# ====================================================================
 
 def pytest_configure(config):
     """Configuración inicial de pytest"""
@@ -77,9 +77,9 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.performance)
 
 
-# ===========================
+# ====================================================================
 # SHARED FIXTURES
-# ===========================
+# ====================================================================
 
 @pytest.fixture(scope="session")
 def test_config():
@@ -89,42 +89,6 @@ def test_config():
         "frontend_url": "http://localhost:3000",
         "timeout": 30,
         "retry_attempts": 3
-    }
-
-
-@pytest.fixture(scope="session")
-def mock_dependencies():
-    """Mock de dependencias externas para tests que no requieren servicios reales"""
-    # Importar numpy solo si está disponible
-    try:
-        import numpy as np
-        numpy_available = True
-    except ImportError:
-        numpy_available = False
-        # Crear mock de numpy para tests que lo necesiten
-        class MockNumpy:
-            @staticmethod
-            def mean(data):
-                return sum(data) / len(data) if data else 0
-            
-            @staticmethod
-            def std(data):
-                if not data:
-                    return 0
-                mean_val = sum(data) / len(data)
-                variance = sum((x - mean_val) ** 2 for x in data) / len(data)
-                return variance ** 0.5
-        
-        np = MockNumpy()
-    
-    # Agregar numpy al namespace global para tests
-    import builtins
-    if not numpy_available:
-        builtins.np = np
-    
-    return {
-        "numpy_available": numpy_available,
-        "np": np
     }
 
 
@@ -142,9 +106,9 @@ def mock_defaultdict():
     return defaultdict
 
 
-# ===========================
+# ====================================================================
 # ENTERPRISE TEST FIXTURES
-# ===========================
+# ====================================================================
 
 @pytest.fixture(scope="session")
 def enterprise_test_environment():
@@ -163,87 +127,4 @@ def enterprise_test_environment():
     }
 
 
-@pytest.fixture(scope="function")
-def skip_if_no_browser():
-    """Skip test si no hay navegador disponible"""
-    try:
-        from selenium import webdriver
-        return True
-    except ImportError:
-        pytest.skip("Selenium no disponible - test de UI omitido")
-
-
-@pytest.fixture(scope="function")
-def skip_if_no_service(test_config):
-    """Skip test si el servicio no está disponible"""
-    import requests
-    try:
-        response = requests.get(test_config["base_url"] + "/health", timeout=2)
-        if response.status_code != 200:
-            pytest.skip(f"Servicio no disponible en {test_config['base_url']}")
-    except requests.exceptions.RequestException:
-        pytest.skip(f"Servicio no disponible en {test_config['base_url']}")
-
-
-# ===========================
-# TEST REPORTING
-# ===========================
-
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    """Hook para generar reportes personalizados"""
-    outcome = yield
-    report = outcome.get_result()
-    
-    # Agregar información adicional a los reportes
-    if report.when == "call":
-        if hasattr(item, "funcargs"):
-            report.test_metadata = {
-                "test_name": item.name,
-                "test_file": str(item.fspath),
-                "duration": report.duration,
-                "outcome": report.outcome
-            }
-
-
-def pytest_terminal_summary(terminalreporter, exitstatus, config):
-    """Resumen personalizado al final de la ejecución de tests"""
-    print("\n" + "="*60)
-    print(">> EL-AMANECER-V4 TEST EXECUTION SUMMARY")
-    print("="*60)
-    
-    # Estadísticas
-    passed = len(terminalreporter.stats.get('passed', []))
-    failed = len(terminalreporter.stats.get('failed', []))
-    skipped = len(terminalreporter.stats.get('skipped', []))
-    errors = len(terminalreporter.stats.get('error', []))
-    
-    total = passed + failed + skipped + errors
-    
-    if total > 0:
-        success_rate = (passed / total) * 100
-        print(f"[+] Passed:  {passed}/{total} ({success_rate:.1f}%)")
-        print(f"[-] Failed:  {failed}/{total}")
-        print(f"[>] Skipped: {skipped}/{total}")
-        print(f"[!] Errors:  {errors}/{total}")
-        
-        if success_rate >= 95:
-            print("\n[+] ENTERPRISE QUALITY GATE: PASSED")
-        elif success_rate >= 80:
-            print("\n[!] ENTERPRISE QUALITY GATE: WARNING")
-        else:
-            print("\n[-] ENTERPRISE QUALITY GATE: FAILED")
-    
-    print("="*60 + "\n")
-
-
-# ===========================
-# CLEANUP
-# ===========================
-
-@pytest.fixture(scope="session", autouse=True)
-def cleanup_after_tests():
-    """Limpieza automática después de todos los tests"""
-    yield
-    # Aquí se puede agregar lógica de limpieza si es necesaria
-    print("\n[+] Limpieza de tests completada")
+print("[INIT] EL-AMANECER-V4 PYTEST CONFIGURATION LOADED")

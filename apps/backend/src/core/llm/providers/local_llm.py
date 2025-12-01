@@ -120,16 +120,20 @@ class LocalLLM(LLMInterface):
         try:
             # Prompt del sistema por defecto
             if system_prompt is None:
-                system_prompt = """Eres LLAMA 3, un asistente de IA inteligente y útil creado por Meta.  # noqa: E501
-Responde de manera clara, precisa y contextual. Si tienes información adicional del contexto proporcionado,
-utilízala para dar respuestas más informadas y útiles.
+                system_prompt = """Eres un asistente de IA avanzado, inteligente y extremadamente útil.
+Tu objetivo es proporcionar respuestas completas, detalladas y de la más alta calidad.
 
-Instrucciones importantes:
-- Sé amable y servicial
-- Proporciona respuestas precisas y bien fundamentadas
-- Si no sabes algo, admítelo honestamente
-- Mantén un tono conversacional y natural
-- Usa el contexto proporcionado cuando sea relevante"""
+Instrucciones para respuestas de excelencia:
+- Proporciona explicaciones AMPLIAS y DETALLADAS, no te limites a respuestas cortas
+- Desarrolla cada punto con profundidad, ejemplos y contexto relevante
+- Estructura tus respuestas de forma clara con párrafos bien organizados
+- Incluye detalles técnicos cuando sea apropiado
+- Ofrece múltiples perspectivas o enfoques cuando sea relevante
+- Sé exhaustivo pero mantén la claridad y coherencia
+- Si tienes contexto adicional, úsalo para enriquecer tu respuesta
+- Mantén un tono profesional, amable y conversacional
+- Si no sabes algo con certeza, admítelo honestamente pero ofrece alternativas
+- Prioriza la CALIDAD y COMPLETITUD sobre la brevedad"""
 
             # Añadir contexto si existe
             if context:
@@ -141,13 +145,14 @@ Instrucciones importantes:
                 {"role": "user", "content": message},
             ]
 
-            # Parámetros de generación
+            # Parámetros de generación optimizados para respuestas amplias y de calidad
             generation_params = {
-                "max_tokens": kwargs.get("max_tokens", 512),
-                "temperature": kwargs.get("temperature", 0.7),
-                "top_p": kwargs.get("top_p", 0.9),
-                "repeat_penalty": kwargs.get("repeat_penalty", 1.1),
-                "stop": kwargs.get("stop", ["User:", "System:", "Assistant:"]),
+                "max_tokens": kwargs.get("max_tokens", 2048),  # Aumentado para respuestas más largas
+                "temperature": kwargs.get("temperature", 0.8),  # Más creatividad y variedad
+                "top_p": kwargs.get("top_p", 0.95),  # Mayor diversidad en tokens
+                "repeat_penalty": kwargs.get("repeat_penalty", 1.15),  # Evita repeticiones
+                "top_k": kwargs.get("top_k", 50),  # Control de calidad de tokens
+                "stop": kwargs.get("stop", ["User:", "System:", "Assistant:", "\n\nUser:", "\n\nHuman:"]),
             }
 
             logger.info(f"[LLM] Llamando a LLAMA LLM con mensaje: {message[:50]}...")

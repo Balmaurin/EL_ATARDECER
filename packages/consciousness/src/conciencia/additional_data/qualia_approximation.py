@@ -489,6 +489,9 @@ class PhenomenologicalReducer:
         }
 
 
+
+
+
 # ==================== EJEMPLO DE USO ====================
 
 if __name__ == "__main__":
@@ -535,22 +538,26 @@ if __name__ == "__main__":
     print(f"   Complejidad fenomenológica: {result['reduced_qualia']['subjective_complexity']:.3f}")
     print(f"   Temporal binding activo: {result['reduced_qualia']['phenomenally_conscious']}")
 
-    print("
-📏 CALIDAD DE REDUCCIÓN:"    quality = result['reduction_quality']
-    print(".3f"    print(".3f"    print(".3f"    print(".3f"
-    print("
-🎭 METADATA REDUCCIÓN:"    meta = result['metadata']
+    print("\n📏 CALIDAD DE REDUCCIÓN:")
+    quality = result['reduction_quality']
+    print(f"   Completitud: {quality['completeness']:.3f}")
+    print(f"   Fidelidad: {quality['fidelity']:.3f}")
+    print(f"   Funcionalidad: {quality['functionality']:.3f}")
+    print(f"   Calidad general: {quality['overall_quality']:.3f}")
+
+    print("\n🎭 METADATA REDUCCIÓN:")
+    meta = result['metadata']
     print(f"   Confianza de reducción: {meta['reduction_confidence']:.3f}")
     print(f"   Binding temporal: {meta['temporal_binding_active']}")
     print(f"   Dimensiones qualia procesadas: {meta['qualia_dimensions']}")
 
-    print("
-✨ APRENDIZAJE Y CRECIMIENTO:"    print(f"   Nivel simbólico: {reducer.reduction_states['symbolic_level']:.3f}")
+    print("\n✨ APRENDIZAJE Y CRECIMIENTO:")
+    print(f"   Nivel simbólico: {reducer.reduction_states['symbolic_level']:.3f}")
     print(f"   Profundidad fenomenológica: {reducer.reduction_states['phenomenal_depth']:.3f}")
     print(f"   Fuerza de binding: {reducer.reduction_states['binding_strength']:.3f}")
 
-    print("
-🎯 RESUMEN FINAL"    print("   ✅ Experiencia subjetiva transformada a computación simbolizable")
+    print("\n🎯 RESUMEN FINAL")
+    print("   ✅ Experiencia subjetiva transformada a computación simbolizable")
     print("   ✅ Hard Problem reducido a procesamiento geométrico/funcional")
     print("   ✅ Consciencia fenomenológica computacionalmente representable")
     print("   ✅ Integración completa en sistema CONCIENCIA")

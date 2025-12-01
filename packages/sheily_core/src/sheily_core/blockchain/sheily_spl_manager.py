@@ -78,6 +78,13 @@ class SPLTokenConfig:
     symbol: str
     description: str
     network: str
+    test_mode: bool = False
+    faucet_enabled: bool = True
+    faucet_daily_limit: int = 500
+
+    def get(self, key: str, default=None):
+        """Método getter para compatibilidad con dict"""
+        return getattr(self, key, default)
 
 
 @dataclass
@@ -116,14 +123,23 @@ class SheilySPLManager:
 
         # Cliente Solana
         if SOLANA_AVAILABLE:
-            rpc_url = (
-                "https://api.devnet.solana.com"
-                if self.config.network == "devnet"
-                else "https://api.mainnet-beta.solana.com"
-            )
+            if self.config.get("test_mode", False):
+                rpc_url = "https://api.devnet.solana.com"
+            else:
+                rpc_url = (
+                    "https://api.devnet.solana.com"
+                    if self.config.network == "devnet"
+                    else "https://api.mainnet-beta.solana.com"
+                )
             self.client = Client(rpc_url, commitment=Commitment("confirmed"))
         else:
             self.client = None
+
+        # Cargar wallet de autoridad para operaciones reales
+        if SOLANA_AVAILABLE and self.config.get("test_mode", False):
+            self.authority_keypair = self._load_authority_wallet()
+        else:
+            self.authority_keypair = None
 
         # Almacenamiento de cuentas de token
         self.token_accounts: Dict[str, TokenAccount] = {}
@@ -135,7 +151,14 @@ class SheilySPLManager:
         self.balance_cache: Dict[str, Dict[str, Any]] = {}
         self.cache_ttl = 300  # 5 minutos
 
+        # Rate limiting para faucet
+        self.faucet_usage: Dict[str, Dict[str, Any]] = {}
+
         logger.info("🪙 Gestor SPL SHEILY inicializado")
+        if SOLANA_AVAILABLE and self.config.get("test_mode", False):
+            logger.info("✅ Modo REAL activado - operaciones en Solana devnet")
+        else:
+            logger.info("🔄 Modo SIMULACIÓN - operaciones mock")
 
     def _load_config(self) -> SPLTokenConfig:
         """Cargar configuración del token"""
@@ -156,6 +179,119 @@ class SheilySPLManager:
             description=data["description"],
             network=data["network"],
         )
+
+    def _load_authority_wallet(self):
+        """Cargar wallet de autoridad para operaciones reales"""
+        try:
+            wallet_path = Path("config/test_wallet.json")
+            if not wallet_path.exists():
+                logger.warning("Wallet de autoridad no encontrada, creando nueva...")
+                return self._create_authority_wallet()
+
+            with open(wallet_path, "r") as f:
+                wallet_data = json.load(f)
+
+            from solders.keypair import Keypair
+            secret_key = bytes.fromhex(wallet_data["secret_key"])
+            keypair = Keypair.from_secret_key(secret_key)
+
+            logger.info(f"✅ Wallet de autoridad cargada: {keypair.pubkey()}")
+            return keypair
+
+        except Exception as e:
+            logger.error(f"Error cargando wallet de autoridad: {e}")
+            return None
+
+    def _create_authority_wallet(self):
+        """Crear wallet de autoridad si no existe"""
+        try:
+            from solders.keypair import Keypair
+            keypair = Keypair()
+
+            wallet_data = {
+                "public_key": str(keypair.pubkey()),
+                "secret_key": keypair.secret().hex(),
+                "network": "devnet",
+                "description": "Wallet de autoridad para SHEILYS - generada automáticamente",
+                "created_at": datetime.now().isoformat(),
+            }
+
+            Path("config").mkdir(exist_ok=True)
+            with open("config/test_wallet.json", "w") as f:
+                json.dump(wallet_data, f, indent=2)
+
+            logger.info(f"✅ Nueva wallet de autoridad creada: {keypair.pubkey()}")
+            return keypair
+
+        except Exception as e:
+            logger.error(f"Error creando wallet de autoridad: {e}")
+            return None
+
+    def faucet_tokens(self, user_id: str, amount: int = 100) -> SPLTransaction:
+        """Faucet para pruebas - mintear tokens gratuitos"""
+        try:
+            # Verificar límites de faucet
+            if self._check_faucet_limit(user_id, amount):
+                raise ValueError("Límite de faucet alcanzado")
+
+            # Mintear tokens usando método existente
+            transaction = self.mint_tokens(user_id, amount, "faucet")
+
+            # Registrar uso de faucet
+            self._record_faucet_usage(user_id, amount)
+
+            logger.info(f"🚰 Faucet: {amount} tokens para {user_id}")
+            return transaction
+
+        except Exception as e:
+            logger.error(f"❌ Error en faucet: {e}")
+            raise
+
+    def _check_faucet_limit(self, user_id: str, amount: int) -> bool:
+        """Verificar límite diario de faucet"""
+        try:
+            daily_limit = self.config.get("faucet_daily_limit", 500)
+            now = datetime.now()
+
+            if user_id not in self.faucet_usage:
+                self.faucet_usage[user_id] = {
+                    "daily_used": 0,
+                    "last_reset": now.date(),
+                    "total_used": 0
+                }
+
+            usage = self.faucet_usage[user_id]
+
+            # Reset diario si es necesario
+            if usage["last_reset"] != now.date():
+                usage["daily_used"] = 0
+                usage["last_reset"] = now.date()
+
+            # Verificar límite
+            if usage["daily_used"] + amount > daily_limit:
+                return True  # Límite excedido
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Error verificando límite de faucet: {e}")
+            return False
+
+    def _record_faucet_usage(self, user_id: str, amount: int):
+        """Registrar uso de faucet"""
+        try:
+            if user_id not in self.faucet_usage:
+                self.faucet_usage[user_id] = {
+                    "daily_used": 0,
+                    "last_reset": datetime.now().date(),
+                    "total_used": 0
+                }
+
+            self.faucet_usage[user_id]["daily_used"] += amount
+            self.faucet_usage[user_id]["total_used"] += amount
+
+        except Exception as e:
+            logger.error(f"Error registrando uso de faucet: {e}")
 
     def get_token_info(self) -> Dict[str, Any]:
         """Obtener información del token"""

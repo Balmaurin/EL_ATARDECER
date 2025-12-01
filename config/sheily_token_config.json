@@ -1,0 +1,15 @@
+{
+  "mint_address": "4WmWkHmDVo6jSenXamKq39GkwzfDVykjZ5C3tqBVqiYw",
+  "authority": "82bWyKMFx3jEraBk53wqFz6eGgbS52nCQPwvBkL26Swb",
+  "decimals": 9,
+  "initial_supply": 1000000000,
+  "name": "Sheily Educational Token",
+  "symbol": "SHEILYS",
+  "description": "Token educativo Web3 para aprendizaje y recompensas",
+  "network": "devnet",
+  "test_mode": true,
+  "faucet_enabled": true,
+  "faucet_daily_limit": 500,
+  "created_at": "2025-11-27T00:00:00Z",
+  "updated_at": "2025-11-29T12:28:44Z"
+}

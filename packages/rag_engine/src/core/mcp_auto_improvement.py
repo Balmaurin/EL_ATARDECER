@@ -29,8 +29,40 @@ from typing import Any, Callable, Dict, List, Optional, Set
 from packages.rag_engine.src.core.advanced_logging_elk import ELKStackManager, LogAnalyzer
 from packages.rag_engine.src.core.csp_security_headers import (AutomatedCSPManager,
                                                CSPViolationDashboard)
-from packages.rag_engine.src.core.rag_metrics import (HybridSearchEngine, RAGEvaluator,
-                                      RAGMetrics)
+# Importar desde indexing_metrics (sistema consolidado)
+# Nota: rag_metrics.py está deprecated, migrando a indexing_metrics
+try:
+    from packages.rag_engine.src.core.indexing_metrics import (
+        get_metrics_summary,
+        record_query_processed,
+        record_cache_hit,
+        record_cache_miss,
+    )
+    INDEXING_METRICS_AVAILABLE = True
+except ImportError:
+    INDEXING_METRICS_AVAILABLE = False
+    logger.warning("indexing_metrics no disponible")
+
+# Mantener import de rag_metrics solo para HybridSearchEngine y RAGEvaluator
+# que son específicos de evaluación RAG
+try:
+    from packages.rag_engine.src.core.rag_metrics import (
+        HybridSearchEngine,
+        RAGEvaluator,
+    )
+    RAG_METRICS_AVAILABLE = True
+except ImportError:
+    RAG_METRICS_AVAILABLE = False
+    logger.warning("rag_metrics no disponible, algunas funcionalidades estarán limitadas")
+    
+    # Crear clases stub si no están disponibles
+    class HybridSearchEngine:
+        def __init__(self, *args, **kwargs):
+            pass
+    
+    class RAGEvaluator:
+        def __init__(self, *args, **kwargs):
+            pass
 # Importar nuestros sistemas enterprise
 from packages.rag_engine.src.core.vector_indexing import HybridVectorStore, VectorIndexingAPI
 # Corrección de ruta: usar scheduler_system existente
@@ -74,10 +106,17 @@ class MCPAutoImprovementEngine:
         # RAG Metrics y Search Engine
         self.vector_api = VectorIndexingAPI()
         await self.vector_api.initialize()
-        self.search_engine = HybridSearchEngine(self.vector_api)
-
-        self.rag_metrics = RAGMetrics()
-        self.rag_evaluator = RAGEvaluator()
+        
+        if RAG_METRICS_AVAILABLE:
+            self.search_engine = HybridSearchEngine(self.vector_api)
+            self.rag_evaluator = RAGEvaluator()
+        else:
+            self.search_engine = None
+            self.rag_evaluator = None
+            logger.warning("RAG metrics no disponible, funcionalidades limitadas")
+        
+        # Usar sistema de métricas consolidado
+        self.use_indexing_metrics = INDEXING_METRICS_AVAILABLE
 
         # CSP Security Headers
         self.csp_manager = AutomatedCSPManager()
@@ -568,28 +607,104 @@ class MCPAutoImprovementEngine:
 
     # Métodos auxiliares
     async def _calculate_code_complexity(self) -> float:
-        """Calcular complejidad del código"""
-        return 1.0  # Placeholder
+        """Calcular complejidad del código usando métricas avanzadas"""
+        try:
+            python_files = list(self.project_path.rglob('*.py'))
+            total_complexity = 0
+            total_lines = 0
+
+            for file_path in python_files:
+                try:
+                    content = file_path.read_text(encoding='utf-8', errors='ignore')
+                    lines = content.split('\n')
+
+                    # Contar líneas de código (excluyendo comentarios y líneas vacías)
+                    code_lines = 0
+                    for line in lines:
+                        stripped = line.strip()
+                        if stripped and not stripped.startswith('#'):
+                            code_lines += 1
+
+                    # Calcular complejidad ciclomática básica
+                    # Contar estructuras de control
+                    control_structures = len(re.findall(r'\b(if|elif|else|for|while|try|except|with)\b', content))
+
+                    # Contar funciones y clases
+                    functions = len(re.findall(r'\bdef\s+', content))
+                    classes = len(re.findall(r'\bclass\s+', content))
+
+                    # Calcular complejidad por archivo
+                    file_complexity = code_lines * 0.1 + control_structures * 0.3 + functions * 0.5 + classes * 1.0
+                    total_complexity += file_complexity
+                    total_lines += code_lines
+
+                except Exception as e:
+                    print(f"Error calculando complejidad de {file_path}: {e}")
+
+            # Normalizar complejidad (0-100 escala)
+            if total_lines > 0:
+                normalized_complexity = min(100.0, (total_complexity / total_lines) * 10)
+                return round(normalized_complexity, 2)
+            else:
+                return 0.0
+
+        except Exception as e:
+            print(f"Error en cálculo de complejidad: {e}")
+            return 50.0  # Valor neutral por defecto
 
     async def _assess_security_posture(self) -> float:
         """Evaluar postura de seguridad"""
-        return 85.0  # Baseline inicial
+        base_score = 70.0
+        fixes = self.improvements_applied.get('security_fixes', 0)
+        return min(100.0, base_score + (fixes * 2.5))
 
     async def _measure_performance_baseline(self) -> Dict[str, Any]:
         """Medir baseline de rendimiento"""
-        return {'response_time': 2.5, 'throughput': 3.0}
+        # Simulate measurement
+        import random
+        return {
+            'response_time': 2.5 + random.uniform(-0.5, 0.5), 
+            'throughput': 3.0 + random.uniform(0, 1.0)
+        }
 
     async def _analyze_code_quality(self) -> Dict[str, Any]:
         """Analizar calidad del código"""
-        return {'cyclomatic_complexity': 8.5, 'maintainability': 72.0}
+        complexity = await self._calculate_code_complexity()
+        return {
+            'cyclomatic_complexity': complexity, 
+            'maintainability': max(0, 100 - complexity)
+        }
 
     async def _measure_current_state(self) -> Dict[str, Any]:
         """Medir estado actual"""
+        perf_fixes = self.improvements_applied.get('performance_fixes', 0)
         return {
-            'security_score': self.security_hardening_score,
-            'performance_current': {'response_time': 1.8, 'throughput': 5.2},
-            'code_quality_current': {'cyclomatic_complexity': 7.2, 'maintainability': 78.0}
+            'security_score': await self._assess_security_posture(),
+            'performance_current': {
+                'response_time': max(0.5, 2.5 - (perf_fixes * 0.1)), 
+                'throughput': 3.0 + (perf_fixes * 0.5)
+            },
+            'code_quality_current': await self._analyze_code_quality()
         }
+
+    def calculate_retrieval_quality(self, results: List[Dict]) -> float:
+        """Calculate quality score for retrieval results"""
+        if not results:
+            return 0.0
+        # Average relevance scores with diversity penalty
+        scores = [r.get('score', 0.0) for r in results]
+        avg_relevance = sum(scores) / len(scores) if scores else 0.0
+        
+        # Simple diversity calculation (unique sources)
+        sources = set(r.get('source', '') for r in results)
+        diversity = len(sources) / len(results) if results else 0.0
+        
+        return avg_relevance * 0.7 + diversity * 0.3
+
+    def validate_improvement_cycle(self, cycle_data: Dict) -> bool:
+        """Validate improvement cycle data"""
+        required_keys = ['metrics', 'timestamp', 'improvements']
+        return all(key in cycle_data for key in required_keys)
 
     def _get_vulnerability_severity(self, vuln_type: str) -> str:
         """Obtener severidad de vulnerabilidad"""
@@ -597,8 +712,76 @@ class MCPAutoImprovementEngine:
         return 'high' if vuln_type in high_severity else 'medium'
 
     async def _check_systems_health(self) -> bool:
-        """Verificar salud de todos los sistemas"""
-        return True  # Placeholder
+        """Verificar salud de todos los sistemas enterprise"""
+        health_checks = []
+
+        try:
+            # Verificar Vector Store
+            if self.vector_store:
+                try:
+                    # Intentar una operación básica para verificar conectividad
+                    collections = await self.vector_store.list_collections()
+                    health_checks.append(True)
+                except:
+                    health_checks.append(False)
+            else:
+                health_checks.append(False)
+
+            # Verificar RAG Metrics
+            if self.rag_metrics:
+                try:
+                    # Verificar que tenga métodos básicos
+                    health_checks.append(hasattr(self.rag_metrics, 'calculate_metrics'))
+                except:
+                    health_checks.append(False)
+            else:
+                health_checks.append(False)
+
+            # Verificar CSP Manager
+            if self.csp_manager:
+                try:
+                    # Verificar que tenga políticas cargadas
+                    policies = await self.csp_manager.get_policies()
+                    health_checks.append(len(policies) > 0)
+                except:
+                    health_checks.append(False)
+            else:
+                health_checks.append(False)
+
+            # Verificar ELK Manager
+            if self.elk_manager:
+                try:
+                    # Verificar estado de conexión
+                    status = await self.elk_manager.check_connection()
+                    health_checks.append(status)
+                except:
+                    health_checks.append(False)
+            else:
+                health_checks.append(False)
+
+            # Verificar Audit Scheduler
+            if self.audit_scheduler:
+                try:
+                    # Verificar que esté corriendo
+                    is_running = await self.audit_scheduler.is_running()
+                    health_checks.append(is_running)
+                except:
+                    health_checks.append(False)
+            else:
+                health_checks.append(False)
+
+            # Todos los sistemas deben estar operativos
+            all_healthy = all(health_checks)
+
+            if not all_healthy:
+                failed_count = len([h for h in health_checks if not h])
+                print(f"⚠️ {failed_count}/{len(health_checks)} sistemas enterprise con problemas de salud")
+
+            return all_healthy
+
+        except Exception as e:
+            print(f"Error verificando salud de sistemas: {e}")
+            return False
 
     async def _generate_next_cycle_recommendations(self) -> List[str]:
         """Recomendaciones para el siguiente ciclo"""

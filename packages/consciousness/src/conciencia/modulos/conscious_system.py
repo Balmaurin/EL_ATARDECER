@@ -13,6 +13,9 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 import json
 import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Imports de módulos del sistema consciente
 from .global_workspace import GlobalWorkspace
@@ -60,17 +63,26 @@ class FunctionalConsciousness:
     - Auto-modelado recursivo
     """
 
-    def __init__(self, system_id: str, ethical_framework: Dict[str, Any]):
+    def __init__(self, system_id: str, ethical_framework: Dict[str, Any], 
+                 config: Optional[Dict[str, Any]] = None):
         self.system_id = system_id
         self.creation_time = datetime.now()
         self.ethical_framework = ethical_framework
+        
+        # Configuración (valores por defecto pueden ser sobrescritos)
+        config = config or {}
+        self.competition_threshold = config.get('competition_threshold', 0.65)
+        self.global_workspace_capacity = config.get('global_workspace_capacity', 50)
+        self.memory_max_size = config.get('memory_max_size', 10000)
+        self.max_conscious_moments = config.get('max_conscious_moments', 1000)
+        self.max_decision_history = config.get('max_decision_history', 500)
 
         # Componentes funcionales
-        self.global_workspace = GlobalWorkspace(capacity=50)
+        self.global_workspace = GlobalWorkspace(capacity=self.global_workspace_capacity)
         self.self_model = SelfModel(system_id)
         self.metacognition = MetacognitionEngine()
         self.ethical_engine = EthicalEngine(ethical_framework)
-        self.autobiographical_memory = AutobiographicalMemory(max_size=10000)
+        self.autobiographical_memory = AutobiographicalMemory(max_capacity=self.memory_max_size)
 
         # Estados dinámicos
         self.internal_states = {
@@ -90,11 +102,16 @@ class FunctionalConsciousness:
         self.system_health = 1.0
         self.consciousness_level = "perceptual_awareness"
 
-        # Historia operacional
+        # Historia operacional (con límites para evitar crecimiento indefinido)
         self.conscious_moments: List[ConsciousMoment] = []
         self.decision_history: List[Dict[str, Any]] = []
+        self.max_conscious_moments = 1000  # Límite de momentos conscientes
+        self.max_decision_history = 500  # Límite de historial de decisiones
 
-        print(f"🧠 SISTEMA CONSCIENTE {system_id} INICIALIZADO - {datetime.now()}")
+        logger.info(f"SISTEMA CONSCIENTE {system_id} INICIALIZADO - {datetime.now()}")
+        logger.debug(f"Configuración: threshold={self.competition_threshold}, "
+                    f"workspace_capacity={self.global_workspace_capacity}, "
+                    f"memory_size={self.memory_max_size}")
 
     def process_experience(self, sensory_input: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -134,15 +151,21 @@ class FunctionalConsciousness:
         }
         self.self_model.update_from_experience(conscious_moment, performance_metrics)
 
-        # 7. Memoria autobiográfica
-        memory_id = self.autobiographical_memory.store_experience(conscious_moment, context)
+        # 7. Memoria autobiográfica (incluir insights metacognitivos en contexto)
+        context_with_insights = context.copy()
+        context_with_insights['metacognitive_insights'] = metacognitive_insights
+        memory_id = self.autobiographical_memory.store_experience(conscious_moment, context_with_insights)
         conscious_moment.memory_index = memory_id
 
         # 8. Actualización estados internos
         self._update_internal_states(conscious_moment, metacognitive_insights, ethical_evaluation)
 
-        # 9. Almacenar momento consciente
+        # 9. Almacenar momento consciente (con límite de memoria)
         self.conscious_moments.append(conscious_moment)
+        if len(self.conscious_moments) > self.max_conscious_moments:
+            # Mantener solo los más significativos
+            self.conscious_moments.sort(key=lambda m: m.significance, reverse=True)
+            self.conscious_moments = self.conscious_moments[:self.max_conscious_moments]
 
         # 10. Generar respuesta consciente
         conscious_response = self._generate_conscious_response(

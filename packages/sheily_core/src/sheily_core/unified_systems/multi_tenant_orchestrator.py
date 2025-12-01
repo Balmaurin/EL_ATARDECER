@@ -1188,4 +1188,20 @@ async def demo_multi_tenant_system():
     ]
 
     tenant_ids = []
-    for config in
+    for config in tenant_configs:
+        tenant_id = await orchestrator.create_tenant(config)
+        tenant_ids.append(tenant_id)
+        print(f"   ✓ Tenant created: {config['name']} (ID: {tenant_id[:8]}...)")
+
+    print(f"\n✅ {len(tenant_ids)} tenants created successfully")
+
+    # Start monitoring
+    await orchestrator.start_monitoring()
+
+    # Show system overview
+    overview = await orchestrator.get_system_overview()
+    print("\n📊 SYSTEM OVERVIEW:")
+    print(json.dumps(overview, indent=2, default=str))
+
+if __name__ == "__main__":
+    asyncio.run(demo_multi_tenant_system())

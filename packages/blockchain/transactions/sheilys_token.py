@@ -13,6 +13,7 @@ El token SHEILYS facilita:
 
 import hashlib
 import json
+import logging
 import time
 import uuid
 from dataclasses import asdict, dataclass
@@ -21,6 +22,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from .sheilys_blockchain import SHEILYSBlockchain, TransactionType, SHEILYSTransaction
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 class SHEILYSTokenStandard(Enum):
@@ -117,6 +121,16 @@ class SHEILYSTokenManager:
 
         # Balances de staked tokens
         self.staked_balances: Dict[str, float] = {}
+        
+        # Tracking de staking para rewards reales
+        self.staking_timestamps: Dict[str, float] = {}  # address -> timestamp del último claim
+        self.staking_pool_tracking: Dict[str, Dict[str, Any]] = {}  # address -> pool info
+        
+        # Tracking de tokens quemados
+        self.total_burned: float = 0.0
+        
+        # Tracking de votos para prevenir doble voto
+        self.vote_tracking: Dict[str, Dict[str, bool]] = {}  # proposal_id -> {voter: True}
 
         # Colecciones NFT
         self.nft_collections: Dict[NFTCollection, List[SHEILYSNFT]] = {}
@@ -198,24 +212,32 @@ class SHEILYSTokenManager:
             bool: True si el mint fue exitoso
         """
         try:
-            # Verificar límite de supply
+            # Verificar límite de supply CONSIDERANDO BURNS
             current_supply = sum(self.token_balances.values()) + sum(
                 self.staked_balances.values()
             )
-            if current_supply + amount > self.token_metadata.properties["max_supply"]:
+            # El supply real es el inicial + minted - burned
+            real_supply = current_supply - self.total_burned
+            
+            if real_supply + amount > self.token_metadata.properties["max_supply"]:
+                logger.warning(
+                    f"Mint fallido: excedería max supply. "
+                    f"Supply actual: {real_supply}, Max: {self.token_metadata.properties['max_supply']}, "
+                    f"Intenta mintear: {amount}"
+                )
                 return False
 
             # Mint tokens
             self.token_balances[to_address] = self.get_balance(to_address) + amount
 
-            # Registrar en blockchain
-            tx = SHEILYSTransaction(
-                transaction_id=f"mint_{to_address}_{int(time.time())}_{uuid.uuid4().hex[:8]}",
+            # Crear transacción con hash correcto
+            tx_timestamp = time.time()
+            tx = SHEILYSTransaction.create_with_hash(
                 sender="sheily_system_minter",
                 receiver=to_address,
                 amount=amount,
                 transaction_type=TransactionType.REWARD,
-                timestamp=time.time(),
+                timestamp=tx_timestamp,
                 signature=f"system_mint_signature_{reason}",
                 metadata={
                     "mint_reason": reason,
@@ -224,11 +246,14 @@ class SHEILYSTokenManager:
                 },
             )
             tx_success = self.blockchain.add_transaction(tx)
+            
+            if tx_success:
+                logger.info(f"Tokens minted: {amount} SHEILYS a {to_address} por {reason}")
 
             return tx_success
 
         except Exception as e:
-            print(f"Error minting tokens: {e}")
+            logger.error(f"Error minting tokens: {e}", exc_info=True)
             return False
 
     def transfer_tokens(
@@ -249,37 +274,55 @@ class SHEILYSTokenManager:
             self.token_balances[from_address] -= amount
             self.token_balances[to_address] = self.get_balance(to_address) + amount
 
-            # Registrar transacción en blockchain
-            tx_id = f"transfer_{from_address}_{to_address}_{int(time.time())}"
-            tx_hash = hashlib.sha256(
-                f"{tx_id}{from_address}{to_address}{amount}{time.time()}".encode()
-            ).hexdigest()
-
-            self.blockchain.add_transaction(
-                SHEILYSTransaction(
-                    transaction_id=tx_hash,
-                    sender=from_address,
-                    receiver=to_address,
-                    amount=amount,
-                    transaction_type=TransactionType.TRANSFER,
-                    timestamp=time.time(),
-                    signature=f"{from_address}_transfer_sig",
-                    metadata={
-                        "transfer_type": "direct_transfer",
-                        "gas_used": 0.001,  # Gas simbólico
-                    },
-                )
-            )
-
-            # Auto-burn (quemado automático del 1% para deflación)
+            # Calcular burn ANTES de transferir (1% para deflación)
             burn_amount = amount * 0.01
+            
+            # Verificar que tenga suficiente para transferencia + burn
+            if available_balance < (amount + burn_amount):
+                logger.warning(
+                    f"Transferencia fallida: balance insuficiente para transfer + burn. "
+                    f"Tiene: {available_balance}, Necesita: {amount + burn_amount}"
+                )
+                return False
+
+            # Ejecutar transferencia
+            self.token_balances[from_address] -= amount
+            self.token_balances[to_address] = self.get_balance(to_address) + amount
+
+            # Aplicar burn (reducir del remitente y del total supply)
             if burn_amount > 0:
                 self.token_balances[from_address] -= burn_amount
+                self.total_burned += burn_amount
+                
+                # Actualizar balances en blockchain también
+                if hasattr(self.blockchain, 'burned_supply'):
+                    self.blockchain.burned_supply += burn_amount
+                if hasattr(self.blockchain, 'circulating_supply'):
+                    self.blockchain.circulating_supply -= burn_amount
+
+            # Crear transacción con hash correcto usando método estático
+            tx_timestamp = time.time()
+            tx = SHEILYSTransaction.create_with_hash(
+                sender=from_address,
+                receiver=to_address,
+                amount=amount,
+                transaction_type=TransactionType.TRANSFER,
+                timestamp=tx_timestamp,
+                signature=f"{from_address}_transfer_sig",
+                metadata={
+                    "transfer_type": "direct_transfer",
+                    "gas_used": 0.001,
+                    "burn_amount": burn_amount,  # Incluir burn en metadata
+                },
+            )
+
+            self.blockchain.add_transaction(tx)
+            logger.info(f"Transferencia: {from_address} -> {to_address}: {amount} SHEILYS (burn: {burn_amount})")
 
             return True
 
         except Exception as e:
-            print(f"Error transferring tokens: {e}")
+            logger.error(f"Error transferring tokens: {e}", exc_info=True)
             return False
 
     def stake_tokens(
@@ -311,19 +354,32 @@ class SHEILYSTokenManager:
             # Mover a stake
             self.token_balances[address] -= amount
             self.staked_balances[address] = self.get_staked_balance(address) + amount
+            
+            # TRACKING REAL DE STAKING - guardar timestamp y pool
+            self.staking_timestamps[address] = time.time()
+            if address not in self.staking_pool_tracking:
+                self.staking_pool_tracking[address] = {}
+            self.staking_pool_tracking[address][pool_name] = {
+                "amount": self.staked_balances[address],
+                "start_time": time.time(),
+                "last_claim": time.time(),
+                "pool_config": pool_config,
+            }
 
             # Registrar en blockchain
             self.blockchain.stake_tokens(address, amount)
+            
+            logger.info(f"Stake exitoso: {address} stakeó {amount} SHEILYS en {pool_name}")
 
             return True
 
         except Exception as e:
-            print(f"Error staking tokens: {e}")
+            logger.error(f"Error staking tokens: {e}", exc_info=True)
             return False
 
     def claim_staking_rewards(self, address: str) -> float:
         """
-        Claim staking rewards acumulados
+        Claim staking rewards acumulados basado en tiempo REAL
 
         Returns:
             float: Cantidad de rewards claimed
@@ -331,20 +387,60 @@ class SHEILYSTokenManager:
         try:
             staked_amount = self.get_staked_balance(address)
             if staked_amount == 0:
+                logger.warning(f"Claim fallido: {address} no tiene tokens staked")
                 return 0.0
 
-            # Calcular rewards basado en APY promedio (implementación simplificada)
-            avg_apy = 10.0  # 10% APY promedio
-            daily_reward = staked_amount * (avg_apy / 100) / 365
-            claimed_amount = daily_reward * 30  # Simular 30 días
+            # Obtener información de staking real
+            if address not in self.staking_timestamps:
+                logger.warning(f"Claim fallido: {address} no tiene timestamp de staking")
+                return 0.0
 
-            # Mint rewards
-            self.mint_tokens(address, claimed_amount, f"staking_rewards_{address}")
+            # Calcular tiempo REAL desde último claim o desde staking inicial
+            last_claim_time = self.staking_timestamps.get(address, time.time())
+            current_time = time.time()
+            time_delta_seconds = current_time - last_claim_time
+            
+            # Calcular APY basado en pools del usuario
+            if address in self.staking_pool_tracking and self.staking_pool_tracking[address]:
+                # Obtener pool con mayor stake
+                pools = self.staking_pool_tracking[address]
+                max_pool = max(pools.items(), key=lambda x: x[1].get("amount", 0))
+                pool_name, pool_info = max_pool
+                pool_config = pool_info.get("pool_config", {})
+                apy = pool_config.get("apy", 10.0)  # APY del pool
+            else:
+                # Fallback a APY promedio
+                apy = 10.0
 
-            return claimed_amount
+            # Calcular rewards REALES basados en tiempo transcurrido
+            daily_reward_rate = (apy / 100) / 365
+            time_delta_days = time_delta_seconds / (24 * 3600)
+            claimed_amount = staked_amount * daily_reward_rate * time_delta_days
+
+            # Limitar a máximo razonable (evitar explotación)
+            max_daily_claim = staked_amount * (apy / 100) / 365 * 2  # Máximo 2 días por claim
+            claimed_amount = min(claimed_amount, max_daily_claim)
+
+            if claimed_amount > 0:
+                # Actualizar timestamp de último claim
+                self.staking_timestamps[address] = current_time
+                if address in self.staking_pool_tracking:
+                    for pool_info in self.staking_pool_tracking[address].values():
+                        pool_info["last_claim"] = current_time
+
+                # Mint rewards
+                success = self.mint_tokens(address, claimed_amount, f"staking_rewards_{address}")
+                if success:
+                    logger.info(
+                        f"Rewards claimed: {address} reclamó {claimed_amount:.6f} SHEILYS "
+                        f"por {time_delta_days:.2f} días de staking"
+                    )
+                    return claimed_amount
+
+            return 0.0
 
         except Exception as e:
-            print(f"Error claiming staking rewards: {e}")
+            logger.error(f"Error claiming staking rewards: {e}", exc_info=True)
             return 0.0
 
     def reward_gamification_action(self, user_address: str, action_type: str) -> float:
@@ -411,28 +507,33 @@ class SHEILYSTokenManager:
                 self.nft_ownership[owner] = []
             self.nft_ownership[owner].append(token_id)
 
-            # Registrar en blockchain
-            self.blockchain.add_transaction(
-                {
-                    "transaction_id": f"nft_mint_{token_id}",
-                    "sender": "sheily_nft_minter",
-                    "receiver": owner,
-                    "amount": 1,  # NFTs son únicos
-                    "transaction_type": TransactionType.NFT_MINT,
-                    "timestamp": time.time(),
-                    "signature": f"nft_mint_signature_{token_id}",
-                    "metadata": {
-                        "nft_token_id": token_id,
-                        "collection": collection.value,
-                        "rarity": nft.rarity_score,
-                    },
-                }
+            # Crear transacción REAL con objeto SHEILYSTransaction
+            tx_timestamp = time.time()
+            nft_tx = SHEILYSTransaction.create_with_hash(
+                sender="sheily_nft_minter",
+                receiver=owner,
+                amount=1,  # NFTs son únicos
+                transaction_type=TransactionType.NFT_MINT,
+                timestamp=tx_timestamp,
+                signature=f"nft_mint_signature_{token_id}",
+                metadata={
+                    "nft_token_id": token_id,
+                    "collection": collection.value,
+                    "rarity": nft.rarity_score,
+                },
             )
 
-            return token_id
+            # Registrar en blockchain
+            success = self.blockchain.add_transaction(nft_tx)
+            if success:
+                logger.info(f"NFT minted: {token_id} en colección {collection.value} para {owner}")
+                return token_id
+            else:
+                logger.error(f"Error minting NFT: transacción no se pudo agregar a blockchain")
+                return None
 
         except Exception as e:
-            print(f"Error minting NFT: {e}")
+            logger.error(f"Error minting NFT: {e}", exc_info=True)
             return None
 
     def _get_nft_utility_functions(self, collection: NFTCollection) -> List[str]:
@@ -500,29 +601,34 @@ class SHEILYSTokenManager:
                 self.nft_ownership[to_address] = []
             self.nft_ownership[to_address].append(token_id)
 
-            # Registrar en blockchain (corregir bug cuando collection es None)
+            # Crear transacción REAL con objeto SHEILYSTransaction
             collection_str = collection.value if collection else "unknown"
-            self.blockchain.add_transaction(
-                {
-                    "transaction_id": f"nft_transfer_{token_id}_{from_address}_{to_address}",
-                    "sender": from_address,
-                    "receiver": to_address,
-                    "amount": 1,
-                    "transaction_type": TransactionType.NFT_TRANSFER,
-                    "timestamp": time.time(),
-                    "signature": f"nft_transfer_signature_{token_id}",
-                    "metadata": {
-                        "nft_token_id": token_id,
-                        "collection": collection_str,
-                        "rarity": nft.rarity_score,
-                    },
-                }
+            tx_timestamp = time.time()
+            nft_transfer_tx = SHEILYSTransaction.create_with_hash(
+                sender=from_address,
+                receiver=to_address,
+                amount=1,
+                transaction_type=TransactionType.NFT_TRANSFER,
+                timestamp=tx_timestamp,
+                signature=f"nft_transfer_signature_{token_id}",
+                metadata={
+                    "nft_token_id": token_id,
+                    "collection": collection_str,
+                    "rarity": nft.rarity_score,
+                },
             )
 
-            return True
+            # Registrar en blockchain
+            success = self.blockchain.add_transaction(nft_transfer_tx)
+            if success:
+                logger.info(f"NFT transferido: {token_id} de {from_address} a {to_address}")
+                return True
+            else:
+                logger.error(f"Error en transferencia NFT: transacción no se pudo agregar")
+                return False
 
         except Exception as e:
-            print(f"Error transferring NFT: {e}")
+            logger.error(f"Error transferring NFT: {e}", exc_info=True)
             return False
 
     def get_user_nfts(self, address: str) -> List[Dict[str, Any]]:
@@ -547,16 +653,28 @@ class SHEILYSTokenManager:
         self, proposer: str, title: str, description: str, voting_period_days: int = 7
     ) -> str:
         """
-        Crear propuesta de gobernanza
+        Crear propuesta de gobernanza (REQUIERE MÍNIMO DE TOKENS)
 
         Returns:
             str: ID de la propuesta
         """
+        # REQUERIR MÍNIMO DE TOKENS PARA CREAR PROPUESTA
+        min_proposal_tokens = 1000.0  # Mínimo 1000 SHEILYS para crear propuesta
+        voting_power = self.get_balance(proposer) + self.get_staked_balance(proposer)
+        
+        if voting_power < min_proposal_tokens:
+            logger.warning(
+                f"Propuesta fallida: {proposer} no tiene suficientes tokens. "
+                f"Tiene: {voting_power}, Requiere: {min_proposal_tokens}"
+            )
+            raise ValueError(
+                f"Se requieren al menos {min_proposal_tokens} SHEILYS para crear una propuesta. "
+                f"Tienes: {voting_power}"
+            )
+
         proposal_id = (
             f"prop_{int(time.time())}_{hashlib.sha256(title.encode()).hexdigest()[:8]}"
         )
-
-        voting_power = self.get_balance(proposer) + self.get_staked_balance(proposer)
 
         self.proposals[proposal_id] = {
             "id": proposal_id,
@@ -570,12 +688,18 @@ class SHEILYSTokenManager:
             "votes_against": 0,
             "status": "active",
         }
+        
+        # Inicializar tracking de votos para esta propuesta
+        if proposal_id not in self.vote_tracking:
+            self.vote_tracking[proposal_id] = {}
+        
+        logger.info(f"Propuesta creada: {proposal_id} por {proposer}")
 
         return proposal_id
 
     def vote_on_proposal(self, proposal_id: str, voter: str, votes_for: bool) -> bool:
         """
-        Votar en una propuesta de gobernanza
+        Votar en una propuesta de gobernanza (PREVIENE DOBLE VOTO)
 
         Args:
             proposal_id: ID de la propuesta
@@ -586,22 +710,45 @@ class SHEILYSTokenManager:
             bool: True si el voto fue registrado
         """
         if proposal_id not in self.proposals:
+            logger.warning(f"Voto fallido: propuesta {proposal_id} no existe")
             return False
 
         proposal = self.proposals[proposal_id]
 
         if time.time() > proposal["voting_ends"]:
+            logger.warning(f"Voto fallido: período de votación terminado para {proposal_id}")
+            return False
+
+        # PREVENIR DOBLE VOTO - verificar si ya votó
+        if proposal_id not in self.vote_tracking:
+            self.vote_tracking[proposal_id] = {}
+        
+        if voter in self.vote_tracking[proposal_id]:
+            logger.warning(f"Voto fallido: {voter} ya votó en propuesta {proposal_id}")
             return False
 
         # Calcular poder de voto
         voting_power = self.get_balance(voter) + self.get_staked_balance(voter)
+        
+        if voting_power <= 0:
+            logger.warning(f"Voto fallido: {voter} no tiene poder de voto (balance: {self.get_balance(voter)}, staked: {self.get_staked_balance(voter)})")
+            return False
 
+        # Registrar voto
         if votes_for:
             proposal["votes_for"] += voting_power
         else:
             proposal["votes_against"] += voting_power
 
         proposal["total_votes"] += voting_power
+        
+        # Marcar que este voter ya votó
+        self.vote_tracking[proposal_id][voter] = True
+        
+        logger.info(
+            f"Voto registrado: {voter} votó {'A FAVOR' if votes_for else 'EN CONTRA'} "
+            f"en {proposal_id} con poder de voto {voting_power}"
+        )
 
         return True
 
@@ -620,11 +767,13 @@ class SHEILYSTokenManager:
         return {
             "token_metadata": self.token_metadata.to_metadata_dict(),
             "total_supply": total_supply,
-            "circulating_supply": total_supply,
+            "circulating_supply": total_supply - self.total_burned,
+            "burned_supply": self.total_burned,
             "staked_supply": total_staked,
             "holders_count": total_holders,
             "stakers_count": total_stakers,
             "staking_ratio": total_staked / total_supply if total_supply > 0 else 0,
+            "burn_ratio": self.total_burned / total_supply if total_supply > 0 else 0,
             "total_nfts": total_nfts,
             "nft_collections": {
                 k.value: len(v) for k, v in self.nft_collections.items()

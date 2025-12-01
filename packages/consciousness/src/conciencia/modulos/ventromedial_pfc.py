@@ -144,18 +144,104 @@ class VMDatabase:
 
 
 # --------------------------
-# RAG stub (can be replaced by real RAG)
+# Real RAG using RealSemanticSearch
 # --------------------------
-class SimpleRAG:
+class RealRAGWrapper:
+    """
+    Wrapper para RealSemanticSearch que mantiene la interfaz de SimpleRAG
+    Usa búsqueda semántica real con embeddings y FAISS
+    """
     def __init__(self):
-        self.db = [
+        self._search = None
+        self._initialized = False
+        self._default_docs = [
             {"id": "ctx1", "text": "En situaciones pasadas, permanecer calmado funcionó."},
             {"id": "ctx2", "text": "Evitar riesgo es mejor cuando la confianza es baja."}
         ]
-
+    
+    def _initialize_real_search(self):
+        """Inicializar RealSemanticSearch de forma lazy"""
+        if self._initialized:
+            return
+        
+        try:
+            import sys
+            from pathlib import Path
+            
+            # Agregar path para importar RealSemanticSearch
+            root = Path(__file__).resolve().parents[6]
+            sys.path.insert(0, str(root / "packages" / "sheily_core" / "src"))
+            
+            from sheily_core.search.real_semantic_search import get_real_semantic_search
+            
+            self._search = get_real_semantic_search()
+            
+            # Agregar documentos por defecto
+            default_texts = [doc["text"] for doc in self._default_docs]
+            self._search.add_documents(default_texts, metadata=self._default_docs)
+            
+            self._initialized = True
+            logger.info("✅ RealSemanticSearch inicializado para vmPFC")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ No se pudo inicializar RealSemanticSearch: {e}. Usando búsqueda básica.")
+            self._search = None
+            self._initialized = True  # Marcar como inicializado para no reintentar
+    
     def retrieve(self, query: str, top_k: int = 1) -> List[Dict[str, Any]]:
-        # simple substring match
-        return [d for d in self.db if query.lower() in d["text"].lower()][:top_k]
+        """
+        Recupera documentos relevantes usando búsqueda semántica real.
+        Si RealSemanticSearch no está disponible, usa búsqueda básica como fallback.
+        """
+        self._initialize_real_search()
+        
+        if self._search is not None:
+            try:
+                # Usar búsqueda semántica real
+                results = self._search.search(query, k=top_k)
+                
+                # Convertir formato de RealSemanticSearch a formato esperado
+                formatted_results = []
+                for result in results:
+                    formatted_results.append({
+                        "id": result.get("metadata", {}).get("id", f"doc_{result.get('index', 0)}"),
+                        "text": result.get("document", ""),
+                        "similarity_score": result.get("score", 0.0)
+                    })
+                
+                return formatted_results
+                
+            except Exception as e:
+                logger.warning(f"Error en búsqueda semántica real: {e}. Usando fallback básico.")
+        
+        # Fallback básico si RealSemanticSearch no está disponible
+        if not query:
+            return []
+        
+        query_lower = query.lower()
+        query_words = set(query_lower.split())
+        
+        scored_docs = []
+        for doc in self._default_docs:
+            doc_text_lower = doc["text"].lower()
+            doc_words = set(doc_text_lower.split())
+            
+            common_words = query_words.intersection(doc_words)
+            word_similarity = len(common_words) / max(len(query_words), 1) if query_words else 0
+            
+            if query_lower in doc_text_lower:
+                word_similarity += 0.3
+            
+            scored_docs.append({
+                **doc,
+                'similarity_score': word_similarity
+            })
+        
+        scored_docs.sort(key=lambda x: x['similarity_score'], reverse=True)
+        return scored_docs[:top_k] if scored_docs else []
+
+# Alias para compatibilidad
+SimpleRAG = RealRAGWrapper
 
 
 # --------------------------

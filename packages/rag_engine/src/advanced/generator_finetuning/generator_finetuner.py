@@ -356,7 +356,7 @@ class GeneratorFinetuner:
             fp16=self.device == "cuda",
             dataloader_num_workers=0,
             report_to=[],  # Disable wandb
-            evaluation_strategy="no",  # No validation for this example
+            eval_strategy="no",  # No validation for this example
         )
 
         # Data collator

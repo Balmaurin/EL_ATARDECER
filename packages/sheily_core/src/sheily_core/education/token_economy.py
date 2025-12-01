@@ -17,8 +17,8 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 # Integración completa con sistemas reales de Sheily AI
-from sheily_core.blockchain.sheily_spl_manager import get_sheily_spl_manager
-from sheily_core.rewards.reward_system import SheilyRewardSystem
+from packages.sheily_core.src.sheily_core.blockchain.sheily_spl_manager import get_sheily_spl_manager
+from packages.sheily_core.src.sheily_core.rewards.reward_system import SheilyRewardSystem
 
 logger = logging.getLogger(__name__)
 

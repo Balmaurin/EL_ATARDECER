@@ -179,6 +179,23 @@ class QRLoRALayer(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass with QR-LoRA adaptation"""
+        # Validar dimensiones de entrada
+        if x.dim() > 2:
+            # Si x tiene más de 2 dimensiones (batch, seq_len, hidden), aplanar
+            original_shape = x.shape
+            x = x.view(-1, x.shape[-1])  # (batch * seq_len, hidden)
+            needs_reshape = True
+        else:
+            needs_reshape = False
+        
+        # Validar que las dimensiones coincidan
+        if x.shape[-1] != self.in_features:
+            raise RuntimeError(
+                f"Dimension mismatch in QRLoRALayer: "
+                f"input has {x.shape[-1]} features but layer expects {self.in_features}. "
+                f"Input shape: {x.shape}, Weight shape: {self.pretrained_weight.shape}"
+            )
+        
         # Original weight matrix multiplication
         original_output = torch.matmul(x, self.pretrained_weight.t())
 
@@ -190,19 +207,38 @@ class QRLoRALayer(nn.Module):
             # Traditional LoRA (fallback)
             delta_W = self._compute_delta_W_lora()
 
+        # Validar dimensiones de delta_W
+        if delta_W.shape != self.pretrained_weight.shape:
+            raise RuntimeError(
+                f"Dimension mismatch in delta_W: "
+                f"delta_W shape {delta_W.shape} != weight shape {self.pretrained_weight.shape}"
+            )
+
         # Apply adaptation
         adapted_weight = self.pretrained_weight + delta_W
         adapted_output = torch.matmul(x, adapted_weight.t())
 
         # Combine with scaling and dropout
         lora_output = self.dropout(adapted_output - original_output)
-        return original_output + self.scaling * lora_output
+        result = original_output + self.scaling * lora_output
+        
+        # Restaurar forma original si fue necesario
+        if needs_reshape:
+            result = result.view(original_shape[:-1] + (result.shape[-1],))
+        
+        return result
 
     def _compute_delta_W_from_scalars(self) -> torch.Tensor:
         """
         Compute weight update from scalar coefficients only
 
-        This is the key innovation: ∆W = Σ λ_i * Q_i * R_i^T
+        This is the key innovation: ∆W = Q * Λ * R
+        Where:
+        - Q: (out_features, rank) - orthonormal basis
+        - Λ: (rank, rank) - diagonal matrix of scalar coefficients
+        - R: (rank, in_features) - upper triangular matrix
+        
+        Result: (out_features, in_features)
         """
         Q = self.qr_result.Q  # (out_features, rank)
         R = self.qr_result.R  # (rank, in_features)
@@ -210,9 +246,10 @@ class QRLoRALayer(nn.Module):
         # Expand scalar coefficients to diagonal matrix
         lambda_diag = torch.diag(self.lambda_coeffs)  # (rank, rank)
 
-        # Compute update: Q * Λ * R^T
-        # This gives us the low-rank update in the QR basis
-        delta_W = torch.matmul(torch.matmul(Q, lambda_diag), R.t())
+        # Compute update: Q * Λ * R
+        # Q * lambda_diag: (out_features, rank) * (rank, rank) = (out_features, rank)
+        # (Q * lambda_diag) * R: (out_features, rank) * (rank, in_features) = (out_features, in_features)
+        delta_W = torch.matmul(torch.matmul(Q, lambda_diag), R)
 
         return delta_W
 
@@ -260,27 +297,44 @@ class QRLoRAModel(nn.Module):
 
     def _replace_modules_with_qr_lora(self):
         """Replace target linear layers with QR-LoRA versions"""
+        replaced_count = 0
         for name, module in self.base_model.named_modules():
             if any(target in name for target in self.target_modules):
                 if isinstance(module, nn.Linear):
-                    # Create QR-LoRA replacement
-                    qr_lora_layer = QRLoRALayer(
-                        in_features=module.in_features,
-                        out_features=module.out_features,
-                        config=self.config,
-                        pretrained_weight=module.weight.data,
-                    )
+                    try:
+                        # Create QR-LoRA replacement
+                        qr_lora_layer = QRLoRALayer(
+                            in_features=module.in_features,
+                            out_features=module.out_features,
+                            config=self.config,
+                            pretrained_weight=module.weight.data.clone(),
+                        )
 
-                    # Replace in parent module
-                    parent_name = ".".join(name.split(".")[:-1])
-                    child_name = name.split(".")[-1]
+                        # Replace in parent module
+                        parent_name = ".".join(name.split(".")[:-1])
+                        child_name = name.split(".")[-1]
 
-                    parent = self.base_model
-                    if parent_name:
-                        for part in parent_name.split("."):
-                            parent = getattr(parent, part)
+                        parent = self.base_model
+                        if parent_name:
+                            for part in parent_name.split("."):
+                                parent = getattr(parent, part)
 
-                    setattr(parent, child_name, qr_lora_layer)
+                        setattr(parent, child_name, qr_lora_layer)
+                        replaced_count += 1
+                    except Exception as e:
+                        import warnings
+                        warnings.warn(
+                            f"Failed to replace {name} with QRLoRA: {e}. "
+                            f"Keeping original layer."
+                        )
+        
+        if replaced_count == 0:
+            import warnings
+            warnings.warn(
+                f"No layers were replaced with QRLoRA. "
+                f"Target modules: {self.target_modules}. "
+                f"Check if the model architecture matches the target module names."
+            )
 
     def _freeze_base_model(self):
         """Freeze all base model parameters except QR-LoRA layers"""
@@ -362,36 +416,52 @@ class QRLoRATrainer:
         device: str = "cuda" if torch.cuda.is_available() else "cpu",
     ) -> Dict[str, float]:
         """Train for one epoch"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"   Iniciando época - Device: {device}, Batches: {len(dataloader)}")
         self.model.train()
         self.model.to(device)
+        logger.info("   Modelo movido a device")
 
         total_loss = 0.0
         num_batches = 0
 
-        for batch in dataloader:
-            # Move batch to device
-            batch = {
-                k: v.to(device) if isinstance(v, torch.Tensor) else v
-                for k, v in batch.items()
-            }
+        logger.info("   Iniciando loop de entrenamiento...")
+        for batch_idx, batch in enumerate(dataloader):
+            try:
+                # Log cada 10 batches para ver progreso
+                if batch_idx % 10 == 0:
+                    logger.info(f"   Procesando batch {batch_idx + 1}/{len(dataloader)}")
+                
+                # Move batch to device
+                batch = {
+                    k: v.to(device) if isinstance(v, torch.Tensor) else v
+                    for k, v in batch.items()
+                }
 
-            # Forward pass
-            outputs = self.model(**batch)
-            loss = outputs.loss
+                # Forward pass
+                outputs = self.model(**batch)
+                loss = outputs.loss
 
-            # Backward pass
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+                # Backward pass
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
-            if self.scheduler:
-                self.scheduler.step()
+                if self.scheduler:
+                    self.scheduler.step()
 
-            total_loss += loss.item()
-            num_batches += 1
+                total_loss += loss.item()
+                num_batches += 1
+                
+            except Exception as batch_error:
+                logger.error(f"   ❌ Error en batch {batch_idx + 1}: {batch_error}")
+                raise
 
+        logger.info(f"   ✅ Época completada: {num_batches} batches procesados")
         return {
-            "train_loss": total_loss / num_batches,
+            "train_loss": total_loss / num_batches if num_batches > 0 else 0.0,
             "learning_rate": self.optimizer.param_groups[0]["lr"],
         }
 
@@ -440,10 +510,24 @@ def create_qr_lora_model(
     if not TRANSFORMERS_AVAILABLE:
         raise ImportError("transformers library required for QR-LoRA")
 
-    # Load base model
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, cache_dir=cache_dir
-    )
+    # Load base model - Use AutoModelForCausalLM for language models
+    # This fixes dimension mismatch errors when using causal language models like Phi-3
+    try:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, 
+            cache_dir=cache_dir,
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            device_map="auto" if torch.cuda.is_available() else None,
+            trust_remote_code=True
+        )
+    except Exception as e:
+        # Fallback to sequence classification if causal fails
+        try:
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_name, cache_dir=cache_dir
+            )
+        except Exception:
+            raise RuntimeError(f"Failed to load model {model_name}: {e}")
 
     # Create QR-LoRA model
     qr_lora_model = QRLoRAModel(model, config)

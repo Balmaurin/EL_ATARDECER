@@ -7,12 +7,16 @@ Implementa prioridades, límites de memoria, y políticas de limpieza.
 """
 
 import heapq
+import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .sheilys_blockchain import SHEILYSTransaction
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 class TransactionPriority(Enum):
@@ -132,7 +136,7 @@ class TransactionPool:
             return True
 
         except Exception as e:
-            print(f"Error agregando transacción al pool: {e}")
+            logger.error(f"Error agregando transacción al pool: {e}", exc_info=True)
             return False
 
     def _calculate_priority(
@@ -209,7 +213,7 @@ class TransactionPool:
             return True
 
         except Exception as e:
-            print(f"Error removiendo transacción del pool: {e}")
+            logger.error(f"Error removiendo transacción del pool: {e}", exc_info=True)
             return False
 
     def get_transactions_for_block(
@@ -253,7 +257,7 @@ class TransactionPool:
             return transactions
 
         except Exception as e:
-            print(f"Error obteniendo transacciones para bloque: {e}")
+            logger.error(f"Error obteniendo transacciones para bloque: {e}", exc_info=True)
             return []
 
     def _clean_expired_transactions(self):
@@ -292,7 +296,7 @@ class TransactionPool:
         self.stats["oldest_transaction"] = min(timestamps)
         self.stats["newest_transaction"] = max(timestamps)
 
-    def get_pool_stats(self) -> Dict[str, any]:
+    def get_pool_stats(self) -> Dict[str, Any]:
         """Obtener estadísticas del transaction pool"""
         return {
             "current_size": len(self.transaction_heap),
@@ -383,7 +387,7 @@ class TransactionPool:
             return True
 
         except Exception as e:
-            print(f"Error actualizando prioridad de transacción: {e}")
+            logger.error(f"Error actualizando prioridad de transacción: {e}", exc_info=True)
             return False
 
     def clear_pool(self):

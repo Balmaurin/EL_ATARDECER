@@ -15,49 +15,55 @@ import sys
 import os
 import asyncio
 
-# Importar el ML Orchestrator existente
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Importar el ML Orchestrator existente - REAL imports without hardcoded paths
 try:
-    sys.path.append(os.path.abspath("packages/sheily_core/src"))
     from sheily_core.models.ml.advanced_ml_orchestrator import (
         ContinualLearningSystem,
         MetaLearningSystem,
         MLOptimizationConfig
     )
     ORCHESTRATOR_AVAILABLE = True
+    logger.info("✅ Advanced ML Orchestrator available")
 except ImportError as e:
-    print(f"⚠️ Advanced ML Orchestrator not available: {e}")
+    logger.warning(f"⚠️ Advanced ML Orchestrator not available: {e}")
     ORCHESTRATOR_AVAILABLE = False
     ContinualLearningSystem = None
     MetaLearningSystem = None
+    MLOptimizationConfig = None
 
-# Importar QR-LoRA para fine-tuning REAL
+# Importar QR-LoRA para fine-tuning REAL - REAL imports without hardcoded paths
 try:
-    sys.path.append(os.path.abspath("packages/rag_engine/src"))
-    from advanced.qr_lora import (
+    from packages.rag_engine.src.advanced.qr_lora import (
         QRLoRAConfig,
         QRLoRATrainer,
         create_qr_lora_model
     )
     QRLORA_AVAILABLE = True
+    logger.info("✅ QR-LoRA available")
 except ImportError as e:
-    print(f"⚠️ QR-LoRA not available: {e}")
+    logger.warning(f"⚠️ QR-LoRA not available: {e}")
     QRLORA_AVAILABLE = False
     QRLoRAConfig = None
     QRLoRATrainer = None
     create_qr_lora_model = None
 
-# Verificar PyTorch (acepta CPU o CUDA)
+# Verificar PyTorch (acepta CPU o CUDA) - REAL check
 try:
     import torch
     TORCH_AVAILABLE = True  # Funciona con CPU o CUDA
     CUDA_AVAILABLE = torch.cuda.is_available()
     if CUDA_AVAILABLE:
-        print("⚡ CUDA detected - GPU training available")
+        logger.info("⚡ CUDA detected - GPU training available")
     else:
-        print("💻 CPU mode - training will be slower but functional")
+        logger.info("💻 CPU mode - training will be slower but functional")
 except ImportError:
     TORCH_AVAILABLE = False
     CUDA_AVAILABLE = False
+    logger.warning("⚠️ PyTorch not available - training features disabled")
 
 @dataclass
 class LearningExperience:
@@ -94,10 +100,11 @@ class AdvancedLearningSystem:
             config = MLOptimizationConfig()
             self.continual_learning = ContinualLearningSystem(config.continual_learning_buffer)
             self.meta_learning = MetaLearningSystem()
-            print("🧠 Advanced Learning System initialized (Continual + Meta-Learning)")
+            logger.info("🧠 Advanced Learning System initialized (Continual + Meta-Learning)")
         else:
             self.continual_learning = None
             self.meta_learning = None
+            logger.info("🧠 Advanced Learning System initialized (SQLite-based, no ML orchestrator)")
             print("🎓 Basic Learning System initialized (SQLite only)")
         
         # Inicializar QR-LoRA para fine-tuning REAL
@@ -313,7 +320,7 @@ class AdvancedLearningSystem:
             # Crear modelo si no existe
             if self.qr_lora_model is None:
                 print("📦 Loading base model for fine-tuning...")
-                model_name = "microsoft/DialoGPT-small"  # Modelo pequeño para pruebas
+                model_name = "microsoft/Phi-3-mini-4k-instruct"  # Sheily v1 base model
                 
                 # Ejecutar en thread para no bloquear
                 loop = asyncio.get_event_loop()

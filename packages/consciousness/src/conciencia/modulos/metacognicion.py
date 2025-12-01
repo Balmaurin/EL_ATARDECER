@@ -117,8 +117,11 @@ class MetacognitionEngine:
         depth_score = min(1.0, len(conscious_contents) / 5.0)
         quality_scores.append(depth_score)
 
-        # Uso de evidencia (simulado)
-        evidence_score = 0.7  # Placeholder para implementación real
+        # Uso de evidencia
+        evidence_score = self.calculate_evidence_score(
+            {"content": conscious_contents}, 
+            [c.get("evidence", {}) for c in conscious_contents if "evidence" in c]
+        )
         quality_scores.append(evidence_score)
 
         # Complejidad apropiada
@@ -132,6 +135,57 @@ class MetacognitionEngine:
             overall_quality *= 0.8  # Penalizar razonamiento superficial
 
         return max(0.1, min(0.95, overall_quality))
+
+    def calculate_evidence_score(self, belief: Dict, evidence: List[Dict]) -> float:
+        """Calculate evidence strength for a belief"""
+        if not evidence:
+            return 0.0
+        
+        # Weight evidence by:
+        # - Source reliability
+        # - Recency
+        # - Consistency with other evidence
+        total_weight = 0.0
+        weighted_sum = 0.0
+        
+        for item in evidence:
+            if not item: 
+                continue
+            reliability = item.get('source_reliability', 0.5)
+            recency_factor = self._calculate_recency_factor(item.get('timestamp', time.time()))
+            consistency = self._check_consistency(item, evidence)
+            
+            weight = reliability * recency_factor * consistency
+            total_weight += weight
+            weighted_sum += weight * item.get('strength', 0.5)
+        
+        return weighted_sum / total_weight if total_weight > 0 else 0.0
+
+    def _calculate_recency_factor(self, timestamp: float) -> float:
+        """Calcula factor de recency basado en timestamp"""
+        if not timestamp:
+            return 0.5
+        time_diff_hours = (time.time() - timestamp) / 3600
+        # Decay exponencial (half-life = 24 horas)
+        return np.exp(-time_diff_hours * np.log(2) / 24)
+
+    def _check_consistency(self, item: Dict, evidence: List[Dict]) -> float:
+        """Verifica consistencia de un item con el resto de evidencia"""
+        if not evidence or len(evidence) < 2:
+            return 1.0
+        
+        item_strength = item.get('strength', 0.5)
+        consistent_count = 0
+        
+        for other_item in evidence:
+            if other_item == item:
+                continue
+            other_strength = other_item.get('strength', 0.5)
+            # Consistencia = 1 - diferencia absoluta
+            consistency = 1.0 - abs(item_strength - other_strength)
+            consistent_count += consistency
+        
+        return consistent_count / (len(evidence) - 1) if len(evidence) > 1 else 1.0
 
     def _evaluate_consistency(self, contents: List[Dict]) -> float:
         """Evalúa consistencia en el contenido consciente"""

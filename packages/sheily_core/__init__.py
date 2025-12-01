@@ -1,0 +1,3 @@
+"""
+Sheily Core Package
+"""

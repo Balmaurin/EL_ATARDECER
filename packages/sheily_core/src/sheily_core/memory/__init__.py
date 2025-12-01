@@ -57,6 +57,7 @@ __description__ = "Sistema avanzado de memoria híbrida humano-IA con procesamie
 # IMPORTS CONDICIONALES PARA MEJOR COMPATIBILIDAD
 # ==============================================================================
 
+# REAL imports - fail clearly if modules not available
 try:
     # Imports principales desde componentes internos
     from ..memory_system_complete import SheilyMemorySystem
@@ -64,33 +65,28 @@ try:
     from .core.attention.advanced_attention_v2 import AdvancedAttentionV2
     from .core.database.memory_engine import MemoryDatabase, SheilyMemoryV2
     from .core.storage.optimized_vector_store_v2 import OptimizedVectorStore
+    
+    logger.info("✅ Memory system components loaded successfully")
+    
 except ImportError as e:
-    # Fallback para desarrollo o imports parciales (usar logging para no ensuciar stdout)
-    try:
-        import logging
-
-        logging.getLogger(__name__).debug(
-            f"Componentes de memoria opcionales no disponibles: {e}"
-        )
-    except Exception:
-        pass
-
-    # Clases básicas como fallback
-    class SheilyMemoryV2:
-        """Sistema de memoria híbrida (fallback)"""
-
-        def __init__(self, db_path="memory.db"):
-            self.db_path = db_path
-
-    class SheilyFileProcessor:
-        """Procesador de archivos (fallback)"""
-
-        pass
-
-    class SheilyMemorySystem:
-        """Sistema completo de memoria (fallback)"""
-
-        pass
+    # NO FALLBACKS - Fail clearly with helpful error message
+    logger.error(
+        f"❌ CRITICAL: Memory system components not available: {e}\n"
+        f"   Required modules:\n"
+        f"   - memory_system_complete (SheilyMemorySystem)\n"
+        f"   - process_files_for_memory (SheilyFileProcessor)\n"
+        f"   - core.attention.advanced_attention_v2 (AdvancedAttentionV2)\n"
+        f"   - core.database.memory_engine (MemoryDatabase, SheilyMemoryV2)\n"
+        f"   - core.storage.optimized_vector_store_v2 (OptimizedVectorStore)\n"
+        f"   Ensure all memory system modules are properly installed and available."
+    )
+    
+    # Raise exception instead of providing fake fallbacks
+    raise ImportError(
+        f"Memory system components not available. This is a required dependency. "
+        f"Original error: {e}\n"
+        f"Please ensure the memory system modules are properly installed."
+    ) from e
 
 
 # ==============================================================================

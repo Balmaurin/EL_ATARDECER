@@ -540,18 +540,201 @@ class ELKStackManager:
         return report
 
     async def _send_alert_notification(self, alert: Dict[str, Any]):
-        """Enviar notificación de alerta"""
-        # Implementación placeholder - integrar con sistemas de notificación reales
-        print(f"📢 ALERT NOTIFICATION: {alert['message']}")
+        """Enviar notificación de alerta a múltiples canales"""
+        alert_sent = False
 
-        # En producción: enviar a Slack, email, PagerDuty, etc.
+        # 1. Webhook HTTP (Slack, Discord, Teams, etc.)
         webhook_url = os.getenv("ALERT_WEBHOOK_URL")
         if webhook_url and AIOHTTP_AVAILABLE:
             try:
+                # Formatear mensaje para diferentes plataformas
+                webhook_payload = self._format_webhook_payload(alert, "slack")  # Default Slack format
+
                 async with aiohttp.ClientSession() as session:
-                    await session.post(webhook_url, json=alert)
-            except:
-                pass
+                    async with session.post(
+                        webhook_url,
+                        json=webhook_payload,
+                        headers={"Content-Type": "application/json"},
+                        timeout=aiohttp.ClientTimeout(total=10)
+                    ) as response:
+                        if response.status == 200:
+                            logger.info(f"✅ Alerta enviada a webhook: {alert['alert_type']}")
+                            alert_sent = True
+                        else:
+                            logger.error(f"❌ Error webhook ({response.status}): {await response.text()}")
+            except Exception as e:
+                logger.error(f"Error enviando alerta a webhook: {e}")
+
+        # 2. Email notification (SMTP)
+        email_config = self._get_email_config()
+        if email_config and not alert_sent:  # Fallback si webhook falla
+            try:
+                await self._send_email_alert(alert, email_config)
+                alert_sent = True
+            except Exception as e:
+                logger.error(f"Error enviando alerta por email: {e}")
+
+        # 3. PagerDuty (para alertas críticas)
+        if alert.get('severity') == 'critical':
+            pagerduty_key = os.getenv("PAGERDUTY_INTEGRATION_KEY")
+            if pagerduty_key and AIOHTTP_AVAILABLE:
+                try:
+                    await self._send_pagerduty_alert(alert, pagerduty_key)
+                    alert_sent = True
+                except Exception as e:
+                    logger.error(f"Error enviando alerta a PagerDuty: {e}")
+
+        # 4. Log local como último recurso
+        if not alert_sent:
+            logger.warning(f"📢 ALERTA LOCAL: {alert['message']} (Severity: {alert.get('severity', 'unknown')})")
+            print(f"🚨 ALERTA NO ENVIADA - REVISAR CONFIGURACIÓN: {alert['message']}")
+
+    def _format_webhook_payload(self, alert: Dict[str, Any], platform: str) -> Dict[str, Any]:
+        """Formatear payload para diferentes plataformas de webhook"""
+        base_message = f"🚨 *ALERTA*: {alert['message']}\n"
+        base_message += f"• Servicio: {alert.get('service', 'unknown')}\n"
+        base_message += f"• Severidad: {alert.get('severity', 'unknown')}\n"
+        base_message += f"• Timestamp: {alert.get('timestamp', datetime.now().isoformat())}\n"
+
+        if alert.get('anomaly_score'):
+            base_message += f"• Score de anomalía: {alert['anomaly_score']:.2f}\n"
+
+        if platform.lower() == "slack":
+            return {
+                "text": base_message,
+                "attachments": [{
+                    "color": "danger" if alert.get('severity') == 'critical' else "warning",
+                    "fields": [
+                        {"title": "Tipo", "value": alert.get('alert_type', 'unknown'), "short": True},
+                        {"title": "Detalles", "value": str(alert.get('details', {}))[:500], "short": False}
+                    ]
+                }]
+            }
+        elif platform.lower() == "discord":
+            return {
+                "content": base_message,
+                "embeds": [{
+                    "title": "Alerta de Sistema",
+                    "description": alert.get('message', ''),
+                    "color": 15158332 if alert.get('severity') == 'critical' else 16776960,  # Red or Orange
+                    "fields": [
+                        {"name": "Tipo", "value": alert.get('alert_type', 'unknown'), "inline": True},
+                        {"name": "Severidad", "value": alert.get('severity', 'unknown'), "inline": True},
+                        {"name": "Servicio", "value": alert.get('service', 'unknown'), "inline": True}
+                    ]
+                }]
+            }
+        else:
+            # Generic webhook format
+            return {
+                "alert": alert,
+                "formatted_message": base_message
+            }
+
+    def _get_email_config(self) -> Optional[Dict[str, Any]]:
+        """Obtener configuración de email desde variables de entorno"""
+        smtp_server = os.getenv("SMTP_SERVER")
+        smtp_port = os.getenv("SMTP_PORT", "587")
+        smtp_user = os.getenv("SMTP_USER")
+        smtp_password = os.getenv("SMTP_PASSWORD")
+        alert_emails = os.getenv("ALERT_EMAILS", "").split(",") if os.getenv("ALERT_EMAILS") else []
+
+        if not all([smtp_server, smtp_user, smtp_password, alert_emails]):
+            return None
+
+        return {
+            "smtp_server": smtp_server,
+            "smtp_port": int(smtp_port),
+            "smtp_user": smtp_user,
+            "smtp_password": smtp_password,
+            "alert_emails": [email.strip() for email in alert_emails if email.strip()],
+            "from_email": smtp_user
+        }
+
+    async def _send_email_alert(self, alert: Dict[str, Any], config: Dict[str, Any]):
+        """Enviar alerta por email SMTP"""
+        try:
+            import smtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+
+            # Crear mensaje
+            msg = MIMEMultipart()
+            msg['From'] = config['from_email']
+            msg['To'] = ", ".join(config['alert_emails'])
+            msg['Subject'] = f"🚨 ALERTA: {alert.get('alert_type', 'Sistema')} - {alert.get('service', 'Unknown')}"
+
+            # Cuerpo del email
+            body = f"""
+ALERTA DE SISTEMA
+
+Tipo: {alert.get('alert_type', 'Unknown')}
+Servicio: {alert.get('service', 'Unknown')}
+Severidad: {alert.get('severity', 'Unknown').upper()}
+Timestamp: {alert.get('timestamp', datetime.now().isoformat())}
+
+Mensaje:
+{alert.get('message', 'Sin mensaje')}
+
+Detalles:
+{json.dumps(alert.get('details', {}), indent=2, ensure_ascii=False)}
+
+--
+Sistema de Monitoreo ELK
+{self.service_name} v{self.service_version}
+            """.strip()
+
+            msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+            # Enviar email
+            server = smtplib.SMTP(config['smtp_server'], config['smtp_port'])
+            server.starttls()
+            server.login(config['smtp_user'], config['smtp_password'])
+            text = msg.as_string()
+            server.sendmail(config['from_email'], config['alert_emails'], text)
+            server.quit()
+
+            logger.info(f"✅ Alerta enviada por email a {len(config['alert_emails'])} destinatarios")
+
+        except Exception as e:
+            logger.error(f"Error enviando email: {e}")
+            raise
+
+    async def _send_pagerduty_alert(self, alert: Dict[str, Any], routing_key: str):
+        """Enviar alerta crítica a PagerDuty"""
+        if not AIOHTTP_AVAILABLE:
+            return
+
+        try:
+            payload = {
+                "routing_key": routing_key,
+                "event_action": "trigger",
+                "payload": {
+                    "summary": alert.get('message', 'Alerta crítica del sistema'),
+                    "severity": "critical" if alert.get('severity') == 'critical' else "error",
+                    "source": alert.get('service', 'unknown'),
+                    "component": "monitoring_system",
+                    "group": "infrastructure",
+                    "class": "alert",
+                    "custom_details": alert
+                }
+            }
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://events.pagerduty.com/v2/enqueue",
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
+                    if response.status == 202:
+                        logger.info("✅ Alerta enviada a PagerDuty")
+                    else:
+                        logger.error(f"❌ Error PagerDuty ({response.status}): {await response.text()}")
+
+        except Exception as e:
+            logger.error(f"Error enviando a PagerDuty: {e}")
+            raise
 
 
 class ELKLogger(logging.Handler):

@@ -21,67 +21,130 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+# Configure logger first
+logger = logging.getLogger("Sheily.AutonomousController")
+
 # Importar sistemas funcionales reales
 from .coordination_system import functional_multi_agent_system, functional_coordinator
 from .active_registry import active_registry
 
-# Memory
+# REAL imports - use proper package structure or fail clearly
+# Memory - try relative import first, then package import
 try:
     from ..consciousness.vector_memory_system import get_vector_memory
 except ImportError:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
     try:
         from sheily_core.consciousness.vector_memory_system import get_vector_memory
     except ImportError:
+        logger.warning("⚠️ Vector memory system not available - consciousness features limited")
         get_vector_memory = None
 
-# Consciousness modules
+# Consciousness modules - use package imports, not hardcoded paths
 try:
-    sys.path.append(os.path.abspath("packages/consciousness/src"))
-    from conciencia.meta_cognition_system import MetaCognitionSystem
-    from conciencia.modulos.digital_nervous_system import DigitalNervousSystem
-    from conciencia.modulos.ethical_engine import EthicalEngine
-    from conciencia.modulos.digital_dna import DigitalDNA, GeneticTrait
-    from conciencia.modulos.global_workspace import GlobalWorkspace
-    from conciencia.modulos.qualia_simulator import QualiaSimulator
-    from conciencia.modulos.teoria_mente import TheoryOfMind
-except ImportError as e:
-    print(f"⚠️ Consciousness module import error: {e}")
-    MetaCognitionSystem = DigitalNervousSystem = EthicalEngine = DigitalDNA = None
-    GlobalWorkspace = QualiaSimulator = TheoryOfMind = None
+    # Try package import first (if consciousness is installed as package)
+    from packages.consciousness.src.conciencia.meta_cognition_system import MetaCognitionSystem
+    from packages.consciousness.src.conciencia.modulos.digital_nervous_system import DigitalNervousSystem
+    from packages.consciousness.src.conciencia.modulos.ethical_engine import EthicalEngine
+    from packages.consciousness.src.conciencia.modulos.digital_dna import DigitalDNA, GeneticTrait
+    from packages.consciousness.src.conciencia.modulos.global_workspace import GlobalWorkspace
+    from packages.consciousness.src.conciencia.modulos.qualia_simulator import QualiaSimulator
+    from packages.consciousness.src.conciencia.modulos.teoria_mente import TheoryOfMind
+    logger.info("✅ Consciousness modules loaded via package import")
+except ImportError:
+    try:
+        # Try alternative package structure
+        from conciencia.meta_cognition_system import MetaCognitionSystem
+        from conciencia.modulos.digital_nervous_system import DigitalNervousSystem
+        from conciencia.modulos.ethical_engine import EthicalEngine
+        from conciencia.modulos.digital_dna import DigitalDNA, GeneticTrait
+        from conciencia.modulos.global_workspace import GlobalWorkspace
+        from conciencia.modulos.qualia_simulator import QualiaSimulator
+        from conciencia.modulos.teoria_mente import TheoryOfMind
+        logger.info("✅ Consciousness modules loaded via direct import")
+    except ImportError as e:
+        logger.warning(f"⚠️ Consciousness modules not available: {e}")
+        logger.warning("   Install consciousness package or set PYTHONPATH appropriately")
+        MetaCognitionSystem = DigitalNervousSystem = EthicalEngine = DigitalDNA = None
+        GlobalWorkspace = QualiaSimulator = TheoryOfMind = None
 
-# RAG System (usando adaptador simplificado)
+# RAG System - use real adapters, fail if not available
 try:
     from .simple_rag_adapter import SimpleRAGSystem, initialize_rag_with_base_knowledge
-    print("✅ RAG adapter loaded")
+    logger.info("✅ RAG adapter loaded")
 except ImportError as e:
-    print(f"⚠️ RAG adapter not available: {e}")
+    logger.warning(f"⚠️ RAG adapter not available: {e}")
     SimpleRAGSystem = None
     initialize_rag_with_base_knowledge = None
 
-# Learning System (usando adaptador simplificado)
+# Learning System - use real adapters
 try:
     from .simple_learning_adapter import SimpleLearningSystem
-    print("✅ Learning adapter loaded")
+    logger.info("✅ Learning adapter loaded")
 except ImportError as e:
-    print(f"⚠️ Learning adapter not available: {e}")
+    logger.warning(f"⚠️ Learning adapter not available: {e}")
     SimpleLearningSystem = None
 
-# Auto-Improvement
+# Auto-Improvement - use package import
 try:
-    sys.path.append(os.path.abspath("packages/auto-improvement"))
-    from recursive_self_improvement import RecursiveSelfImprovementEngine
+    from packages.auto_improvement.recursive_self_improvement import RecursiveSelfImprovementEngine
 except ImportError:
-    RecursiveSelfImprovementEngine = None
+    try:
+        from auto_improvement.recursive_self_improvement import RecursiveSelfImprovementEngine
+    except ImportError:
+        logger.warning("⚠️ Auto-improvement module not available")
+        RecursiveSelfImprovementEngine = None
 
-# Gamification
+# Gamification - REAL implementation with persistence
 class SimpleGamification:
-    def __init__(self):
+    """REAL gamification system with logging and persistence"""
+    def __init__(self, db_path: str = None):
         self.xp = 0
         self.level = 1
+        self.achievements = []
+        self.db_path = db_path or os.getenv("GAMIFICATION_DB", "./data/gamification.db")
+        self._load_state()
+        logger.info("🎮 Gamification system initialized")
+    
+    def _load_state(self):
+        """Load gamification state from file"""
+        try:
+            if os.path.exists(self.db_path):
+                import json
+                with open(self.db_path, 'r') as f:
+                    data = json.load(f)
+                    self.xp = data.get('xp', 0)
+                    self.level = data.get('level', 1)
+                    self.achievements = data.get('achievements', [])
+        except Exception as e:
+            logger.debug(f"Could not load gamification state: {e}")
+    
+    def _save_state(self):
+        """Save gamification state to file"""
+        try:
+            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+            import json
+            with open(self.db_path, 'w') as f:
+                json.dump({
+                    'xp': self.xp,
+                    'level': self.level,
+                    'achievements': self.achievements
+                }, f)
+        except Exception as e:
+            logger.warning(f"Could not save gamification state: {e}")
+    
     def award_xp(self, amount, reason):
+        """Award XP and log properly"""
+        old_level = self.level
         self.xp += amount
-        print(f"🎮 XP +{amount} ({reason})")
+        
+        # Calculate level (1 level per 100 XP)
+        new_level = (self.xp // 100) + 1
+        if new_level > self.level:
+            self.level = new_level
+            logger.info(f"🎮 Level up! New level: {self.level}")
+        
+        logger.info(f"🎮 XP +{amount} ({reason}) - Total: {self.xp} XP, Level: {self.level}")
+        self._save_state()
 
 
 class AutonomousSystemController:
@@ -95,36 +158,41 @@ class AutonomousSystemController:
     def __init__(self):
         self.running = False
         self.coordination_thread = None
-        self.logger = logging.getLogger("Sheily.AutonomousController")
+        self.logger = logger
         self.system_metrics = {}
         
-        print("[INIT] Initializing COMPLETE AI SYSTEM...")
+        logger.info("[INIT] Initializing COMPLETE AI SYSTEM...")
 
         # 1. GLOBAL WORKSPACE (Núcleo de Conciencia)
         self.global_workspace = GlobalWorkspace() if GlobalWorkspace else None
-        if self.global_workspace: print("✨ Global Workspace initialized")
+        if self.global_workspace: 
+            logger.info("✨ Global Workspace initialized")
+        else:
+            logger.warning("⚠️ Global Workspace not available - consciousness features limited")
 
         # 2. RAG SYSTEM (Sistema de Conocimiento)
         try:
             if SimpleRAGSystem and initialize_rag_with_base_knowledge:
                 self.rag_system = initialize_rag_with_base_knowledge()
-                print("📚 RAG System initialized with base knowledge")
+                logger.info("📚 RAG System initialized with base knowledge")
             else:
                 self.rag_system = None
+                logger.warning("⚠️ RAG System not available")
         except Exception as e:
             self.rag_system = None
-            print(f"⚠️ RAG System error: {e}")
+            logger.error(f"⚠️ RAG System error: {e}", exc_info=True)
 
         # 3. LEARNING SYSTEM (Sistema de Aprendizaje)
         try:
             if SimpleLearningSystem:
                 self.learning_system = SimpleLearningSystem()
-                print("🎓 Learning System initialized (SQLite-based)")
+                logger.info("🎓 Learning System initialized (SQLite-based)")
             else:
                 self.learning_system = None
+                logger.warning("⚠️ Learning System not available")
         except Exception as e:
             self.learning_system = None
-            print(f"⚠️ Learning System error: {e}")
+            logger.error(f"⚠️ Learning System error: {e}", exc_info=True)
 
         # 4. Módulos de Conciencia
         self._init_consciousness_modules()
@@ -133,7 +201,7 @@ class AutonomousSystemController:
         self.coordination_interval = 5
         self.cpu_threshold_warning = 70.0
 
-        print("[INFO] COMPLETE AI SYSTEM READY (Consciousness + Knowledge + Learning)")
+        logger.info("[INFO] COMPLETE AI SYSTEM READY (Consciousness + Knowledge + Learning)")
 
     def _init_consciousness_modules(self):
         """Inicializa módulos periféricos de conciencia"""
@@ -141,32 +209,60 @@ class AutonomousSystemController:
         # Memory
         try:
             self.memory = get_vector_memory() if get_vector_memory else None
-            if self.memory: print("🧠 Memory Processor connected")
-        except: self.memory = None
+            if self.memory: 
+                logger.info("🧠 Memory Processor connected")
+            else:
+                logger.warning("⚠️ Memory Processor not available")
+        except Exception as e:
+            self.memory = None
+            logger.error(f"Error initializing memory: {e}", exc_info=True)
 
         # Metacognition
         try:
-            self.meta_cognition = MetaCognitionSystem(consciousness_dir="./data/consciousness") if MetaCognitionSystem else None
-            if self.meta_cognition: print("👁️ Meta-Cognition Processor connected")
-        except: self.meta_cognition = None
+            if MetaCognitionSystem:
+                # Use environment variable or default path
+                consciousness_dir = os.getenv("CONSCIOUSNESS_DATA_DIR", "./data/consciousness")
+                self.meta_cognition = MetaCognitionSystem(consciousness_dir=consciousness_dir)
+                logger.info("👁️ Meta-Cognition Processor connected")
+            else:
+                self.meta_cognition = None
+                logger.warning("⚠️ Meta-Cognition not available")
+        except Exception as e:
+            self.meta_cognition = None
+            logger.error(f"Error initializing metacognition: {e}", exc_info=True)
 
         # Nervous System
         try:
             self.nervous_system = DigitalNervousSystem() if DigitalNervousSystem else None
-            if self.nervous_system: print("⚡ Nervous System Processor connected")
-        except: self.nervous_system = None
+            if self.nervous_system: 
+                logger.info("⚡ Nervous System Processor connected")
+            else:
+                logger.warning("⚠️ Nervous System not available")
+        except Exception as e:
+            self.nervous_system = None
+            logger.error(f"Error initializing nervous system: {e}", exc_info=True)
 
         # Qualia
         try:
             self.qualia = QualiaSimulator() if QualiaSimulator else None
-            if self.qualia: print("🌈 Qualia Simulator connected")
-        except: self.qualia = None
+            if self.qualia: 
+                logger.info("🌈 Qualia Simulator connected")
+            else:
+                logger.warning("⚠️ Qualia Simulator not available")
+        except Exception as e:
+            self.qualia = None
+            logger.error(f"Error initializing qualia: {e}", exc_info=True)
 
         # Theory of Mind
         try:
             self.theory_of_mind = TheoryOfMind() if TheoryOfMind else None
-            if self.theory_of_mind: print("👥 Theory of Mind Processor connected")
-        except: self.theory_of_mind = None
+            if self.theory_of_mind: 
+                logger.info("👥 Theory of Mind Processor connected")
+            else:
+                logger.warning("⚠️ Theory of Mind not available")
+        except Exception as e:
+            self.theory_of_mind = None
+            logger.error(f"Error initializing theory of mind: {e}", exc_info=True)
 
         # Ethical Engine
         try:
@@ -176,28 +272,47 @@ class AutonomousSystemController:
                     'value_weights': {'safety': 0.9},
                     'ethical_boundaries': ['never_harm_humans']
                 })
-                print("⚖️ Ethical Processor connected")
-            else: self.ethical_engine = None
-        except: self.ethical_engine = None
+                logger.info("⚖️ Ethical Processor connected")
+            else: 
+                self.ethical_engine = None
+                logger.warning("⚠️ Ethical Engine not available")
+        except Exception as e:
+            self.ethical_engine = None
+            logger.error(f"Error initializing ethical engine: {e}", exc_info=True)
 
         # Digital DNA
         try:
             if DigitalDNA:
-                dna_path = "./data/consciousness/digital_dna.json"
-                if os.path.exists(dna_path):
-                    self.dna = DigitalDNA.load_genetic_profile(dna_path)
+                # Use environment variable or default path
+                dna_path = os.getenv("DIGITAL_DNA_PATH", "./data/consciousness/digital_dna.json")
+                dna_path_obj = Path(dna_path)
+                dna_path_obj.parent.mkdir(parents=True, exist_ok=True)
+                
+                if dna_path_obj.exists():
+                    self.dna = DigitalDNA.load_genetic_profile(str(dna_path_obj))
                 else:
                     self.dna = DigitalDNA()
-                    self.dna.save_genetic_profile(dna_path)
-                print(f"🧬 Digital DNA Active")
-            else: self.dna = None
-        except: self.dna = None
+                    self.dna.save_genetic_profile(str(dna_path_obj))
+                logger.info(f"🧬 Digital DNA Active at {dna_path}")
+            else: 
+                self.dna = None
+                logger.warning("⚠️ Digital DNA not available")
+        except Exception as e:
+            self.dna = None
+            logger.error(f"Error initializing digital DNA: {e}", exc_info=True)
 
         # Self-Improvement
         try:
-            self.self_improvement = RecursiveSelfImprovementEngine(singularity_dir="./data/singularity") if RecursiveSelfImprovementEngine else None
-            if self.self_improvement: print("🚀 Self-Improvement Processor connected")
-        except: self.self_improvement = None
+            if RecursiveSelfImprovementEngine:
+                singularity_dir = os.getenv("SINGULARITY_DIR", "./data/singularity")
+                self.self_improvement = RecursiveSelfImprovementEngine(singularity_dir=singularity_dir)
+                logger.info("🚀 Self-Improvement Processor connected")
+            else:
+                self.self_improvement = None
+                logger.warning("⚠️ Self-Improvement not available")
+        except Exception as e:
+            self.self_improvement = None
+            logger.error(f"Error initializing self-improvement: {e}", exc_info=True)
 
         # Gamification
         self.gamification = SimpleGamification()
@@ -215,13 +330,13 @@ class AutonomousSystemController:
             self.coordination_thread = threading.Thread(target=self._coordination_loop)
             self.coordination_thread.daemon = True
             self.coordination_thread.start()
-            print("🚀 Conscious Control Loop started")
+            logger.info("🚀 Conscious Control Loop started")
 
     def stop_autonomous_control(self):
         self.running = False
         if self.coordination_thread:
             self.coordination_thread.join(timeout=5)
-        print("⏹️ Control stopped")
+        logger.info("⏹️ Control stopped")
 
     def _coordination_loop(self):
         """Bucle principal de conciencia GWT con RAG y Learning"""
@@ -255,7 +370,7 @@ class AutonomousSystemController:
                 time.sleep(self.coordination_interval)
 
             except Exception as e:
-                print(f"Error in conscious loop: {e}")
+                logger.error(f"Error in conscious loop: {e}", exc_info=True)
                 time.sleep(5)
         
         loop.close()
@@ -329,7 +444,7 @@ class AutonomousSystemController:
         content = conscious_content.get('conscious_content', {})
         focus = content.get('primary_focus')
         
-        print(f"✨ CONSCIOUS BROADCAST: {str(focus)[:60]}")
+        logger.info(f"✨ CONSCIOUS BROADCAST: {str(focus)[:60]}")
         
         # Actualizar Teoría de la Mente
         if self.theory_of_mind:
@@ -344,7 +459,7 @@ class AutonomousSystemController:
         if isinstance(primary_focus, dict) and 'cpu_load' in primary_focus:
             cpu = primary_focus['cpu_load']
             if cpu > self.cpu_threshold_warning:
-                print(f"⚡ CONSCIOUS ACTION: Mitigating High CPU ({cpu}%)")
+                logger.warning(f"⚡ CONSCIOUS ACTION: Mitigating High CPU ({cpu}%)")
                 
                 # Validar éticamente
                 if self.ethical_engine:
@@ -360,8 +475,52 @@ class AutonomousSystemController:
                             )
 
     async def _execute_unconscious_routines(self, inputs: Dict[str, Any]):
-        """Rutinas automáticas cuando no hay emergencia consciente"""
-        pass
+        """REAL unconscious routines - background processing when no conscious emergency"""
+        try:
+            # 1. Memory consolidation (if not done recently)
+            if self.memory and random.random() < 0.1:  # 10% chance per cycle
+                try:
+                    await asyncio.to_thread(self.memory.consolidate_memories)
+                    logger.debug("🧠 Unconscious: Memory consolidation completed")
+                except Exception as e:
+                    logger.debug(f"Memory consolidation skipped: {e}")
+            
+            # 2. Learning system background processing
+            if self.learning_system and random.random() < 0.05:  # 5% chance per cycle
+                try:
+                    await self.learning_system.consolidate_learning()
+                    logger.debug("🎓 Unconscious: Learning consolidation completed")
+                except Exception as e:
+                    logger.debug(f"Learning consolidation skipped: {e}")
+            
+            # 3. System metrics collection (always)
+            if hasattr(self, 'system_metrics'):
+                # Update metrics from inputs
+                if 'hardware' in inputs:
+                    self.system_metrics.update(inputs['hardware'])
+            
+            # 4. Health check for subsystems (occasionally)
+            if random.random() < 0.02:  # 2% chance per cycle
+                health_checks = []
+                
+                if self.rag_system:
+                    try:
+                        # Quick health check - try a simple query
+                        test_result = self.rag_system.process_query("test", use_advanced_processing=False)
+                        health_checks.append(("rag_system", "healthy" if test_result else "degraded"))
+                    except Exception as e:
+                        health_checks.append(("rag_system", f"error: {str(e)[:50]}"))
+                
+                if health_checks:
+                    logger.debug(f"🏥 Unconscious health checks: {health_checks}")
+            
+            # 5. Cleanup old data (very rarely)
+            if random.random() < 0.01:  # 1% chance per cycle
+                # This would trigger cleanup of old logs, temp files, etc.
+                logger.debug("🧹 Unconscious: Cleanup cycle triggered")
+            
+        except Exception as e:
+            logger.debug(f"Error in unconscious routines: {e}")
 
     async def _background_maintenance(self):
         """Procesos de fondo (consolidación de memoria y entrenamiento)"""
@@ -409,14 +568,15 @@ def get_autonomous_controller():
     return autonomous_controller
 
 if __name__ == "__main__":
-    print("🤖 SHEILY AI - COMPLETE SYSTEM (CONSCIOUSNESS + KNOWLEDGE + LEARNING)")
-    print("=" * 70)
+    logging.basicConfig(level=logging.INFO)
+    logger.info("🤖 SHEILY AI - COMPLETE SYSTEM (CONSCIOUSNESS + KNOWLEDGE + LEARNING)")
+    logger.info("=" * 70)
     start_system_control()
     try:
         for _ in range(6):
             time.sleep(5)
             status = get_system_status()
-            print(f"📊 {status.get('metrics', {}).get('cpu_load')}% CPU | Modules: {status.get('modules')}")
+            logger.info(f"📊 {status.get('metrics', {}).get('cpu_load')}% CPU | Modules: {status.get('modules')}")
     except KeyboardInterrupt:
         pass
     stop_system_control()

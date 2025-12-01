@@ -24,8 +24,17 @@ class MCPModuleLoader:
         """Load Theory of Mind module from consciousness package"""
         try:
             # Add consciousness package to path
-            project_root = Path(__file__).parent.parent.parent.parent
+            project_root = Path(__file__).parent.parent.parent.parent.parent
             consciousness_path = project_root / "packages" / "consciousness" / "src"
+
+            # Debug: log the computed path
+            print(f"[MCP-LOADER] Looking for consciousness at: {consciousness_path}")
+            print(f"[MCP-LOADER] Absolute path: {consciousness_path.absolute()}")
+            print(f"[MCP-LOADER] Current dir context: {Path.cwd()}")
+
+            # Also try alternative path structure
+            alt_consciousness_path = project_root / "packages" / "consciousness" / "src" / "conciencia"
+            print(f"[MCP-LOADER] Alternative path: {alt_consciousness_path}")
             
             if not consciousness_path.exists():
                 logger.warning(f"Consciousness package not found at {consciousness_path}")
@@ -50,7 +59,7 @@ class MCPModuleLoader:
                 "location": str(consciousness_path)
             }
             
-            logger.info("✅ MCP loaded Theory of Mind from packages/consciousness")
+            logger.info("[OK] MCP loaded Theory of Mind from packages/consciousness")
             return unified_tom
             
         except ImportError as e:
@@ -72,7 +81,7 @@ class MCPModuleLoader:
         """Load training system for uploads"""
         try:
             # Try to load from sheily_core or training-system package
-            project_root = Path(__file__).parent.parent.parent.parent
+            project_root = Path(__file__).parent.parent.parent.parent.parent
             training_paths = [
                 project_root / "packages" / "training-system" / "src",
                 project_root / "packages" / "sheily_core" / "src"
@@ -94,7 +103,7 @@ class MCPModuleLoader:
                     "loaded": True,
                     "version": "1.0.0"
                 }
-                logger.info("✅ MCP loaded Training System")
+                logger.info("[OK] MCP loaded Training System")
                 return training_system
             except ImportError:
                 # Training system not available
@@ -115,7 +124,7 @@ class MCPModuleLoader:
     def load_sheily_core(self) -> Optional[Any]:
         """Load sheily_core package for dashboard and other features"""
         try:
-            project_root = Path(__file__).parent.parent.parent.parent
+            project_root = Path(__file__).parent.parent.parent.parent.parent
             sheily_path = project_root / "packages" / "sheily_core" / "src"
             
             if not sheily_path.exists():
@@ -139,7 +148,7 @@ class MCPModuleLoader:
                 "location": str(sheily_path)
             }
             
-            logger.info("✅ MCP loaded Sheily Core package")
+            logger.info("[OK] MCP loaded Sheily Core package")
             return sheily_core
             
         except ImportError as e:

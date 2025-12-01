@@ -161,6 +161,20 @@ class MCPServer:
         }
         self.running = False
 
+    def validate_message_quality(self, message: MCPMessage) -> float:
+        """Validate message quality and structure"""
+        score = 1.0
+        
+        # Structure check
+        if not message.jsonrpc == "2.0": score -= 0.2
+        if not message.id: score -= 0.1
+        
+        # Content check
+        if message.method and len(message.method) > 50: score -= 0.1
+        if message.params and len(str(message.params)) > 10000: score -= 0.1
+        
+        return max(0.0, score)
+
     async def start(self):
         """Inicia el servidor MCP"""
         self.running = True
@@ -540,8 +554,20 @@ class CodeAnalysisMCPServer(MCPServer):
         language = args.get("language", "python")
 
         issues = []
-        complexity_score = len(code) / 100  # Simple metric
-        quality_score = 0.8  # Placeholder
+        issues = []
+        
+        # Calculate complexity score
+        loc = len(code.split('\n'))
+        complexity_score = min(1.0, loc / 500.0)  # Normalize
+        
+        # Calculate quality score based on heuristics
+        quality_deductions = 0.0
+        if "TODO" in code: quality_deductions += 0.1
+        if "FIXME" in code: quality_deductions += 0.2
+        if "except Exception:" in code: quality_deductions += 0.1
+        if "print(" in code: quality_deductions += 0.05
+        
+        quality_score = max(0.0, 1.0 - quality_deductions)
 
         # Análisis simple
         if "TODO" in code:

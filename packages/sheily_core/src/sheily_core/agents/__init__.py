@@ -30,6 +30,13 @@ Author: MCP Enterprise Master
 Version: 1.0.0
 """
 
+import asyncio
+import logging
+import uuid
+
+# Configuración de logging para el módulo
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
 from .base.base_agent import (
     AgentCapability,
     AgentMessage,
@@ -183,13 +190,3 @@ async def execute_parallel_tasks(tasks: list) -> dict:
         return await coordinator.execute_task(coordination_task)
     except Exception as e:
         return {"error": f"Parallel execution failed: {str(e)}"}
-
-
-import asyncio
-import logging
-
-# Importaciones necesarias para el sistema
-import uuid
-
-# Configuración de logging para el módulo
-logging.getLogger(__name__).addHandler(logging.NullHandler())

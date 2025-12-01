@@ -362,6 +362,20 @@ class UnifiedEmbeddingSemanticSystem:
             logger.error(f"Error calculando similitud: {e}")
             return 0.0
 
+    def calculate_semantic_similarity(self, emb1: np.ndarray, emb2: np.ndarray) -> float:
+        """
+        Calculate cosine similarity between two embedding vectors using numpy.
+        Useful when sentence_transformers is not available.
+        """
+        if emb1.size == 0 or emb2.size == 0:
+            return 0.0
+        
+        # Ensure 1D arrays
+        v1 = emb1.flatten()
+        v2 = emb2.flatten()
+        
+        return float(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2) + 1e-8))
+
     def batch_generate_embeddings(
         self, texts: List[str], domain: str = "batch"
     ) -> List[EmbeddingResult]:
@@ -467,11 +481,59 @@ async def generate_embeddings(texts: List[str]) -> List[np.ndarray]:
 
 
 def calculate_text_similarity(text1: str, text2: str) -> float:
-    """Función de compatibilidad para calcular similitud"""
-    system = UnifiedEmbeddingSemanticSystem()
-    # Nota: Esta función síncrona no inicializará el modelo correctamente
-    # Se debería usar la versión async en producción
-    return 0.0  # Placeholder
+    """Función de compatibilidad para calcular similitud semántica entre textos"""
+    try:
+        # Nota: Esta función síncrona tiene limitaciones con la inicialización async
+        # En producción se debería usar la versión async del sistema
+
+        # Crear sistema con configuración básica
+        config = EmbeddingConfig(device="cpu", cache_enabled=False)
+        system = UnifiedEmbeddingSemanticSystem(config)
+
+        # Intentar inicializar (esto puede fallar en entornos sin dependencias)
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        try:
+            # Intentar inicialización síncrona forzada
+            success = loop.run_until_complete(system.initialize())
+            if not success:
+                logger.warning("No se pudo inicializar modelo de embeddings, retornando similitud básica")
+                return _basic_text_similarity(text1, text2)
+
+            # Calcular similitud usando el sistema inicializado
+            return system.calculate_similarity(text1, text2)
+
+        finally:
+            loop.close()
+
+    except Exception as e:
+        logger.warning(f"Error en cálculo de similitud semántica: {e}, usando similitud básica")
+        # Fallback a similitud básica basada en texto
+        return _basic_text_similarity(text1, text2)
+
+
+def _basic_text_similarity(text1: str, text2: str) -> float:
+    """Calcular similitud básica basada en overlapping de palabras"""
+    if not text1 or not text2:
+        return 0.0
+
+    # Normalizar textos
+    words1 = set(text1.lower().split())
+    words2 = set(text2.lower().split())
+
+    if not words1 or not words2:
+        return 0.0
+
+    # Calcular Jaccard similarity
+    intersection = len(words1.intersection(words2))
+    union = len(words1.union(words2))
+
+    if union == 0:
+        return 0.0
+
+    return intersection / union
 
 
 if __name__ == "__main__":

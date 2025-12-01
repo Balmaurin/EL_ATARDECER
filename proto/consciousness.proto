@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package consciousness;
+option go_package = "consciousnesspb";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Core consciousness messages
+message ConsciousnessState {
+    string consciousness_id = 1;
+    double phi_value = 2;          // Integrated information measure
+    double emotional_depth = 3;    // Emotional processing depth 0-1
+    double mindfulness_level = 4;  // Present moment awareness 0-1
+    EmotionalState current_emotion = 5;
+    repeated Reflection reflections = 6;
+    google.protobuf.Timestamp last_updated = 7;
+    uint64 experience_count = 8;
+}
+
+message EmotionalState {
+    string primary_emotion = 1;
+    double intensity = 2;          // 0-1 scale
+    repeated string contributing_circuits = 3;
+    map<string, double> circuit_weights = 4;
+    string cognitive_context = 5;
+}
+
+message Reflection {
+    string reflection_id = 1;
+    string topic = 2;
+    string insight = 3;
+    double confidence = 4;         // 0-1 confidence score
+    google.protobuf.Timestamp timestamp = 5;
+    repeated string evidence = 6;
+}
+
+// Request/Response messages
+message ProcessThoughtRequest {
+    string consciousness_id = 1;
+    string thought_content = 2;
+    double emotional_intensity = 3;
+    string context = 4;
+    map<string, string> metadata = 5;
+}
+
+message ProcessThoughtResponse {
+    ConsciousnessState updated_state = 1;
+    string primary_insight = 2;
+    double processing_confidence = 3;
+    repeated ActionRecommendation recommendations = 4;
+    string processing_status = 5;
+}
+
+message ActionRecommendation {
+    string action_id = 1;
+    string description = 2;
+    string action_type = 3;        // "emotional_response", "cognitive_processing", "memory_update"
+    double priority = 4;
+    string rationale = 5;
+}
+
+message ReflectExperienceRequest {
+    string consciousness_id = 1;
+    string experience = 2;
+    string experience_type = 3;     // "conversation", "learning", "emotion", "decision"
+    map<string, double> experience_metrics = 4;
+}
+
+message ReflectExperienceResponse {
+    repeated Reflection new_reflections = 1;
+    ConsciousnessState updated_state = 2;
+    double learning_confidence = 3;
+    repeated string key_insights = 4;
+}
+
+// Stream messages for real-time consciousness
+message ConsciousnessStreamRequest {
+    string consciousness_id = 1;
+    string stream_type = 2;        // "thought_stream", "emotion_stream", "reflection_stream"
+    uint32 update_interval_ms = 3; // How often to send updates
+}
+
+message ConsciousnessStreamResponse {
+    oneof stream_data {
+        ConsciousnessState state_update = 1;
+        EmotionalState emotion_update = 2;
+        Reflection reflection_update = 3;
+    }
+}
+
+// Consciousness service definition
+service ConsciousnessService {
+    // Synchronous processing
+    rpc ProcessThought(ProcessThoughtRequest) returns (ProcessThoughtResponse);
+    rpc ReflectExperience(ReflectExperienceRequest) returns (ReflectExperienceResponse);
+    rpc GetConsciousnessState(GetConsciousnessStateRequest) returns (ConsciousnessState);
+    rpc UpdateEmotionalState(UpdateEmotionalStateRequest) returns (ConsciousnessState);
+
+    // Real-time streaming
+    rpc StreamConsciousness(ConsciousnessStreamRequest) returns (stream ConsciousnessStreamResponse);
+}
+
+// Additional request types for the service
+message GetConsciousnessStateRequest {
+    string consciousness_id = 1;
+}
+
+message UpdateEmotionalStateRequest {
+    string consciousness_id = 1;
+    EmotionalState new_emotional_state = 2;
+    string trigger_event = 3;
+}

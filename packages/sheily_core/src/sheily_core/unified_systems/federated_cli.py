@@ -341,17 +341,20 @@ def start_round(ctx, rounds):
 
     print_header("Iniciando Rondas de Entrenamiento", "🏃")
 
-    for round_num in range(1, rounds + 1):
-        try:
-            round_id = await active_system.start_federated_round(round_num)
-            print_success(f"Ronda {round_num} iniciada: {round_id}")
+    async def _run_rounds():
+        for round_num in range(1, rounds + 1):
+            try:
+                round_id = await active_system.start_federated_round(round_num)
+                print_success(f"Ronda {round_num} iniciada: {round_id}")
 
-            # Get updated metrics
-            metrics = active_system.get_federated_metrics()
-            print_metrics(metrics)
+                # Get updated metrics
+                metrics = active_system.get_federated_metrics()
+                print_metrics(metrics)
 
-        except Exception as e:
-            print_error(f"Error en ronda {round_num}: {str(e)}")
+            except Exception as e:
+                print_error(f"Error en ronda {round_num}: {str(e)}")
+
+    asyncio.run(_run_rounds())
 
 # ============================================================================
 # MONITORING COMMANDS

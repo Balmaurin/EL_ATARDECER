@@ -1,0 +1,10 @@
+{
+  "user_id": "user-1",
+  "balance": 100,
+  "level": 1,
+  "experience": 0,
+  "next_level_experience": 200,
+  "total_earned": 100,
+  "total_spent": 0,
+  "transactions": []
+}

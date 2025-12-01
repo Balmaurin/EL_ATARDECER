@@ -32,6 +32,7 @@ import queue
 import sqlite3
 import zlib
 from pathlib import Path
+from datetime import datetime, timedelta
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -66,6 +67,8 @@ class EmbCache:
         max_connections: int = 5,
         max_cache_size_mb: int = 1024,
         compression_level: int = 1,
+        ttl_days: Optional[int] = None,
+        auto_compact_threshold: float = 0.2,  # Compactar si fragmentación > 20%
     ) -> None:
         """Initialize embedding cache.
 
@@ -84,6 +87,8 @@ class EmbCache:
         self.max_size = max_cache_size_mb * 1024 * 1024
         self.compression_level = compression_level
         self.connection_pool = queue.Queue(maxsize=max_connections)
+        self.ttl_days = ttl_days
+        self.auto_compact_threshold = auto_compact_threshold
 
         try:
             # Create cache directory
@@ -119,7 +124,8 @@ class EmbCache:
                     size_bytes INTEGER NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    access_count INTEGER DEFAULT 0
+                    access_count INTEGER DEFAULT 0,
+                    expires_at TIMESTAMP NULL
                 );
 
                 CREATE TABLE IF NOT EXISTS statistics (
@@ -133,8 +139,25 @@ class EmbCache:
 
                 CREATE INDEX IF NOT EXISTS idx_size
                 ON cache(size_bytes);
+
+                CREATE INDEX IF NOT EXISTS idx_expires_at
+                ON cache(expires_at);
             """
             )
+
+            # Migrar esquema si es necesario (agregar expires_at si no existe)
+            try:
+                cursor = conn.execute(
+                    "PRAGMA table_info(cache)"
+                )
+                columns = [row[1] for row in cursor.fetchall()]
+                if "expires_at" not in columns:
+                    log.info("Migrando esquema: agregando columna expires_at")
+                    conn.execute("ALTER TABLE cache ADD COLUMN expires_at TIMESTAMP NULL")
+                    conn.execute("CREATE INDEX IF NOT EXISTS idx_expires_at ON cache(expires_at)")
+                    conn.commit()
+            except sqlite3.Error as e:
+                log.warning(f"Error en migración de esquema: {e}")
 
             # Initialize statistics
             conn.executemany(
@@ -348,10 +371,13 @@ class EmbCache:
 
             with self._get_db() as conn:
                 try:
+                    # Limpiar entradas expiradas antes de buscar
+                    self._cleanup_expired(conn)
+                    
                     cursor = conn.execute(
                         """
-                        SELECT vec FROM cache
-                        WHERE hash = ?
+                        SELECT vec, expires_at FROM cache
+                        WHERE hash = ? AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
                         """,
                         (text_hash,),
                     )
@@ -372,6 +398,10 @@ class EmbCache:
                             conn.execute(
                                 "UPDATE statistics SET stat_value = stat_value + 1 WHERE stat_name = 'total_hits'"
                             )
+                            
+                            # Verificar fragmentación y compactar si es necesario
+                            self._maybe_compact(conn)
+                            
                             conn.commit()
                             return self._decompress_array(row[0])
 
@@ -443,13 +473,18 @@ class EmbCache:
                     compressed = self._compress_array(vector)
                     size_bytes = len(compressed)
 
+                    # Calcular expires_at si TTL está configurado
+                    expires_at = None
+                    if self.ttl_days is not None:
+                        expires_at = (datetime.now() + timedelta(days=self.ttl_days)).isoformat()
+
                     # Store in database
                     conn.execute(
                         """
-                        INSERT OR REPLACE INTO cache (hash, vec, size_bytes)
-                        VALUES (?, ?, ?)
+                        INSERT OR REPLACE INTO cache (hash, vec, size_bytes, expires_at)
+                        VALUES (?, ?, ?, ?)
                         """,
-                        (text_hash, compressed, size_bytes),
+                        (text_hash, compressed, size_bytes, expires_at),
                     )
 
                     # Update statistics
@@ -469,6 +504,59 @@ class EmbCache:
                             "compressed_size": size_bytes,
                         },
                     )
+
+    def _cleanup_expired(self, conn: sqlite3.Connection) -> None:
+        """Eliminar entradas expiradas del cache"""
+        try:
+            deleted = conn.execute(
+                """
+                DELETE FROM cache
+                WHERE expires_at IS NOT NULL AND expires_at < CURRENT_TIMESTAMP
+                """
+            ).rowcount
+            if deleted > 0:
+                log.debug(f"Limpiadas {deleted} entradas expiradas del cache")
+                self._update_stats(conn)
+        except sqlite3.Error as e:
+            log.warning(f"Error limpiando entradas expiradas: {e}")
+
+    def _maybe_compact(self, conn: sqlite3.Connection) -> None:
+        """Compactar la base de datos si la fragmentación supera el umbral"""
+        try:
+            # Obtener estadísticas de fragmentación
+            cursor = conn.execute(
+                """
+                SELECT 
+                    page_count, 
+                    freelist_count 
+                FROM pragma_page_count(), pragma_freelist_count()
+                """
+            )
+            result = cursor.fetchone()
+            
+            if result and result[0] > 0:
+                page_count, freelist_count = result
+                fragmentation = freelist_count / page_count if page_count > 0 else 0
+                
+                if fragmentation > self.auto_compact_threshold:
+                    log.info(f"Fragmentación detectada ({fragmentation:.2%}), compactando cache...")
+                    # Vacuum para compactar
+                    conn.execute("VACUUM")
+                    log.info("✅ Cache compactado exitosamente")
+        except sqlite3.Error as e:
+            log.warning(f"Error al compactar cache: {e}")
+
+    def compact(self) -> None:
+        """Compactar manualmente el cache"""
+        with self._get_db() as conn:
+            try:
+                log.info("Compactando cache manualmente...")
+                conn.execute("VACUUM")
+                conn.commit()
+                log.info("✅ Cache compactado exitosamente")
+            except sqlite3.Error as e:
+                log.error(f"Error en compactación manual: {e}")
+                raise
 
     def close(self) -> None:
         """Close all database connections.

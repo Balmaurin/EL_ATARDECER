@@ -7,7 +7,10 @@ import asyncio
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 
-from backend.main_api import app
+# Import federation gateway instead of missing main_api
+from apps.backend.federation_server import create_federation_gateway
+
+app = create_federation_gateway()
 
 
 async def main():

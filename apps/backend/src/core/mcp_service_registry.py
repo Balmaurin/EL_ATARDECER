@@ -205,10 +205,10 @@ class MCPServiceRegistry:
         """Registrar un nuevo servicio"""
         try:
             self.services[service.id] = service
-            logger.info(f"✅ Service registered: {service.name}")
+            logger.info(f"[OK] Service registered: {service.name}")
             return True
         except Exception as e:
-            logger.error(f"❌ Failed to register service {service.name}: {e}")
+            logger.error(f"[ERROR] Failed to register service {service.name}: {e}")
             return False
     
     def get_service(self, service_id: str) -> Optional[RegisteredService]:

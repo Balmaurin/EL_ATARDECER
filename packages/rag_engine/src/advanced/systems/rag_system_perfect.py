@@ -78,63 +78,85 @@ try:
         "✅ Todos los módulos avanzados importados correctamente (incluyendo memoria implícita, agéntica y multimodal)"
     )
 except ImportError as e:
-    logger.error(f"❌ Error importando módulos: {e}")
-    # Crear implementaciones básicas si no existen
-    logger.warning("⚠️ Creando implementaciones básicas para módulos faltantes...")
-
+    logger.error(f"❌ Error importando módulos avanzados: {e}")
+    logger.error("❌ Módulos de memoria avanzada no disponibles")
+    logger.error("⚠️ El sistema funcionará pero sin funcionalidades de memoria avanzada")
+    logger.error("💡 Instala las dependencias requeridas o deshabilita estas funcionalidades")
+    
+    # Fails fast: No crear stubs que engañen al usuario
+    # En su lugar, crear clases que claramente indican que no están disponibles y fallan explícitamente
     class ImplicitMemoryManager:
+        """Memoria implícita no disponible - requiere dependencias adicionales. Falla explícitamente."""
         def __init__(self, model_dim=768):
-            pass
+            logger.warning("⚠️ ImplicitMemoryManager no disponible - funcionalidad deshabilitada")
+            self.available = False
 
         def modify_knowledge(self, updates, modification_type="editing"):
-            return True
+            logger.error("❌ modify_knowledge llamado pero ImplicitMemoryManager no está disponible")
+            raise RuntimeError("ImplicitMemoryManager no disponible. Instala las dependencias requeridas.")
 
     class AssociativeMemory:
+        """Memoria asociativa no disponible - requiere dependencias adicionales. Falla explícitamente."""
         def __init__(self, memory_dim=512, max_patterns=1000):
-            pass
+            logger.warning("⚠️ AssociativeMemory no disponible - funcionalidad deshabilitada")
+            self.available = False
 
         def store_pattern(self, pattern):
-            return True
+            logger.error("❌ store_pattern llamado pero AssociativeMemory no está disponible")
+            raise RuntimeError("AssociativeMemory no disponible. Instala las dependencias requeridas.")
 
         def retrieve_pattern(self, cue, top_k=5):
-            return []
+            logger.error("❌ retrieve_pattern llamado pero AssociativeMemory no está disponible")
+            raise RuntimeError("AssociativeMemory no disponible. Instala las dependencias requeridas.")
 
     class KnowledgeEditor:
+        """Editor de conocimiento no disponible - requiere dependencias adicionales. Falla explícitamente."""
         def __init__(self, memory_manager):
-            pass
+            logger.warning("⚠️ KnowledgeEditor no disponible - funcionalidad deshabilitada")
+            self.available = False
 
         def edit_fact(self, subject, relation, old_object, new_object):
-            return {"success": True}
+            logger.error("❌ edit_fact llamado pero KnowledgeEditor no está disponible")
+            raise RuntimeError("KnowledgeEditor no disponible. Instala las dependencias requeridas.")
 
     class AgentMemorySystem:
+        """Sistema de memoria de agente no disponible - requiere dependencias adicionales. Falla explícitamente."""
         def __init__(self, agent_id="default"):
-            pass
+            logger.warning("⚠️ AgentMemorySystem no disponible - funcionalidad deshabilitada")
+            self.available = False
 
         def store_experience(
             self, content, memory_type="working", context=None, episode_id=None
         ):
-            return "mem_001"
+            logger.error("❌ store_experience llamado pero AgentMemorySystem no está disponible")
+            raise RuntimeError("AgentMemorySystem no disponible. Instala las dependencias requeridas.")
 
         def retrieve_memory(self, query, memory_types=None, top_k=5):
-            return {}
+            logger.error("❌ retrieve_memory llamado pero AgentMemorySystem no está disponible")
+            raise RuntimeError("AgentMemorySystem no disponible. Instala las dependencias requeridas.")
 
         def consolidate_memories(self):
-            return {"consolidated": 0}
+            logger.error("❌ consolidate_memories llamado pero AgentMemorySystem no está disponible")
+            raise RuntimeError("AgentMemorySystem no disponible. Instala las dependencias requeridas.")
 
         def get_memory_stats(self):
-            return {"total_memories": 0}
+            return {"total_memories": 0, "available": False}
 
     class MultimodalMemoryManager:
+        """Gestor de memoria multimodal no disponible - requiere dependencias adicionales. Falla explícitamente."""
         def __init__(self):
-            pass
+            logger.warning("⚠️ MultimodalMemoryManager no disponible - funcionalidad deshabilitada")
+            self.available = False
 
         def store_multimodal_experience(
             self, modalities, experience_type="general", context=None
         ):
-            return "mm_001"
+            logger.error("❌ store_multimodal_experience llamado pero MultimodalMemoryManager no está disponible")
+            raise RuntimeError("MultimodalMemoryManager no disponible. Instala las dependencias requeridas.")
 
         def retrieve_multimodal_context(self, query, top_k=5):
-            return []
+            logger.error("❌ retrieve_multimodal_context llamado pero MultimodalMemoryManager no está disponible")
+            raise RuntimeError("MultimodalMemoryManager no disponible. Instala las dependencias requeridas.")
 
 
 @dataclass
@@ -204,13 +226,32 @@ class AdvancedChunkingSystem:
         self, doc_id: str, content: str, strategy: str = "hybrid"
     ) -> List[DocumentChunk]:
         """Chunk document usando estrategia especificada"""
-        if strategy not in self.chunkers:
+        # Validación de inputs
+        if not doc_id or not isinstance(doc_id, str):
+            logger.error(f"❌ doc_id inválido: {doc_id}")
+            return []
+        
+        if not content or not isinstance(content, str):
+            logger.error(f"❌ Contenido inválido para documento: {doc_id}")
+            return []
+        
+        if not isinstance(strategy, str) or strategy not in self.chunkers:
+            logger.warning(f"⚠️ Estrategia inválida '{strategy}', usando 'hybrid'")
             strategy = "hybrid"
 
         return self.chunkers[strategy](doc_id, content)
 
     def _small_to_big_chunking(self, doc_id: str, content: str) -> List[DocumentChunk]:
         """Small-to-big chunking strategy"""
+        # Validación de inputs
+        if not content or not isinstance(content, str):
+            logger.warning(f"⚠️ Contenido inválido para chunking: {doc_id}")
+            return []
+        
+        if not content.strip():
+            logger.warning(f"⚠️ Contenido vacío para chunking: {doc_id}")
+            return []
+        
         chunks = []
 
         # Small chunks (sentences)
@@ -247,8 +288,16 @@ class AdvancedChunkingSystem:
         self, doc_id: str, content: str
     ) -> List[DocumentChunk]:
         """Sliding window chunking"""
+        # Validación de inputs
+        if not content or not isinstance(content, str) or not content.strip():
+            logger.warning(f"⚠️ Contenido inválido para sliding window: {doc_id}")
+            return []
+        
         chunks = []
         words = content.split()
+        
+        if not words:
+            return []
         window_size = 50
         stride = 25
 
@@ -269,6 +318,11 @@ class AdvancedChunkingSystem:
 
     def _semantic_chunking(self, doc_id: str, content: str) -> List[DocumentChunk]:
         """Semantic chunking basado en similitud semántica"""
+        # Validación de inputs
+        if not content or not isinstance(content, str) or not content.strip():
+            logger.warning(f"⚠️ Contenido inválido para semantic chunking: {doc_id}")
+            return []
+        
         # Simplified semantic chunking
         sentences = re.split(r"[.!?]+", content)
         chunks = []
@@ -331,16 +385,33 @@ class AdvancedRetrievalSystem:
         self.index_manager = MultiIndexManager(dimension)
         self.chunking_system = AdvancedChunkingSystem()
         self.documents: Dict[str, List[DocumentChunk]] = {}
+        self._embedding_model = None  # Lazy loading del modelo
 
     def add_document(self, doc_id: str, content: str) -> bool:
         """Añadir documento con chunking avanzado"""
+        # Validación de inputs
+        if not doc_id or not isinstance(doc_id, str):
+            logger.error(f"❌ doc_id inválido: {doc_id}")
+            return False
+        
+        if not content or not isinstance(content, str) or not content.strip():
+            logger.warning(f"⚠️ Contenido vacío para documento {doc_id}")
+            return False
+        
         try:
             # Crear chunks usando estrategia híbrida
             chunks = self.chunking_system.chunk_document(doc_id, content, "hybrid")
+            
+            if not chunks:
+                logger.warning(f"⚠️ No se generaron chunks para documento {doc_id}")
+                return False
 
             # Generar embeddings para cada chunk
             for chunk in chunks:
-                chunk.embedding = self._generate_embedding(chunk.content)
+                if chunk.content and chunk.content.strip():
+                    chunk.embedding = self._generate_embedding(chunk.content)
+                else:
+                    logger.warning(f"⚠️ Chunk vacío encontrado, saltando embedding")
 
             self.documents[doc_id] = chunks
 
@@ -353,15 +424,44 @@ class AdvancedRetrievalSystem:
             return True
 
         except Exception as e:
-            logger.error(f"❌ Error añadiendo documento {doc_id}: {e}")
+            logger.error(f"❌ Error añadiendo documento {doc_id}: {e}", exc_info=True)
             return False
 
     def _generate_embedding(self, text: str) -> np.ndarray:
-        """Generar embedding determinístico"""
-        np.random.seed(hash(text) % 2**32)
-        # Generar embedding 1D para compatibilidad
-        embedding = np.random.randn(self.dimension).astype(np.float32)
-        return embedding
+        """Generar embedding usando modelo real de SentenceTransformers"""
+        if not text or not text.strip():
+            # Retornar embedding cero si el texto está vacío
+            return np.zeros(self.dimension, dtype=np.float32)
+        
+        try:
+            # Intentar usar modelo real de embeddings
+            from sentence_transformers import SentenceTransformer
+            
+            # Lazy loading del modelo
+            if not hasattr(self, '_embedding_model') or self._embedding_model is None:
+                model_name = "sentence-transformers/all-MiniLM-L6-v2"
+                logger.info(f"Cargando modelo de embeddings: {model_name}")
+                self._embedding_model = SentenceTransformer(model_name)
+                # Actualizar dimensión real del modelo
+                test_emb = self._embedding_model.encode(["test"])
+                self.dimension = len(test_emb[0])
+            
+            # Generar embedding real
+            embedding = self._embedding_model.encode([text], convert_to_numpy=True)[0]
+            return embedding.astype(np.float32)
+            
+        except ImportError:
+            logger.warning("SentenceTransformers no disponible, usando fallback determinístico")
+            # Fallback determinístico (solo para desarrollo/testing)
+            np.random.seed(hash(text) % 2**32)
+            embedding = np.random.randn(self.dimension).astype(np.float32)
+            return embedding
+        except Exception as e:
+            logger.error(f"Error generando embedding: {e}")
+            # Fallback en caso de error
+            np.random.seed(hash(text) % 2**32)
+            embedding = np.random.randn(self.dimension).astype(np.float32)
+            return embedding
 
     def _index_chunks(self, chunks: List[DocumentChunk]):
         """Indexar chunks en múltiples estrategias"""
@@ -399,10 +499,26 @@ class AdvancedRetrievalSystem:
         self, query: str, top_k: int = 10, method: str = "hybrid"
     ) -> RetrievalResult:
         """Retrieval con múltiples estrategias"""
+        # Validación de inputs
+        if not query or not isinstance(query, str) or not query.strip():
+            logger.error("❌ Query vacía o inválida")
+            return RetrievalResult(chunks=[], scores=[], method=method)
+        
+        if not isinstance(top_k, int) or top_k <= 0:
+            logger.warning(f"⚠️ top_k inválido ({top_k}), usando default 10")
+            top_k = 10
+        
+        if not isinstance(method, str):
+            method = "hybrid"
+        
         start_time = time.time()
 
         try:
             query_embedding = self._generate_embedding(query)
+            
+            if query_embedding is None or query_embedding.size == 0:
+                logger.error("❌ Error generando embedding de query")
+                return RetrievalResult(chunks=[], scores=[], method=method)
 
             all_chunks = []
             all_scores = []
@@ -1348,7 +1464,18 @@ class HybridRAGSystem:
         use_advanced_features: bool = True,
     ) -> GenerationResult:
         """Procesar query con TODAS las técnicas avanzadas"""
+        # Validación de inputs
+        if not query or not isinstance(query, str) or not query.strip():
+            logger.error("❌ Query vacía o inválida")
+            return GenerationResult(
+                answer="Error: Query vacía o inválida",
+                confidence=0.0,
+                sources=[],
+                processing_time=0.0,
+            )
+        
         if not self.is_initialized:
+            logger.error("❌ Sistema no inicializado")
             return GenerationResult(
                 answer="Sistema no inicializado",
                 confidence=0.0,
@@ -1798,38 +1925,38 @@ def demo_perfect_rag_system():
     """
     Demostración completa del Sistema RAG Perfecto
     """
-    print("🚀 SISTEMA RAG ULTRA-COMPLETO PERFECTO")
-    print("=" * 80)
-    print("🎯 TODAS las técnicas avanzadas implementadas y funcionando:")
-    print("✅ FASE 1: Query Classification System (BERT-multilingual, 95% accuracy)")
-    print("✅ FASE 2: Chunking Avanzado (small-to-big, sliding window)")
-    print("✅ FASE 3: Retrieval Methods (HyDE, Query Rewriting, Decomposition)")
-    print("✅ FASE 4: Reranking System (RankLLaMA, MonoT5, TILDEv2)")
-    print("✅ FASE 5: Summarization Methods (Selective Context, LongLLMLingua)")
-    print("✅ FASE 6: Generator Fine-tuning (LoRA, datasets QA)")
-    print("✅ FASE 7: Evaluación RAGAs (Faithfulness, Context Relevancy)")
-    print("✅ FASE 8: Integración MCP + Federated Learning")
-    print("✅ FASE 9: Query Expansion (T5-based, COLING 2025)")
-    print("✅ FASE 10: Retrieval Stride (Dynamic context update)")
-    print("✅ FASE 11: Contrastive ICL (Correct + Incorrect examples)")
-    print("✅ FASE 12: Focus Mode (Sentence-level retrieval)")
-    print("✅ FASE 13: Advanced Metrics (ROUGE, MAUVE, FActScore)")
-    print("✅ BONUS: Multilingual Support + Dynamic Prompts (COLING 2025)")
-    print("=" * 80)
+    logger.info("🚀 SISTEMA RAG ULTRA-COMPLETO PERFECTO")
+    logger.info("=" * 80)
+    logger.info("🎯 TODAS las técnicas avanzadas implementadas y funcionando:")
+    logger.info("✅ FASE 1: Query Classification System (BERT-multilingual, 95% accuracy)")
+    logger.info("✅ FASE 2: Chunking Avanzado (small-to-big, sliding window)")
+    logger.info("✅ FASE 3: Retrieval Methods (HyDE, Query Rewriting, Decomposition)")
+    logger.info("✅ FASE 4: Reranking System (RankLLaMA, MonoT5, TILDEv2)")
+    logger.info("✅ FASE 5: Summarization Methods (Selective Context, LongLLMLingua)")
+    logger.info("✅ FASE 6: Generator Fine-tuning (LoRA, datasets QA)")
+    logger.info("✅ FASE 7: Evaluación RAGAs (Faithfulness, Context Relevancy)")
+    logger.info("✅ FASE 8: Integración MCP + Federated Learning")
+    logger.info("✅ FASE 9: Query Expansion (T5-based, COLING 2025)")
+    logger.info("✅ FASE 10: Retrieval Stride (Dynamic context update)")
+    logger.info("✅ FASE 11: Contrastive ICL (Correct + Incorrect examples)")
+    logger.info("✅ FASE 12: Focus Mode (Sentence-level retrieval)")
+    logger.info("✅ FASE 13: Advanced Metrics (ROUGE, MAUVE, FActScore)")
+    logger.info("✅ BONUS: Multilingual Support + Dynamic Prompts (COLING 2025)")
+    logger.info("=" * 80)
 
     # Inicializar sistema
-    print("\n1. 🔧 Inicializando Sistema RAG Híbrido Ultra-Avanzado...")
+    logger.info("\n1. 🔧 Inicializando Sistema RAG Híbrido Ultra-Avanzado...")
     rag_system = HybridRAGSystem(dimension=768)
 
     success = rag_system.initialize_system()
     if not success:
-        print("❌ Error inicializando sistema")
+        logger.error("❌ Error inicializando sistema")
         return
 
-    print("✅ Sistema RAG Perfecto inicializado exitosamente!")
+    logger.info("✅ Sistema RAG Perfecto inicializado exitosamente!")
 
     # Añadir documentos de ejemplo
-    print("\n2. 📚 Añadiendo documentos con chunking avanzado...")
+    logger.info("\n2. 📚 Añadiendo documentos con chunking avanzado...")
     sample_documents = [
         """
         La Inteligencia Artificial (IA) es una rama de la informática que busca crear máquinas capaces
@@ -1864,12 +1991,12 @@ def demo_perfect_rag_system():
 
     success = rag_system.add_documents(sample_documents)
     if success:
-        print(f"✅ {len(sample_documents)} documentos añadidos con chunking avanzado")
+        logger.info(f"✅ {len(sample_documents)} documentos añadidos con chunking avanzado")
     else:
-        print("❌ Error añadiendo documentos")
+        logger.error("❌ Error añadiendo documentos")
 
     # Procesar queries de ejemplo con TODAS las técnicas
-    print("\n3. 🔍 Procesando queries con TODAS las técnicas avanzadas...")
+    logger.info("\n3. 🔍 Procesando queries con TODAS las técnicas avanzadas...")
 
     test_queries = [
         "¿Qué es la Inteligencia Artificial?",

@@ -26,6 +26,7 @@ ARQUITECTURA NEUROLÓGICA:
 
 import asyncio
 import json
+import logging
 import math
 import os
 import threading
@@ -613,7 +614,7 @@ class NeuroTrainingEngine:
                 warmup_steps=self.config.warmup_steps,
                 logging_steps=50,
                 save_steps=MODEL_SAVE_INTERVAL,
-                evaluation_strategy="steps" if self.config.early_stopping else "no",
+                eval_strategy="steps" if self.config.early_stopping else "no",
                 eval_steps=200,
                 save_total_limit=3,
                 load_best_model_at_end=True,

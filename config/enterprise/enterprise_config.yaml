@@ -3,8 +3,8 @@ version: "3.1.0"
 environment: "development"
 
 # Model Configuration
-model_path: "modelsLLM/llama-3.2-3b/Llama-3.2-3B-Instruct-f16.gguf"
-llama_binary_path: "llama-cli.exe"
+model_path: "models/gemma-2-2b-it-Q4_K_M.gguf"
+llama_binary_path: "tools/llama_cpp/llama-cli.exe"
 model_max_tokens: 512
 model_temperature: 0.7
 model_threads: 4
@@ -44,7 +44,7 @@ cors_origins:
   - "http://127.0.0.1:8002"
 
 # Database Configuration
-database_url: "sqlite:///./data/sheily_ai.db"
+database_url: "sqlite:///./data/db/sheily_ai.db"
 connection_pool_size: 10
 connection_timeout: 30
 

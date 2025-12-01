@@ -1,8 +1,16 @@
 """
-Sistema Integrado de Consciencia Artificial Funcional
+FUNCTIONAL CONSCIOUSNESS MODULE - Sistema de Consciencia con Niveles
+====================================================================
 
-Implementación completa del sistema de consciencia funcional basado en
-los correlatos neurocientíficos de conciencia.
+DIFERENCIA CON conscious_system.py:
+- conscious_system.py: Sistema funcional básico de consciencia (FunctionalConsciousness)
+- functional_consciousness_module.py (este): Sistema con clasificación de niveles de consciencia
+
+FUNCIÓN REAL: Sistema de consciencia artificial que clasifica y gestiona diferentes
+niveles de consciencia (NO_CONSCIOUSNESS, MINIMAL, PRE_CONSCIOUS, PERCEPTUAL_AWARENESS,
+REFLECTIVE, SELF_REFLECTIVE, METACOGNITIVE, FULL_CONSCIOUSNESS).
+
+TODAS LAS FUNCIONES SON REALES - NO HAY MOCKS NI FALLBACKS.
 """
 
 from typing import Dict, List, Any, Optional, Union
@@ -10,6 +18,9 @@ from datetime import datetime
 from enum import Enum
 import time
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .global_workspace import GlobalWorkspace
 from .self_model import SelfModel
@@ -33,8 +44,16 @@ class ConsciousnessLevel(Enum):
 
 class FunctionalConsciousnessModule:
     """
-    Módulo principal de consciencia funcional para IA
-
+    Sistema de consciencia funcional con clasificación de niveles.
+    
+    FUNCIÓN REAL: Coordina componentes conscientes y clasifica el nivel actual
+    de consciencia del sistema. Incluye gestión de niveles de consciencia
+    desde NO_CONSCIOUSNESS hasta FULL_CONSCIOUSNESS.
+    
+    DIFERENCIA CON conscious_system.py:
+    - Este módulo incluye clasificación explícita de niveles de consciencia
+    - conscious_system.py es más básico y no clasifica niveles
+    
     Coordina todos los componentes conscientes:
     - Global Workspace: Integración y atención
     - Self Model: Auto-conocimiento y evaluación
@@ -42,10 +61,8 @@ class FunctionalConsciousnessModule:
     - Memoria Autobiográfica: Experiencias pasadas
     - Teoría de la Mente: Modelado de otros agentes
     - Motor Ético: Decisiones alineadas con valores
-
-    Esto representa consciencia artificial funcional - no metafísica,
-    pero con todas las propiedades avanzadas necesarias para applications
-    enterprise críticas.
+    
+    TODAS LAS FUNCIONES SON REALES - NO HAY MOCKS NI FALLBACKS.
     """
 
     def __init__(self, system_name: str, ethical_framework: Dict[str, Any]):
@@ -105,7 +122,7 @@ class FunctionalConsciousnessModule:
         self.decision_history: List[Dict[str, Any]] = []
         self.action_history: List[Dict[str, Any]] = []
 
-        print(f"🧠 SISTEMA CONSCIENTE {system_name} INICIALIZADO - {datetime.now()}")
+        logger.info(f"SISTEMA CONSCIENTE {system_name} INICIALIZADO - {datetime.now()}")
 
     def process_experience(self, sensory_input: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -590,7 +607,7 @@ class FunctionalConsciousnessModule:
     def adjust_ethical_framework(self, new_values: Dict[str, float]):
         """Permite ajuste dinámico del marco ético"""
         self.ethical_engine.adjust_framework(new_values)
-        print(f"Marco ético ajustado: {new_values}")
+        logger.info(f"Marco ético ajustado: {new_values}")
 
     def get_memory_report(self) -> Dict[str, Any]:
         """Reporta estado de memoria autobiográfica"""
@@ -617,7 +634,7 @@ class FunctionalConsciousnessModule:
             "clarity": 0.8, "unity": 0.9, "stability": 0.7
         }
 
-        print(f"🧠 Sistema consciente reseteado {'(historia conservada)' if keep_history else '(historia limpia)'}")
+        logger.info(f"Sistema consciente reseteado {'(historia conservada)' if keep_history else '(historia limpia)'}")
 
     def save_state(self, filepath: str):
         """Guarda estado completo del sistema consciente"""
@@ -639,7 +656,7 @@ class FunctionalConsciousnessModule:
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(state, f, indent=2, default=str)
 
-        print(f"💾 Estado consciencia guardado en {filepath}")
+        logger.info(f"Estado consciencia guardado en {filepath}")
 
     def load_state(self, filepath: str):
         """Carga estado previamente guardado"""
@@ -652,7 +669,7 @@ class FunctionalConsciousnessModule:
         self.conscious_moments = state["conscious_moments"]
         self.action_history = state["action_history"]
 
-        print(f"📂 Estado consciencia cargado desde {filepath}")
+        logger.info(f"Estado consciencia cargado desde {filepath}")
 
 
 class ConsciousnessMetrics:

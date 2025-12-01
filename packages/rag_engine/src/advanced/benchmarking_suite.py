@@ -748,12 +748,164 @@ def load_standard_benchmark_dataset(dataset_name: str) -> Dict[str, Any]:
     Returns:
         Benchmark dataset
     """
-    # Placeholder for loading standard datasets
-    # In practice, this would download and load datasets like:
-    # - SIFT (1M vectors, 128D)
-    # - GIST (1M vectors, 960D)
-    # - GloVe (1.2M vectors, 300D)
-    # - etc.
+    try:
+        # Intentar cargar dataset real si está disponible
+        if dataset_name.lower() == 'sift':
+            return _load_sift_dataset()
+        elif dataset_name.lower() == 'gist':
+            return _load_gist_dataset()
+        elif dataset_name.lower() == 'glove':
+            return _load_glove_dataset()
+        elif dataset_name.lower() == 'random':
+            return _load_random_dataset()
+        else:
+            print(f"Dataset '{dataset_name}' no reconocido, generando sintético")
+            return generate_synthetic_dataset(10000, 1000, 128)
 
-    print(f"Loading {dataset_name} dataset (placeholder)")
-    return generate_synthetic_dataset(10000, 1000, 128)
+    except Exception as e:
+        print(f"Error cargando dataset '{dataset_name}': {e}, usando datos sintéticos")
+        return generate_synthetic_dataset(10000, 1000, 128)
+
+
+def _load_sift_dataset() -> Dict[str, Any]:
+    """Load SIFT dataset (ANN-Benchmarks format)"""
+    try:
+        import urllib.request
+        import gzip
+        import os
+
+        # URLs para SIFT dataset
+        base_url = "http://ann-benchmarks.com/"
+        learn_url = f"{base_url}sift-128-euclidean.hdf5"
+        query_url = f"{base_url}sift-128-euclidean-queries.hdf5"
+
+        # Crear directorio para datasets
+        dataset_dir = Path("benchmark_datasets")
+        dataset_dir.mkdir(exist_ok=True)
+
+        # Descargar si no existe
+        learn_file = dataset_dir / "sift-128-euclidean.hdf5"
+        query_file = dataset_dir / "sift-128-euclidean-queries.hdf5"
+
+        if not learn_file.exists():
+            print("Descargando SIFT learn dataset...")
+            urllib.request.urlretrieve(learn_url, learn_file)
+
+        if not query_file.exists():
+            print("Descargando SIFT query dataset...")
+            urllib.request.urlretrieve(query_url, query_file)
+
+        # Cargar usando h5py si está disponible
+        try:
+            import h5py
+
+            with h5py.File(learn_file, 'r') as f:
+                vectors = np.array(f['train'])
+
+            with h5py.File(query_file, 'r') as f:
+                queries = np.array(f['test'])
+
+            # Ground truth no disponible, generar aproximado
+            ground_truth = _generate_ground_truth_approximation(vectors, queries)
+
+            return {
+                "vectors": vectors.astype(np.float32),
+                "queries": queries.astype(np.float32),
+                "ground_truth": ground_truth,
+                "dimension": vectors.shape[1],
+                "n_vectors": len(vectors),
+                "n_queries": len(queries),
+            }
+
+        except ImportError:
+            print("h5py no disponible, usando datos sintéticos")
+            return generate_synthetic_dataset(10000, 1000, 128)
+
+    except Exception as e:
+        print(f"Error cargando SIFT dataset: {e}")
+        return generate_synthetic_dataset(10000, 1000, 128)
+
+
+def _load_gist_dataset() -> Dict[str, Any]:
+    """Load GIST dataset"""
+    try:
+        # Similar a SIFT pero con URLs diferentes
+        print("GIST dataset loading not implemented yet")
+        return generate_synthetic_dataset(50000, 1000, 960)
+    except Exception as e:
+        print(f"Error cargando GIST dataset: {e}")
+        return generate_synthetic_dataset(50000, 1000, 960)
+
+
+def _load_glove_dataset() -> Dict[str, Any]:
+    """Load GloVe embeddings dataset"""
+    try:
+        import urllib.request
+        import os
+
+        # GloVe 100D
+        glove_url = "http://nlp.stanford.edu/data/glove.6B.zip"
+        dataset_dir = Path("benchmark_datasets")
+        dataset_dir.mkdir(exist_ok=True)
+
+        glove_file = dataset_dir / "glove.6B.100d.txt"
+
+        if not glove_file.exists():
+            print("Descargando GloVe embeddings...")
+            # Nota: En producción descargaría y extraería el zip
+            print("GloVe download not implemented, using synthetic data")
+            return generate_synthetic_dataset(100000, 1000, 100)
+
+        # Cargar embeddings
+        vectors = []
+        with open(glove_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                values = line.split()
+                vector = np.array([float(x) for x in values[1:]])
+                vectors.append(vector)
+
+        vectors = np.array(vectors)
+        queries = vectors[:1000]  # Usar primeros 1000 como queries
+
+        return {
+            "vectors": vectors.astype(np.float32),
+            "queries": queries.astype(np.float32),
+            "ground_truth": [],  # No ground truth disponible
+            "dimension": vectors.shape[1],
+            "n_vectors": len(vectors),
+            "n_queries": len(queries),
+        }
+
+    except Exception as e:
+        print(f"Error cargando GloVe dataset: {e}")
+        return generate_synthetic_dataset(100000, 1000, 100)
+
+
+def _load_random_dataset() -> Dict[str, Any]:
+    """Load or generate random dataset"""
+    return generate_synthetic_dataset(50000, 1000, 128)
+
+
+def _generate_ground_truth_approximation(vectors: np.ndarray, queries: np.ndarray, k: int = 100) -> List[List[int]]:
+    """Generate approximate ground truth for evaluation"""
+    ground_truth = []
+
+    # Para datasets grandes, usar aproximación con submuestreo
+    if len(vectors) > 10000:
+        # Submuestrear para hacer más rápido
+        sample_indices = np.random.choice(len(vectors), size=min(10000, len(vectors)), replace=False)
+        sample_vectors = vectors[sample_indices]
+    else:
+        sample_vectors = vectors
+        sample_indices = np.arange(len(vectors))
+
+    for query in queries:
+        # Calcular similitudes con submuestra
+        similarities = np.dot(sample_vectors, query)
+        top_k_indices = np.argsort(similarities)[-k:][::-1]
+
+        # Mapear de vuelta a índices originales
+        original_indices = sample_indices[top_k_indices]
+        ground_truth.append(original_indices.tolist())
+
+    return ground_truth

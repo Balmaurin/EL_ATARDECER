@@ -526,12 +526,12 @@ class BlockchainCoordinator:
         self.initialized = False
 
     async def initialize(self) -> bool:
-        """Inicializar coordinador blockchain con integración SHEILYS"""
+        """Inicializar coordinador blockchain con integración SHEILYS REAL"""
         try:
             logger.info("⛓️ Inicializando BlockchainCoordinator...")
-            logger.info("   🔗 Conectando SHEILYS Token System...")
+            logger.info("   🔗 Conectando SHEILYS Token System REAL...")
 
-            # Importar y conectar SHEILYS system
+            # Importar y conectar SHEILYS system REAL
             try:
                 from ...blockchain.transactions.sheilys_blockchain import (
                     SHEILYSBlockchain,
@@ -539,35 +539,35 @@ class BlockchainCoordinator:
                 from ...blockchain.transactions.sheilys_token import SHEILYSTokenManager
 
                 self.blockchain_engine = SHEILYSBlockchain()
+                await self.blockchain_engine.initialize()  # Inicialización real
+
                 self.sheilys_token_manager = SHEILYSTokenManager(self.blockchain_engine)
+                await self.sheilys_token_manager.initialize()  # Inicialización real del token manager
 
-                logger.info("   ✅ SHEILYS Token Manager conectado")
-                logger.info("   ✅ SHEILYS Blockchain engine operativo")
+                logger.info("   ✅ SHEILYS Token Manager conectado REAL")
+                logger.info("   ✅ SHEILYS Blockchain engine operativo REAL")
 
-                # Inicializar componentes adicionales
+                # Inicializar componentes adicionales REALES
                 self.wallet_manager = await self._initialize_wallet_system()
                 self.nft_orchestrator = await self._initialize_nft_system()
                 self.staking_controller = await self._initialize_staking_system()
                 self.governance_manager = await self._initialize_governance_system()
 
-                logger.info("   🎯 BlockchainCoordinator completamente integrado")
+                logger.info("   🎯 BlockchainCoordinator completamente integrado REAL")
                 self.initialized = True
                 logger.info(
-                    "✅ BlockchainCoordinator inicializado - SHEILYS ecosystem operativo"
+                    "✅ BlockchainCoordinator inicializado - SHEILYS ecosystem 100% REAL"
                 )
                 return True
 
             except ImportError as e:
-                logger.warning(f"   ⚠️  SHEILYS system no disponible: {e}")
-                logger.info("   🔄 Operando con mock blockchain")
-                # Operar con sistema blockchain simulado
-                self._initialize_mock_blockchain()
-                self.initialized = True
-                return True
+                logger.error(f"   ❌  SHEILYS system REAL no encontrado: {e}")
+                logger.error("   💥 NO SE PERMITEN FALLBACKS MOCK - SISTEMA REQUIERE IMPLEMENTACIÓN REAL")
+                raise RuntimeError("SHEILYS blockchain system REAL requerido - no se permiten mocks")
 
         except Exception as e:
-            logger.error(f"❌ Error inicializando BlockchainCoordinator: {e}")
-            return False
+            logger.error(f"❌ Error inicializando BlockchainCoordinator REAL: {e}")
+            raise RuntimeError(f"Fallo crítico en inicialización blockchain: {e}")
 
     async def _initialize_wallet_system(self):
         """Inicializar sistema de wallets"""
@@ -734,54 +734,56 @@ class RewardsCoordinator:
         self.initialized = False
 
     async def initialize(self) -> bool:
-        """Inicializar coordinador de recompensas con integración completa"""
+        """Inicializar coordinador de recompensas con integración REAL completa"""
         try:
-            logger.info("🎁 Inicializando RewardsCoordinator...")
-            logger.info("   🔗 Conectando sistema de gamificación SHEILYS...")
+            logger.info("🎁 Inicializando RewardsCoordinator REAL...")
+            logger.info("   🔗 Conectando sistema de gamificación SHEILYS REAL...")
 
-            # Importar y conectar sistema de gamificación
+            # Importar y conectar sistema REAL de gamificación
             try:
                 from ...blockchain.transactions.sheilys_token import SHEILYSTokenManager
                 from ...rewards.gamification_engine import GamificationEngine
 
-                # Inicializar token manager para gamificación
+                # Inicializar token manager REAL para gamificación
                 self.token_manager = SHEILYSTokenManager()
-                self.gamification_engine = GamificationEngine(self.token_manager)
+                await self.token_manager.initialize()  # Inicialización REAL
 
-                # Conectar con sistema educativo si existe
+                self.gamification_engine = GamificationEngine(self.token_manager)
+                await self.gamification_engine.initialize()  # Inicialización REAL
+
+                # Conectar con sistema educativo REAL si existe
                 try:
                     from .education.master_education_system import (
                         get_master_education_system,
                     )
 
                     self.learning_system = get_master_education_system()
-                    logger.info("   ✅ Sistema educativo conectado para rewards")
-                except:
-                    logger.warning("   ⚠️  Sistema educativo no disponible para rewards")
+                    if self.learning_system:
+                        await self.learning_system.initialize()  # Inicialización REAL
+                    logger.info("   ✅ Sistema educativo REAL conectado para rewards")
+                except Exception as e:
+                    logger.warning(f"   ⚠️  Sistema educativo REAL no disponible: {e}")
 
-                # Inicializar sistemas auxiliares
+                # Inicializar sistemas auxiliares REALES
                 self.nft_system = await self._initialize_nft_rewards()
                 self.leaderboard_engine = await self._initialize_leaderboards()
                 self.analytics_system = await self._initialize_analytics()
 
-                logger.info("   🎯 RewardsCoordinator completamente integrado")
+                logger.info("   🎯 RewardsCoordinator completamente integrado REAL")
                 self.initialized = True
                 logger.info(
-                    "✅ RewardsCoordinator inicializado - Ecosistema Learn-to-Earn operacional"
+                    "✅ RewardsCoordinator inicializado - Ecosistema Learn-to-Earn 100% REAL"
                 )
                 return True
 
             except ImportError as e:
-                logger.warning(f"   ⚠️  Sistema SHEILYS no disponible: {e}")
-                logger.info("   🔄 Operando con rewards system mock")
-                # Sistema mock para desarrollo
-                self._initialize_mock_rewards()
-                self.initialized = True
-                return True
+                logger.error(f"   ❌  Sistema SHEILYS REAL no encontrado: {e}")
+                logger.error("   💥 NO SE PERMITEN FALLBACKS MOCK - SISTEMA REQUIERE IMPLEMENTACIÓN REAL")
+                raise RuntimeError("SHEILYS rewards system REAL requerido - no se permiten mocks")
 
         except Exception as e:
-            logger.error(f"❌ Error inicializando RewardsCoordinator: {e}")
-            return False
+            logger.error(f"❌ Error inicializando RewardsCoordinator REAL: {e}")
+            raise RuntimeError(f"Fallo crítico en inicialización rewards: {e}")
 
     async def _initialize_nft_rewards(self):
         """Inicializar sistema de NFT rewards"""

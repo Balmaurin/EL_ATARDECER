@@ -53,7 +53,7 @@ async def process_user_command(command: str):
     if command in ["status", "estado"]:
         status = get_system_status()
         metrics = status.get('real_metrics', {})
-        print(f"\n{Colors.HEADER}📊 ESTADO DEL SISTEMA:{Colors.ENDC}")
+        print(f"\n{Colors.HEADER}[CHART] ESTADO DEL SISTEMA:{Colors.ENDC}")
         print(f"   CPU: {metrics.get('cpu_load')}%")
         print(f"   RAM: {metrics.get('memory_usage')}%")
         print(f"   Agentes Activos: {metrics.get('active_agents')}/{metrics.get('total_agents')}")
@@ -102,14 +102,14 @@ async def process_user_command(command: str):
                     "parameters": {"path": filename, "content": content}
                 }
         except:
-            print(f"{Colors.FAIL}❌ Formato incorrecto. Uso: escribe archivo <nombre> <contenido>{Colors.ENDC}")
+            print(f"{Colors.FAIL}[ERROR] Formato incorrecto. Uso: escribe archivo <nombre> <contenido>{Colors.ENDC}")
 
     if task:
-        print(f"{Colors.BLUE}⚡ Enviando tarea al núcleo: {task['type']} -> {task['function']}...{Colors.ENDC}")
+        print(f"{Colors.BLUE}[LIGHTNING] Enviando tarea al núcleo: {task['type']} -> {task['function']}...{Colors.ENDC}")
         result = await functional_multi_agent_system.execute_distributed_task(task)
         
         if result.get("status") == "success":
-            print(f"{Colors.GREEN}✅ Tarea completada:{Colors.ENDC}")
+            print(f"{Colors.GREEN}[OK] Tarea completada:{Colors.ENDC}")
             # Mostrar resultado formateado
             res_data = result.get("result", {})
             for k, v in res_data.items():
@@ -123,23 +123,23 @@ async def process_user_command(command: str):
                     {"command": command}
                 )
         else:
-            print(f"{Colors.FAIL}❌ Error en tarea: {result.get('message')}{Colors.ENDC}")
+            print(f"{Colors.FAIL}[ERROR] Error en tarea: {result.get('message')}{Colors.ENDC}")
             
     else:
-        print(f"{Colors.WARNING}⚠️ Comando no reconocido o no implementado aún.{Colors.ENDC}")
+        print(f"{Colors.WARNING}[WARN] Comando no reconocido o no implementado aún.{Colors.ENDC}")
         print("Comandos disponibles: status, analiza archivo <path>, limpia, diagnostico, escribe archivo <path> <content>")
 
     return "continue"
 
 async def chat_loop():
-    print(f"{Colors.HEADER}🤖 SHEILY OMEGA - INTERFAZ DE MANDO REAL{Colors.ENDC}")
+    print(f"{Colors.HEADER}[BOT] SHEILY OMEGA - INTERFAZ DE MANDO REAL{Colors.ENDC}")
     print("Inicializando sistemas autónomos...")
     
     # Iniciar cerebro
     start_system_control()
     await asyncio.sleep(2) # Esperar arranque
     
-    print(f"{Colors.GREEN}✅ Sistemas Online. Esperando órdenes.{Colors.ENDC}")
+    print(f"{Colors.GREEN}[OK] Sistemas Online. Esperando órdenes.{Colors.ENDC}")
     print("Escribe 'exit' para salir.")
     
     while True:

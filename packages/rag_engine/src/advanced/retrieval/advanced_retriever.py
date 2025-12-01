@@ -431,16 +431,69 @@ Rewritten query:"""
     def _generate_hypothetical_document(self, query: str) -> str:
         """
         Generate hypothetical document for HyDE
-        Simplified version - in production would use GPT-3.5-turbo-instruct
+        
+        Intenta usar LLM real si está disponible, sino usa templates mejorados.
         """
-        # Template-based generation (simplified)
-        templates = [
-            f"This document explains {query}. It covers the main concepts, provides examples, and gives practical advice.",
-            f"A comprehensive guide to {query}. Including background information, current best practices, and future directions.",
-            f"Everything you need to know about {query}. From basic principles to advanced applications and real-world examples.",
-        ]
-
-        return np.random.choice(templates)
+        # Intentar usar LLM real para generar documento hipotético
+        try:
+            # Opción 1: OpenAI (si está disponible)
+            try:
+                import openai
+                if hasattr(openai, 'OpenAI'):
+                    client = openai.OpenAI()
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant that generates hypothetical documents that would answer a query."},
+                            {"role": "user", "content": f"Generate a hypothetical document that would answer this query: {query}"}
+                        ],
+                        max_tokens=200,
+                        temperature=0.7
+                    )
+                    return response.choices[0].message.content.strip()
+            except (ImportError, Exception) as e:
+                logger.debug(f"OpenAI no disponible para HyDE: {e}")
+            
+            # Opción 2: Usar modelo local si está disponible
+            try:
+                from transformers import pipeline
+                if not hasattr(self, '_hyde_generator'):
+                    self._hyde_generator = pipeline(
+                        "text-generation",
+                        model="gpt2",  # Modelo base, puede mejorarse
+                        max_length=150,
+                        do_sample=True,
+                        temperature=0.7
+                    )
+                
+                prompt = f"Document that answers '{query}':"
+                result = self._hyde_generator(prompt, max_length=150, num_return_sequences=1)
+                generated_text = result[0]['generated_text']
+                # Extraer solo la parte generada (después del prompt)
+                if prompt in generated_text:
+                    return generated_text.split(prompt, 1)[1].strip()
+                return generated_text.strip()
+            except (ImportError, Exception) as e:
+                logger.debug(f"Transformers pipeline no disponible para HyDE: {e}")
+            
+        except Exception as e:
+            logger.warning(f"Error usando LLM para HyDE, usando templates mejorados: {e}")
+        
+        # Fallback: Templates mejorados basados en tipo de query
+        query_lower = query.lower()
+        
+        # Detectar tipo de query para template más apropiado
+        if any(word in query_lower for word in ["qué es", "what is", "define", "definición"]):
+            template = f"This is a comprehensive definition of {query}. It explains the core concepts, key characteristics, provides clear examples, and discusses practical applications. The document covers both theoretical foundations and real-world usage."
+        elif any(word in query_lower for word in ["cómo", "how", "pasos", "steps"]):
+            template = f"This document provides a step-by-step guide to {query}. It includes detailed instructions, best practices, common pitfalls to avoid, and practical examples. The guide is structured for both beginners and advanced users."
+        elif any(word in query_lower for word in ["por qué", "why", "causa", "reason"]):
+            template = f"This document explains the reasons and causes behind {query}. It analyzes underlying factors, provides evidence-based explanations, discusses different perspectives, and explores implications."
+        else:
+            # Template general mejorado
+            template = f"This document comprehensively addresses {query}. It covers fundamental concepts, provides detailed explanations with examples, discusses current best practices, explores advanced topics, and includes practical applications. The content is structured to be both informative and actionable."
+        
+        return template
 
     def retrieve(
         self,

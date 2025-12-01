@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+package emotion;
+option go_package = "emotionpb";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Emotional intelligence core types
+message EmotionCircuit {
+    string circuit_id = 1;
+    string name = 2;               // "fear", "joy", "sadness", "anger", etc.
+    double activation_level = 3;   // 0-1 activation
+    double baseline_level = 4;     // Natural baseline for personality
+    double sensitivity = 5;        // How responsive this circuit is
+    repeated string triggers = 6;  // Keywords that activate this circuit
+}
+
+message EmotionalProfile {
+    string profile_id = 1;
+    string consciousness_id = 2;
+    repeated EmotionCircuit circuits = 3;
+    double global_stability = 4;   // Overall emotional stability 0-1
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp last_updated = 6;
+    double adaptability = 7;       // How quickly emotions adjust
+    string dominant_emotion = 8;   // Current primary emotion
+}
+
+// Processing requests
+message ProcessEmotionRequest {
+    string consciousness_id = 1;
+    string stimulus_text = 2;
+    string stimulus_type = 3;      // "conversation", "experience", "memory"
+    double intensity_multiplier = 4; // Context-based modification
+    map<string, string> context = 5;
+    repeated string active_emotions = 6; // Currently active emotions
+}
+
+message ProcessEmotionResponse {
+    EmotionalProfile updated_profile = 1;
+    double overall_emotion_intensity = 2;
+    string primary_emotion = 3;
+    repeated EmotionActivation activations = 4;
+    string processing_status = 5;
+    repeated EmotionInsight insights = 6;
+}
+
+message EmotionActivation {
+    string circuit_name = 1;
+    double activation_value = 2;
+    double baseline_shift = 3;     // How much baseline changed
+    string trigger_reason = 4;
+    double confidence = 5;
+}
+
+message EmotionInsight {
+    string insight_type = 1;      // "pattern", "relationship", "health_indicator"
+    string description = 2;
+    double confidence = 3;
+    repeated string supporting_data = 4;
+    string recommendation = 5;
+}
+
+// Circuit management
+message GetEmotionCircuitsRequest {
+    string consciousness_id = 1;
+}
+
+message GetEmotionCircuitsResponse {
+    repeated EmotionCircuit circuits = 1;
+    double total_activation = 2;
+}
+
+message UpdateEmotionCircuitRequest {
+    string consciousness_id = 1;
+    EmotionCircuit circuit_update = 2;
+    double adaptation_rate = 3;    // How quickly to adapt baseline
+}
+
+message UpdateEmotionCircuitResponse {
+    EmotionalProfile updated_profile = 1;
+    double adaptation_confidence = 2;
+    string adaptation_status = 3;
+}
+
+// Emotional development and learning
+message LearnFromEmotionRequest {
+    string consciousness_id = 1;
+    string emotional_experience = 2;
+    EmotionalProfile before_state = 3;
+    EmotionalProfile after_state = 4;
+    string learning_context = 5;
+    double effectiveness_rating = 6; // How effective the emotional response was
+}
+
+message LearnFromEmotionResponse {
+    EmotionalProfile evolved_profile = 1;
+    repeated string learned_patterns = 2;
+    double adaptation_strength = 3;
+    repeated EmotionInsight new_insights = 4;
+}
+
+// Real-time emotional streaming
+message EmotionStreamRequest {
+    string consciousness_id = 1;
+    repeated string tracked_circuits = 2;
+    uint32 sampling_rate_ms = 3;   // How often to sample
+    double sensitivity_threshold = 4;  // Minimum change to report
+}
+
+message EmotionStreamResponse {
+    oneof emotion_update {
+        EmotionActivation circuit_activation = 1;
+        EmotionalProfile profile_update = 2;
+        EmotionInsight new_insight = 3;
+    }
+    google.protobuf.Timestamp timestamp = 10;
+}
+
+// Emotion service
+service EmotionService {
+    // Core emotional processing
+    rpc ProcessEmotion(ProcessEmotionRequest) returns (ProcessEmotionResponse);
+    rpc GetEmotionCircuits(GetEmotionCircuitsRequest) returns (GetEmotionCircuitsResponse);
+    rpc UpdateEmotionCircuit(UpdateEmotionCircuitRequest) returns (UpdateEmotionCircuitResponse);
+
+    // Emotional learning and evolution
+    rpc LearnFromEmotion(LearnFromEmotionRequest) returns (LearnFromEmotionResponse);
+
+    // Real-time emotional monitoring
+    rpc StreamEmotions(EmotionStreamRequest) returns (stream EmotionStreamResponse);
+
+    // Health and diagnostics
+    rpc GetEmotionalHealth(GetEmotionalHealthRequest) returns (EmotionalHealthReport);
+}
+
+// Additional messages
+message GetEmotionalHealthRequest {
+    string consciousness_id = 1;
+}
+
+message EmotionalHealthReport {
+    string consciousness_id = 1;
+    double overall_health = 2;     // 0-1 emotional health score
+    repeated string health_indicators = 3;
+    repeated string warning_signs = 4;
+    repeated string recommendations = 5;
+    google.protobuf.Timestamp report_generated = 6;
+    string recommended_actions = 7;
+}

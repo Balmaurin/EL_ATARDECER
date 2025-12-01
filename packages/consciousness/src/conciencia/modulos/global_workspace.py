@@ -38,9 +38,14 @@ class GlobalWorkspace:
     def __init__(self,
                  competition_threshold: float = 0.6,
                  max_entries: int = 100,
-                 decay_rate: float = 0.9):
+                 decay_rate: float = 0.9,
+                 capacity: Optional[int] = None):
+        # Compatibilidad: capacity puede venir como parámetro alternativo
+        if capacity is not None:
+            max_entries = capacity
         self.competition_threshold = competition_threshold
         self.max_entries = max_entries
+        self.capacity = max_entries  # Alias para compatibilidad
         self.decay_rate = decay_rate
 
         # Buffer de workspace - entradas activas

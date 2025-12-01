@@ -107,10 +107,13 @@ class NFTEducationalCredential:
     @property
     def nft_metadata(self) -> Dict[str, Any]:
         """Metadata completa para el NFT"""
+        # Generate actual image URL or use default
+        image_url = self._generate_credential_image_url()
+        
         return {
             "name": f"Sheily AI {self.credential_type.value.replace('_', ' ').title()}",
             "description": f"Verifiable educational credential issued by Sheily AI: {self.metadata.course_name}",
-            "image": f"ipfs://educational_credentials/{self.token_id}.png",  # Placeholder para imagen
+            "image": image_url,
             "attributes": [
                 {"trait_type": "Credential Type", "value": self.credential_type.value},
                 {"trait_type": "Institution", "value": self.metadata.institution_name},
@@ -124,6 +127,16 @@ class NFTEducationalCredential:
             ],
             "educational_data": self.metadata.to_dict(),
         }
+    
+    def _generate_credential_image_url(self) -> str:
+        """Generate credential image URL"""
+        # In production, this would:
+        # 1. Generate a visual certificate using PIL/Pillow
+        # 2. Upload to IPFS or Arweave
+        # 3. Return the decentralized storage URL
+        
+        # For now, return a placeholder that indicates the credential type
+        return f"https://sheily.ai/credentials/images/{self.credential_type.value}/{self.token_id}.png"
 
 
 class NFTEducationCredentials:

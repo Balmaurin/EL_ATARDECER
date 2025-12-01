@@ -161,14 +161,4 @@ def graph_search(base: Path, query: str, top_k: int) -> List[Dict[str, Any]]:
             hit["score"] *= score_adjustment
 
     return hits[:top_k]
-        for _,row in subset.iterrows():
-            meta = row["meta"]
-            if isinstance(meta, str):
-                try:
-                    meta = json.loads(meta)
-                except Exception:
-                    meta = {}
-            hits.append({"source":"graph","score": 0.7, "chunk_id": row["chunk_id"],
-                         "doc_id": row["doc_id"], "text": row["text"], "title": meta.get("title",""),
-                         "quality": meta.get("quality",0.5)})
-    return hits[:top_k]
+

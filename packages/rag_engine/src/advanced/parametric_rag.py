@@ -17,6 +17,9 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
@@ -200,26 +203,133 @@ class ParametricRAG:
         """
         augmented_data = {"original": document, "rewrites": [], "qa_pairs": []}
 
-        # Generate rewrites
+        # Generate rewrites usando LLM real si está disponible
         for i in range(num_rewrites):
-            # In practice, this would use the LLM to generate rewrites
-            # For now, we'll use simple variations
-            rewrite_prompt = (
-                f"Rewrite the following text in a different way: {document}"
-            )
-            # TODO: Use LLM to generate actual rewrites
-            rewrite = f"{document} (Rewritten version {i+1})"
-            augmented_data["rewrites"].append(rewrite)
+            rewrite = self._generate_rewrite_with_llm(document, i)
+            if rewrite:
+                augmented_data["rewrites"].append(rewrite)
+            else:
+                # Fallback: variación simple pero mejorada
+                logger.warning(f"⚠️ No se pudo generar rewrite {i+1} con LLM, usando variación simple")
+                augmented_data["rewrites"].append(f"{document} [Variation {i+1}]")
 
-        # Generate QA pairs
+        # Generate QA pairs usando LLM real si está disponible
         for i in range(num_qa_pairs):
-            # In practice, this would use the LLM to generate QA pairs
-            # For now, we'll use template-based generation
-            question = f"What is described in document section {i+1}?"
-            answer = f"The document describes: {document[:200]}..."
-            augmented_data["qa_pairs"].append({"question": question, "answer": answer})
+            qa_pair = self._generate_qa_pair_with_llm(document, i)
+            if qa_pair:
+                augmented_data["qa_pairs"].append(qa_pair)
+            else:
+                # Fallback: QA pair básico pero mejorado
+                logger.warning(f"⚠️ No se pudo generar QA pair {i+1} con LLM, usando template básico")
+                sentences = document.split('.')
+                if sentences:
+                    question = f"What information does the document provide about: {sentences[0][:50]}?"
+                    answer = sentences[0] if len(sentences) > 0 else document[:200]
+                    augmented_data["qa_pairs"].append({"question": question, "answer": answer})
 
         return augmented_data
+
+    def _generate_rewrite_with_llm(self, document: str, index: int) -> Optional[str]:
+        """Generar rewrite usando LLM real"""
+        try:
+            # Intentar OpenAI
+            try:
+                import openai
+                if hasattr(openai, 'OpenAI'):
+                    client = openai.OpenAI()
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant that rewrites text in different ways while preserving meaning."},
+                            {"role": "user", "content": f"Rewrite the following text in a different way (variation {index+1}):\n\n{document[:500]}"}
+                        ],
+                        max_tokens=300,
+                        temperature=0.7
+                    )
+                    return response.choices[0].message.content.strip()
+            except (ImportError, Exception) as e:
+                logger.debug(f"OpenAI no disponible para rewrite: {e}")
+            
+            # Intentar modelo local
+            try:
+                from transformers import pipeline
+                if not hasattr(self, '_rewrite_generator'):
+                    self._rewrite_generator = pipeline(
+                        "text-generation",
+                        model="gpt2",
+                        max_length=200,
+                        do_sample=True,
+                        temperature=0.7
+                    )
+                
+                prompt = f"Rewrite this text differently: {document[:200]}"
+                result = self._rewrite_generator(prompt, max_length=200, num_return_sequences=1)
+                generated = result[0]['generated_text']
+                if prompt in generated:
+                    return generated.split(prompt, 1)[1].strip()
+                return generated.strip()
+            except (ImportError, Exception) as e:
+                logger.debug(f"Transformers no disponible para rewrite: {e}")
+            
+        except Exception as e:
+            logger.warning(f"Error generando rewrite con LLM: {e}")
+        
+        return None
+
+    def _generate_qa_pair_with_llm(self, document: str, index: int) -> Optional[Dict[str, str]]:
+        """Generar par QA usando LLM real"""
+        try:
+            # Intentar OpenAI
+            try:
+                import openai
+                if hasattr(openai, 'OpenAI'):
+                    client = openai.OpenAI()
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant that generates question-answer pairs from documents."},
+                            {"role": "user", "content": f"Generate a question and answer pair based on this document (pair {index+1}):\n\n{document[:500]}\n\nFormat: Question: ...\nAnswer: ..."}
+                        ],
+                        max_tokens=200,
+                        temperature=0.7
+                    )
+                    content = response.choices[0].message.content.strip()
+                    # Parsear respuesta
+                    if "Question:" in content and "Answer:" in content:
+                        parts = content.split("Answer:")
+                        question = parts[0].replace("Question:", "").strip()
+                        answer = parts[1].strip() if len(parts) > 1 else ""
+                        if question and answer:
+                            return {"question": question, "answer": answer}
+            except (ImportError, Exception) as e:
+                logger.debug(f"OpenAI no disponible para QA pair: {e}")
+            
+            # Intentar modelo local
+            try:
+                from transformers import pipeline
+                if not hasattr(self, '_qa_generator'):
+                    self._qa_generator = pipeline(
+                        "text2text-generation",
+                        model="google/flan-t5-small",
+                        max_length=150
+                    )
+                
+                prompt = f"Generate a question and answer from: {document[:200]}"
+                result = self._qa_generator(prompt, max_length=150)
+                generated = result[0]['generated_text']
+                # Intentar parsear
+                if "?" in generated:
+                    parts = generated.split("?")
+                    question = parts[0].strip() + "?"
+                    answer = "?".join(parts[1:]).strip() if len(parts) > 1 else document[:100]
+                    return {"question": question, "answer": answer}
+            except (ImportError, Exception) as e:
+                logger.debug(f"Transformers no disponible para QA pair: {e}")
+            
+        except Exception as e:
+            logger.warning(f"Error generando QA pair con LLM: {e}")
+        
+        return None
 
     def encode_parametric_document(
         self,
@@ -274,7 +384,7 @@ class ParametricRAG:
             fp16=self.device == "cuda",
             dataloader_num_workers=0,
             report_to=[],
-            evaluation_strategy="no",
+            eval_strategy="no",
         )
 
         # Data collator

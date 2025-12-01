@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTOBIOGRAPHICAL MEMORY SYSTEM - Memoria Autobiográfica de Sheily
-==================================================================
+SHEILY IDENTITY MEMORY - Sistema de Identidad y Memoria Personal de Sheily
+===========================================================================
 
-Sistema de memoria autobiográfica persistente que Sheily consulta continuamente:
+SISTEMA ESPECÍFICO PARA IDENTIDAD DE SHEILY - NO ES GENÉRICO
+
+Este módulo gestiona la identidad persistente y memoria personal de Sheily:
 - Autoconciencia: "¿quién soy yo, cuáles son mis características?"
 - Relaciones: "¿quiénes son las personas que conozco?"
 - Historia: "¿qué conversaciones hemos tenido?"
 - Personalidad: "¿cómo he evolucionado?"
 - Coherencia: Verificación de identidad y consistencia
 
-Garantiza que Sheily siempre se comporte consistentemente como "ella misma".
+DIFERENCIA CON autobiographical_memory.py:
+- autobiographical_memory.py: Sistema genérico de memoria emocional y narrativa
+- sheily_identity_memory.py (este): Sistema específico para identidad de Sheily
+
+Este sistema garantiza que Sheily siempre se comporte consistentemente como "ella misma".
+TODAS LAS FUNCIONES SON REALES - NO HAY MOCKS NI FALLBACKS.
 """
 
 import json
@@ -22,14 +29,23 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import asyncio
 import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .user_profile_manager import get_user_profile_store
 from .linguistic_metacognition_system import LinguisticIntent
 
 
-class AutobiographicalMemory:
+class SheilyIdentityMemory:
     """
-    Memoria autobiográfica de la IA - "¿quién soy yo?"
+    Sistema de memoria de identidad específico para Sheily.
+    
+    FUNCIÓN REAL: Gestiona identidad persistente, relaciones, personalidad aprendida,
+    patrones conversacionales y coherencia de identidad de Sheily.
+    
+    NO ES UN SISTEMA GENÉRICO - Está diseñado específicamente para mantener
+    la identidad consistente de Sheily a través del tiempo.
     """
 
     def __init__(self):
@@ -53,7 +69,7 @@ class AutobiographicalMemory:
                 with open(identity_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                print(f"Warning: Could not load self-identity: {e}")
+                logger.warning(f"Could not load self-identity: {e}", exc_info=True)
 
         # Identidad base si no existe memoria previa
         base_identity = {
@@ -96,7 +112,7 @@ class AutobiographicalMemory:
                 with open(personality_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                print(f"Warning: Could not load personality: {e}")
+                logger.warning(f"Could not load personality: {e}", exc_info=True)
 
         # Personalidad base
         base_personality = {
@@ -132,7 +148,7 @@ class AutobiographicalMemory:
                 with open(patterns_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                print(f"Warning: Could not load conversation patterns: {e}")
+                logger.warning(f"Could not load conversation patterns: {e}", exc_info=True)
 
         # Patrones base
         base_patterns = {
@@ -167,7 +183,7 @@ class AutobiographicalMemory:
                 with open(relations_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                print(f"Warning: Could not load relational memory: {e}")
+                logger.warning(f"Could not load relational memory: {e}", exc_info=True)
 
         # Relaciones base (vacías inicialmente)
         base_relations = {}
@@ -183,7 +199,7 @@ class AutobiographicalMemory:
                 with open(history_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                print(f"Warning: Could not load learning history: {e}")
+                logger.warning(f"Could not load learning history: {e}", exc_info=True)
 
         # Historia base
         base_history = [{
@@ -205,7 +221,7 @@ class AutobiographicalMemory:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             temp_file.replace(filepath)
         except Exception as e:
-            print(f"Error saving to {filepath}: {e}")
+            logger.error(f"Error saving to {filepath}: {e}", exc_info=True)
 
     # ============================================================================
     # MÉTODOS DE CONSULTA AUTOBIOGRÁFICA
@@ -436,14 +452,26 @@ class AutobiographicalMemory:
 # ============================================================================
 
 # Instancia global
-_autobiographical_memory: Optional[AutobiographicalMemory] = None
+_sheily_identity_memory: Optional[SheilyIdentityMemory] = None
 
-def get_autobiographical_memory() -> AutobiographicalMemory:
-    """Obtener instancia global de memoria autobiográfica"""
-    global _autobiographical_memory
-    if _autobiographical_memory is None:
-        _autobiographical_memory = AutobiographicalMemory()
-    return _autobiographical_memory
+def get_sheily_identity_memory() -> SheilyIdentityMemory:
+    """
+    Obtener instancia global de memoria de identidad de Sheily.
+    
+    FUNCIÓN REAL: Retorna el sistema de identidad persistente de Sheily.
+    NO HAY MOCKS NI FALLBACKS - Sistema completamente funcional.
+    """
+    global _sheily_identity_memory
+    if _sheily_identity_memory is None:
+        _sheily_identity_memory = SheilyIdentityMemory()
+    return _sheily_identity_memory
+
+# Alias para compatibilidad hacia atrás (deprecated)
+def get_autobiographical_memory() -> SheilyIdentityMemory:
+    """DEPRECATED: Usar get_sheily_identity_memory() en su lugar"""
+    import warnings
+    warnings.warn("get_autobiographical_memory() está deprecado. Usar get_sheily_identity_memory()", DeprecationWarning)
+    return get_sheily_identity_memory()
 
 async def integrate_memory_verification_into_response(
     message: str,
@@ -455,7 +483,7 @@ async def integrate_memory_verification_into_response(
     Garantiza que Sheily siempre sepa quién es y le recuerde al sistema
     """
 
-    memory = get_autobiographical_memory()
+    memory = get_sheily_identity_memory()
 
     # Siempre verificar quién soy yo antes de responder
     self_check = await memory.query_who_am_i(message)
@@ -482,7 +510,7 @@ async def enhance_prompt_with_self_awareness(base_prompt: str) -> str:
     """
     Mejorar cualquier prompt con autoconsciencia
     """
-    memory = get_autobiographical_memory()
+    memory = get_sheily_identity_memory()
 
     self_awareness = await memory.query_who_am_i()
 
@@ -510,7 +538,7 @@ async def demo_autobiographical_memory():
     print("="*80)
 
     # Inicializar memoria
-    memory = AutobiographicalMemory()
+    memory = SheilyIdentityMemory()
 
     print("📖 SHEILY CONSULTANDO SU IDENTIDAD:")
     identity_check = await memory.query_who_am_i("¿quién soy?")

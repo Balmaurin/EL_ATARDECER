@@ -12,12 +12,16 @@ Características:
 
 import hashlib
 import json
+import logging
 import secrets
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 class TransactionType(Enum):
@@ -69,18 +73,64 @@ class SHEILYSTransaction:
         return cls(**data_copy)
 
     def calculate_hash(self) -> str:
-        """Calcular hash de la transacción"""
+        """Calcular hash de la transacción (sin incluir transaction_id para evitar circularidad)"""
         tx_data = {
-            "transaction_id": self.transaction_id,
             "sender": self.sender,
             "receiver": self.receiver,
             "amount": self.amount,
             "transaction_type": self.transaction_type.value,
             "timestamp": self.timestamp,
             "metadata": json.dumps(self.metadata, sort_keys=True),
+            "signature": self.signature,
         }
         tx_string = json.dumps(tx_data, sort_keys=True)
         return hashlib.sha256(tx_string.encode()).hexdigest()
+    
+    @classmethod
+    def create_with_hash(
+        cls,
+        sender: str,
+        receiver: str,
+        amount: float,
+        transaction_type: TransactionType,
+        timestamp: float,
+        signature: str,
+        metadata: Dict[str, Any],
+        gas_used: float = 0.0,
+        block_height: Optional[int] = None,
+    ) -> "SHEILYSTransaction":
+        """
+        Crear transacción con hash calculado automáticamente
+        
+        Este método asegura que transaction_id sea el hash correcto
+        """
+        # Calcular hash ANTES de crear la transacción
+        tx_data = {
+            "sender": sender,
+            "receiver": receiver,
+            "amount": amount,
+            "transaction_type": transaction_type.value,
+            "timestamp": timestamp,
+            "metadata": json.dumps(metadata, sort_keys=True),
+            "signature": signature,
+        }
+        tx_hash = hashlib.sha256(
+            json.dumps(tx_data, sort_keys=True).encode()
+        ).hexdigest()
+        
+        # Crear transacción con transaction_id = hash
+        return cls(
+            transaction_id=tx_hash,
+            sender=sender,
+            receiver=receiver,
+            amount=amount,
+            transaction_type=transaction_type,
+            timestamp=timestamp,
+            signature=signature,
+            metadata=metadata,
+            gas_used=gas_used,
+            block_height=block_height,
+        )
 
 
 @dataclass
@@ -130,9 +180,13 @@ class SHEILYSBlockchain:
         self.validators: List[str] = [genesis_validator]
         self.total_supply: float = 0.0
         self.circulating_supply: float = 0.0
+        self.burned_supply: float = 0.0  # Tokens quemados
         self.block_time: int = 60  # 1 minuto entre bloques
         self.max_block_size: int = 1000  # Máximo 1000 transacciones por bloque
         self.min_stake: float = 1000.0  # Stake mínimo para validar
+
+        # Sistema de balances REAL - trackea balances de todas las direcciones
+        self.balances: Dict[str, float] = {}  # Address -> balance
 
         # Gamification integration
         self.gamification_contracts: Dict[str, Dict[str, Any]] = {}
@@ -143,13 +197,16 @@ class SHEILYSBlockchain:
 
     def _create_genesis_block(self):
         """Crear bloque génesis"""
-        genesis_tx = SHEILYSTransaction(
-            transaction_id="genesis_sheily",
+        genesis_amount = 1000000.0  # 1 millón SHEILYS iniciales
+        genesis_timestamp = time.time()
+        
+        # Usar método create_with_hash para genesis transaction
+        genesis_tx = SHEILYSTransaction.create_with_hash(
             sender="sheily_system",
             receiver="genesis_fund",
-            amount=1000000.0,  # 1 millón SHEILYS iniciales
+            amount=genesis_amount,
             transaction_type=TransactionType.REWARD,
-            timestamp=time.time(),
+            timestamp=genesis_timestamp,
             signature="genesis_signature_system",
             metadata={"genesis": True, "purpose": "initial_supply"},
         )
@@ -167,8 +224,12 @@ class SHEILYSBlockchain:
         genesis_block.nonce = secrets.token_hex(16)
 
         self.chain.append(genesis_block)
-        self.total_supply = genesis_tx.amount
-        self.circulating_supply = genesis_tx.amount
+        self.total_supply = genesis_amount
+        self.circulating_supply = genesis_amount
+        self.burned_supply = 0.0
+        
+        # Inicializar balance del genesis_fund
+        self.balances["genesis_fund"] = genesis_amount
 
     def add_transaction(self, transaction: SHEILYSTransaction) -> bool:
         """
@@ -193,7 +254,7 @@ class SHEILYSBlockchain:
             return True
 
         except Exception as e:
-            print(f"Error agregando transacción: {e}")
+            logger.error(f"Error agregando transacción: {e}", exc_info=True)
             return False
 
     def _validate_transaction(self, transaction: SHEILYSTransaction) -> bool:
@@ -210,26 +271,45 @@ class SHEILYSBlockchain:
                     transaction.signature,
                 ]
             ):
+                logger.warning(f"Transacción {transaction.transaction_id}: campos requeridos faltantes")
                 return False
 
-            # Validar timestamp (no futuro, no muy antiguo)
+            # Validar timestamp (ventana más amplia para relojes desincronizados)
             current_time = time.time()
             if (
-                transaction.timestamp > current_time + 300
-            ):  # Máximo 5 minutos en el futuro
+                transaction.timestamp > current_time + 600
+            ):  # Máximo 10 minutos en el futuro
+                logger.warning(f"Transacción {transaction.transaction_id}: timestamp futuro inválido")
                 return False
             if (
-                transaction.timestamp < current_time - 3600
-            ):  # Máximo 1 hora en el pasado
+                transaction.timestamp < current_time - 7200
+            ):  # Máximo 2 horas en el pasado
+                logger.warning(f"Transacción {transaction.transaction_id}: timestamp muy antiguo")
                 return False
 
-            # Validar hash
-            if transaction.calculate_hash() != transaction.transaction_id:
+            # Validar hash - transaction_id DEBE ser igual al hash calculado
+            calculated_hash = transaction.calculate_hash()
+            if calculated_hash != transaction.transaction_id:
+                logger.warning(
+                    f"Transacción {transaction.transaction_id}: hash inválido. "
+                    f"Esperado: {transaction.transaction_id}, Calculado: {calculated_hash}"
+                )
                 return False
+
+            # Validar balance para transacciones que requieren fondos
+            if transaction.transaction_type in [TransactionType.TRANSFER, TransactionType.STAKE]:
+                sender_balance = self.balances.get(transaction.sender, 0.0)
+                if sender_balance < transaction.amount:
+                    logger.warning(
+                        f"Transacción {transaction.transaction_id}: balance insuficiente. "
+                        f"Tiene: {sender_balance}, Necesita: {transaction.amount}"
+                    )
+                    return False
 
             return True
 
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error validando transacción {transaction.transaction_id}: {e}")
             return False
 
     def create_block(self, validator_address: str) -> Optional[SHEILYSBlock]:
@@ -266,8 +346,12 @@ class SHEILYSBlockchain:
                 validator=validator_address,
             )
 
-            # Proof of Stake - generar nonce aleatorio (simplificado)
-            new_block.nonce = secrets.token_hex(16)
+            # Proof of Stake - nonce basado en stake del validador
+            validator_stake = self.stakes.get(validator_address, 0.0)
+            stake_hash = hashlib.sha256(
+                f"{validator_address}{validator_stake}{time.time()}".encode()
+            ).hexdigest()
+            new_block.nonce = stake_hash[:16]
             new_block.block_hash = new_block.calculate_hash()
 
             # Remover transacciones del pool
@@ -279,7 +363,7 @@ class SHEILYSBlockchain:
             return new_block
 
         except Exception as e:
-            print(f"Error creando bloque: {e}")
+            logger.error(f"Error creando bloque: {e}", exc_info=True)
             return None
 
     def add_block(self, block: SHEILYSBlock) -> bool:
@@ -307,7 +391,7 @@ class SHEILYSBlockchain:
             return True
 
         except Exception as e:
-            print(f"Error agregando bloque: {e}")
+            logger.error(f"Error agregando bloque: {e}", exc_info=True)
             return False
 
     def _validate_block(self, block: SHEILYSBlock) -> bool:
@@ -346,9 +430,56 @@ class SHEILYSBlockchain:
 
     def _update_blockchain_state(self, block: SHEILYSBlock):
         """Actualizar estado global de la blockchain después de agregar bloque"""
-        # Aquí se implementaría lógica de actualización de balances, stakes, etc.
+        # ACTUALIZACIÓN REAL DE BALANCES Y ESTADO
+        for tx in block.transactions:
+            if tx.transaction_type == TransactionType.TRANSFER:
+                # Transferir tokens entre direcciones
+                sender_balance = self.balances.get(tx.sender, 0.0)
+                receiver_balance = self.balances.get(tx.receiver, 0.0)
+                
+                if sender_balance >= tx.amount:
+                    self.balances[tx.sender] = sender_balance - tx.amount
+                    self.balances[tx.receiver] = receiver_balance + tx.amount
+                    logger.debug(
+                        f"Transferencia: {tx.sender} -> {tx.receiver}: {tx.amount} SHEILYS"
+                    )
+                    
+            elif tx.transaction_type == TransactionType.REWARD:
+                # Mint tokens (rewards, minting)
+                receiver_balance = self.balances.get(tx.receiver, 0.0)
+                self.balances[tx.receiver] = receiver_balance + tx.amount
+                self.total_supply += tx.amount
+                self.circulating_supply += tx.amount
+                logger.debug(
+                    f"Reward/Mint: {tx.receiver} recibió {tx.amount} SHEILYS"
+                )
+                
+            elif tx.transaction_type == TransactionType.STAKE:
+                # Staking ya se maneja en stake_tokens, pero actualizamos aquí también
+                if tx.sender in self.balances:
+                    # El balance ya se redujo en stake_tokens, solo verificamos
+                    pass
+                    
+            elif tx.transaction_type == TransactionType.UNSTAKE:
+                # Unstake tokens
+                if tx.sender in self.stakes:
+                    unstake_amount = min(tx.amount, self.stakes[tx.sender])
+                    self.stakes[tx.sender] -= unstake_amount
+                    self.balances[tx.sender] = self.balances.get(tx.sender, 0.0) + unstake_amount
+                    logger.debug(
+                        f"Unstake: {tx.sender} des-stakeó {unstake_amount} SHEILYS"
+                    )
+            
+            # Manejar burn de tokens si está en metadata
+            if "burn_amount" in tx.metadata:
+                burn_amount = tx.metadata["burn_amount"]
+                if tx.sender in self.balances:
+                    self.balances[tx.sender] = max(0.0, self.balances[tx.sender] - burn_amount)
+                    self.burned_supply += burn_amount
+                    self.circulating_supply -= burn_amount
+                    logger.debug(f"Burn: {burn_amount} SHEILYS quemados")
 
-        # Para nuestro caso, simplemente marcamos el bloque como finalizado
+        # Marcar bloque como finalizado
         block.status = BlockStatus.FINALIZED
 
     def stake_tokens(self, address: str, amount: float) -> bool:
@@ -363,12 +494,23 @@ class SHEILYSBlockchain:
             bool: True si el stake fue exitoso
         """
         try:
-            # Verificar que tiene suficientes tokens (implementación simplificada)
-            current_stake = self.stakes.get(address, 0)
-
             if amount < 0:
+                logger.warning(f"Stake inválido: cantidad negativa {amount}")
                 return False
 
+            # VERIFICAR BALANCE REAL - CRÍTICO
+            current_balance = self.balances.get(address, 0.0)
+            if current_balance < amount:
+                logger.warning(
+                    f"Stake fallido: {address} no tiene suficientes tokens. "
+                    f"Tiene: {current_balance}, Intenta stakear: {amount}"
+                )
+                return False
+
+            current_stake = self.stakes.get(address, 0.0)
+
+            # Reducir balance antes de aumentar stake
+            self.balances[address] = current_balance - amount
             self.stakes[address] = current_stake + amount
 
             # Agregar como validador si supera el mínimo
@@ -377,24 +519,26 @@ class SHEILYSBlockchain:
                 and address not in self.validators
             ):
                 self.validators.append(address)
+                logger.info(f"Validador agregado: {address} con stake de {self.stakes[address]}")
 
-            # Crear transacción de stake
-            stake_tx = SHEILYSTransaction(
-                transaction_id=f"stake_{address}_{int(time.time())}",
+            # Crear transacción de stake con hash correcto usando create_with_hash
+            stake_timestamp = time.time()
+            stake_tx = SHEILYSTransaction.create_with_hash(
                 sender=address,
                 receiver="stake_contract",
                 amount=amount,
                 transaction_type=TransactionType.STAKE,
-                timestamp=time.time(),
+                timestamp=stake_timestamp,
                 signature=f"stake_signature_{address}",
                 metadata={"stake_type": "validator"},
             )
 
             self.add_transaction(stake_tx)
+            logger.info(f"Stake exitoso: {address} stakeó {amount} SHEILYS")
             return True
 
         except Exception as e:
-            print(f"Error haciendo stake: {e}")
+            logger.error(f"Error haciendo stake: {e}", exc_info=True)
             return False
 
     def _clean_expired_transactions(self):
@@ -417,9 +561,23 @@ class SHEILYSBlockchain:
             "total_staked": sum(self.stakes.values()),
             "total_supply": self.total_supply,
             "circulating_supply": self.circulating_supply,
+            "burned_supply": self.burned_supply,
+            "total_addresses": len(self.balances),
             "latest_block": self.chain[-1].block_height if self.chain else 0,
             "block_time": self.block_time,
         }
+    
+    def get_balance(self, address: str) -> float:
+        """
+        Obtener balance de una dirección
+        
+        Args:
+            address: Dirección a consultar
+            
+        Returns:
+            float: Balance de la dirección
+        """
+        return self.balances.get(address, 0.0)
 
     def get_block(self, height: int) -> Optional[SHEILYSBlock]:
         """Obtener bloque por altura"""
@@ -460,8 +618,7 @@ class SHEILYSBlockchain:
     ) -> bool:
         """Mint reward tokens para gamificación"""
         try:
-            reward_tx = SHEILYSTransaction(
-                transaction_id=f"reward_{player_address}_{reward_type}_{int(time.time())}",
+            reward_tx = SHEILYSTransaction.create_with_hash(
                 sender="gamification_contract",
                 receiver=player_address,
                 amount=amount,
@@ -478,5 +635,5 @@ class SHEILYSBlockchain:
             return self.add_transaction(reward_tx)
 
         except Exception as e:
-            print(f"Error minting reward: {e}")
+            logger.error(f"Error minting reward: {e}", exc_info=True)
             return False

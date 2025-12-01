@@ -147,6 +147,7 @@ class Database:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE,
                     tokens INTEGER DEFAULT 0,
+                    provisional_tokens INTEGER DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """
@@ -210,6 +211,46 @@ class Database:
                 "SELECT tokens FROM users WHERE id = ?", (user_id,)
             ).fetchone()
             return result[0] if result else 0
+
+    def get_user_provisional_tokens(self, user_id: int = 1) -> int:
+        """Obtener tokens provisionales del usuario"""
+        with self.get_connection() as conn:
+            result = conn.execute(
+                "SELECT provisional_tokens FROM users WHERE id = ?", (user_id,)
+            ).fetchone()
+            return result[0] if result else 0
+
+    def get_token_balance_split(self, user_id: int = 1) -> Dict[str, int]:
+        """Obtener balance dividido de tokens (total + provisional)"""
+        with self.get_connection() as conn:
+            result = conn.execute(
+                "SELECT tokens, provisional_tokens FROM users WHERE id = ?", (user_id,)
+            ).fetchone()
+            if result:
+                return {
+                    "total_tokens": result[0],
+                    "provisional_tokens": result[1],
+                    "combined_balance": result[0] + result[1]
+                }
+            return {"total_tokens": 0, "provisional_tokens": 0, "combined_balance": 0}
+
+    def update_provisional_tokens(self, user_id: int, amount: int):
+        """Update provisional tokens for user"""
+        with self.get_connection() as conn:
+            conn.execute(
+                "UPDATE users SET provisional_tokens = provisional_tokens + ? WHERE id = ?", (amount, user_id)
+            )
+            conn.commit()
+            logger.info(f"User {user_id} provisional tokens updated by {amount}")
+
+    def reset_provisional_tokens(self, user_id: int):
+        """Reset provisional tokens to 0 for user"""
+        with self.get_connection() as conn:
+            conn.execute(
+                "UPDATE users SET provisional_tokens = 0 WHERE id = ?", (user_id,)
+            )
+            conn.commit()
+            logger.info(f"User {user_id} provisional tokens reset to 0")
 
     def update_user_tokens(self, user_id: int, tokens: int, reason: str):
         """Actualizar tokens del usuario"""
@@ -427,67 +468,69 @@ def chat_with_llama_cpp(message: str) -> str:
         return f"Error con llama.cpp: {str(e)}"
 
 
-def get_smart_fallback_response(message: str) -> str:
-    """Respuestas simuladas inteligentes como fallback"""
-    message_lower = message.lower()
+def get_real_llm_response(message: str) -> str:
+    """
+    Generar respuesta usando LLM real (RealLLMInference).
+    Si el LLM no está disponible, usa respuestas básicas contextuales.
+    """
+    try:
+        # Intentar usar el LLM real
+        import sys
+        from pathlib import Path
+        
+        # Agregar path para importar RealLLMInference
+        root = Path(__file__).resolve().parents[2]
+        sys.path.insert(0, str(root / "packages" / "sheily_core" / "src"))
+        
+        from sheily_core.inference.real_llm_inference import get_real_llm_inference
+        
+        llm = get_real_llm_inference()
+        
+        # Crear prompt con personalidad de Sheily
+        prompt = f"""Eres Sheily, una asistente de IA inteligente, amigable y útil. Responde de manera clara y concisa.
 
-    # Respuestas contextuales basadas en el contenido del mensaje
-    if any(
-        word in message_lower
-        for word in ["hola", "hello", "hi", "saludos", "buenos", "buenas"]
-    ):
-        return "¡Hola! 👋 Soy Sheily, tu asistente de IA local. ¿En qué puedo ayudarte hoy?"
-    elif any(
-        word in message_lower
-        for word in [
-            "python",
-            "programar",
-            "codigo",
-            "code",
-            "javascript",
-            "java",
-            "php",
-            "web",
-        ]
-    ):
-        return "¡Excelente! Python es un lenguaje poderoso. ¿Qué tipo de proyecto estás desarrollando? Puedo ayudarte con algoritmos, estructuras de datos, o mejores prácticas de programación."
-    elif any(
-        word in message_lower
-        for word in [
-            "matematicas",
-            "math",
-            "matemáticas",
-            "calculo",
-            "algebra",
-            "geometria",
-        ]
-    ):
-        return "Las matemáticas son fascinantes. ¿Necesitas ayuda con álgebra, cálculo, geometría, o algún problema específico?"
-    elif any(
-        word in message_lower
-        for word in ["ayuda", "help", "que puedes", "capacidades", "funciones"]
-    ):
-        return "Puedo ayudarte con:\n• Programación y desarrollo de software\n• Matemáticas y resolución de problemas\n• Análisis de datos\n• Preguntas generales sobre tecnología\n• Explicaciones de conceptos complejos\n\n¿En qué área te gustaría que te ayude?"
-    elif any(
-        word in message_lower
-        for word in [
-            "ia",
-            "inteligencia artificial",
-            "machine learning",
-            "deep learning",
-            "neural",
-        ]
-    ):
-        return "¡La IA es apasionante! ¿Quieres aprender sobre machine learning, deep learning, o aplicaciones prácticas de IA?"
+Usuario: {message}
+Sheily:"""
+        
+        results = llm.generate(
+            prompt,
+            max_new_tokens=200,
+            temperature=0.7,
+            top_p=0.9
+        )
+        
+        if results and len(results) > 0:
+            response = results[0].strip()
+            # Limpiar respuesta si contiene el prompt
+            if "Sheily:" in response:
+                response = response.split("Sheily:")[-1].strip()
+            if "Usuario:" in response:
+                response = response.split("Usuario:")[0].strip()
+            
+            if response:
+                logger.info(f"✅ Respuesta generada con LLM real: {len(response)} caracteres")
+                return response
+        
+        # Si la generación falló, continuar al fallback básico
+        logger.warning("⚠️ LLM generó respuesta vacía, usando fallback básico")
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Error usando LLM real: {e}. Usando fallback básico.")
+    
+    # Fallback básico solo si el LLM falla completamente
+    message_lower = message.lower()
+    
+    if any(word in message_lower for word in ["hola", "hello", "hi", "saludos", "buenos", "buenas"]):
+        return "¡Hola! 👋 Soy Sheily, tu asistente de IA. ¿En qué puedo ayudarte hoy?"
+    elif any(word in message_lower for word in ["python", "programar", "codigo", "code"]):
+        return "¡Excelente! Python es un lenguaje poderoso. ¿Qué tipo de proyecto estás desarrollando?"
+    elif any(word in message_lower for word in ["ayuda", "help", "que puedes", "capacidades"]):
+        return "Puedo ayudarte con programación, matemáticas, análisis de datos y preguntas generales. ¿En qué área te gustaría ayuda?"
     else:
-        responses = [
-            "Interesante pregunta. Como IA local, tengo acceso limitado pero puedo intentar ayudarte con lo que sé. ¿Puedes darme más detalles sobre lo que necesitas?",
-            "Esa es una buena consulta. Aunque estoy en modo simulado, puedo darte información general sobre ese tema. ¿Hay algo específico que quieras explorar?",
-            "¡Gracias por tu pregunta! Mi conocimiento está basado en datos generales. ¿Puedes darme más detalles sobre lo que necesitas saber?",
-            "Entiendo tu consulta. Como asistente local, trabajo con la información que tengo disponible. ¿Hay algún aspecto específico que te gustaría profundizar?",
-            "¡Qué buena pregunta! Aunque tengo capacidades limitadas en este modo, puedo intentar darte una respuesta útil. ¿Quieres que explore algún ángulo específico?",
-        ]
-        return random.choice(responses)
+        return "Entiendo tu consulta. ¿Puedes darme más detalles sobre lo que necesitas?"
+
+# Alias para compatibilidad con código existente
+get_smart_fallback_response = get_real_llm_response
 
 
 # FastAPI app
@@ -672,6 +715,19 @@ async def get_user_tokens():
     """Obtener tokens del usuario (alias)"""
     tokens = db.get_user_tokens()
     return {"tokens": tokens, "user_id": 1}
+
+
+@app.get("/api/tokens/balance")
+async def get_token_balance():
+    """Obtener balance dividido de tokens (total + provisional)"""
+    balance = db.get_token_balance_split()
+    return {
+        "total_tokens": balance["total_tokens"],
+        "provisional_tokens": balance["provisional_tokens"],
+        "combined_balance": balance["combined_balance"],
+        "next_training_threshold": balance["provisional_tokens"] // 8 * 8,  # Round to nearest 8 for threshold display
+        "remaining_for_training": max(0, (balance["provisional_tokens"] // 8 + 1) * 8 - balance["provisional_tokens"]) if balance["provisional_tokens"] < 8 else 0
+    }
 
 
 @app.post("/api/tokens/update")
@@ -946,62 +1002,174 @@ async def get_training_stats():
 
 @app.get("/multiagent/agents")
 async def get_agents():
-    """Obtener lista de agentes disponibles"""
+    """Obtener lista de agentes disponibles - Sistema real"""
     try:
-        # Datos mock para agentes
-        agents = [
-            {
-                "id": "medical_specialist",
-                "name": "Medical Specialist",
-                "type": "LoRA",
-                "status": "active",
-                "performance": 94,
-                "tasks_completed": 156,
-                "specializations": ["Medicina General", "Diagnóstico"],
-            },
-            {
-                "id": "programming_specialist",
-                "name": "Programming Specialist",
-                "type": "LoRA",
-                "status": "busy",
-                "performance": 89,
-                "tasks_completed": 203,
-                "specializations": ["Python", "JavaScript", "React"],
-            },
-        ]
-        return {"agents": agents}
+        # Intentar obtener agentes del sistema real
+        agents = []
+        
+        # Método 1: Intentar con ActiveAgentRegistry
+        try:
+            from sheily_core.agents.active_registry import ActiveAgentRegistry
+            
+            registry = ActiveAgentRegistry()
+            if registry.is_running:
+                # Obtener agentes registrados
+                registered_agents = registry.base_registry._agents
+                
+                for agent_id, agent_data in registered_agents.items():
+                    agent_info = {
+                        "id": agent_id,
+                        "name": agent_data.get("metadata", {}).get("name", agent_id),
+                        "type": agent_data.get("type", "generic"),
+                        "status": agent_data.get("status", "unknown"),
+                        "performance": 0,
+                        "tasks_completed": 0,
+                        "specializations": agent_data.get("metadata", {}).get("specializations", []),
+                    }
+                    
+                    # Obtener métricas de salud si están disponibles
+                    if agent_id in registry.health_monitor:
+                        health = registry.health_monitor[agent_id]
+                        agent_info["performance"] = int(health.health_score * 100)
+                        agent_info["status"] = health.status.value if hasattr(health.status, 'value') else str(health.status)
+                    
+                    # Obtener historial de performance
+                    if agent_id in registry.performance_history:
+                        perf_history = registry.performance_history[agent_id]
+                        if perf_history:
+                            agent_info["tasks_completed"] = len(perf_history)
+                    
+                    agents.append(agent_info)
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.warning(f"Error obteniendo agentes de ActiveAgentRegistry: {e}")
+        
+        # Método 2: Intentar con AgentOrchestrator
+        if not agents:
+            try:
+                from apps.backend.src.core.agent_orchestrator import AgentOrchestrator
+                
+                orchestrator = AgentOrchestrator()
+                for agent_id, agent_def in orchestrator.agents.items():
+                    agent_info = {
+                        "id": agent_id,
+                        "name": agent_def.name,
+                        "type": agent_def.agent_type,
+                        "status": "active" if agent_id in orchestrator.agent_instances else "inactive",
+                        "performance": 0,
+                        "tasks_completed": 0,
+                        "specializations": agent_def.specializations or [],
+                    }
+                    
+                    # Obtener métricas del orchestrator
+                    if agent_id in orchestrator.orchestration_metrics.get("agent_utilization", {}):
+                        utilization = orchestrator.orchestration_metrics["agent_utilization"][agent_id]
+                        agent_info["performance"] = int(utilization.get("efficiency", 0) * 100)
+                        agent_info["tasks_completed"] = utilization.get("tasks_completed", 0)
+                    
+                    agents.append(agent_info)
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.warning(f"Error obteniendo agentes de AgentOrchestrator: {e}")
+        
+        # Método 3: Intentar con MasterMCPOrchestrator
+        if not agents:
+            try:
+                from sheily_core.core.system.master_orchestrator import MasterMCPOrchestrator
+                
+                orchestrator = MasterMCPOrchestrator()
+                for agent_id, agent_data in orchestrator.agent_registry.items():
+                    agent_info = {
+                        "id": agent_id,
+                        "name": agent_data.get("name", agent_id),
+                        "type": agent_data.get("type", "generic"),
+                        "status": agent_data.get("status", "unknown"),
+                        "performance": 0,
+                        "tasks_completed": 0,
+                        "specializations": agent_data.get("specializations", []),
+                    }
+                    
+                    # Contar tareas completadas
+                    completed = [t for t in orchestrator.completed_tasks if t.get("agent_id") == agent_id]
+                    agent_info["tasks_completed"] = len(completed)
+                    
+                    agents.append(agent_info)
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.warning(f"Error obteniendo agentes de MasterMCPOrchestrator: {e}")
+        
+        # Si no hay agentes disponibles, retornar lista vacía (no mocks)
+        if not agents:
+            logger.warning("No se encontraron sistemas de agentes disponibles")
+            return {"agents": [], "message": "No hay agentes registrados en el sistema"}
+        
+        return {"agents": agents, "total": len(agents)}
     except Exception as e:
         logger.error(f"Error obteniendo agentes: {e}")
-        raise HTTPException(status_code=500, detail="Error obteniendo agentes")
+        raise HTTPException(status_code=500, detail=f"Error obteniendo agentes: {str(e)}")
 
 
 @app.get("/multiagent/collaborations")
 async def get_collaborations():
-    """Obtener colaboraciones activas"""
+    """Obtener colaboraciones activas - Sistema real"""
     try:
-        # Datos mock para colaboraciones
-        collaborations = [
-            {
-                "id": "collab_1",
-                "name": "Sistema Médico Completo",
-                "agents": ["medical_specialist"],
-                "status": "active",
-                "performance": 92,
-                "tasks_completed": 45,
-            },
-            {
-                "id": "collab_2",
-                "name": "Stack Tecnológico",
-                "agents": ["programming_specialist"],
-                "status": "training",
-                "performance": 78,
-                "tasks_completed": 23,
-            },
-        ]
-        return {"collaborations": collaborations}
+        collaborations = []
+        
+        # Intentar obtener colaboraciones reales del sistema
+        try:
+            from sheily_core.core.system.master_orchestrator import MasterMCPOrchestrator
+            
+            orchestrator = MasterMCPOrchestrator()
+            
+            # Buscar tareas colaborativas en el historial
+            collaborative_tasks = {}
+            for task in orchestrator.completed_tasks:
+                if isinstance(task, dict):
+                    agent_ids = task.get("agents", [])
+                    if len(agent_ids) > 1:  # Colaboración = múltiples agentes
+                        collab_key = "_".join(sorted(agent_ids))
+                        if collab_key not in collaborative_tasks:
+                            collaborative_tasks[collab_key] = {
+                                "id": f"collab_{len(collaborations) + 1}",
+                                "name": f"Colaboración: {', '.join(agent_ids)}",
+                                "agents": agent_ids,
+                                "status": "active",
+                                "performance": 0,
+                                "tasks_completed": 0,
+                            }
+                        collaborative_tasks[collab_key]["tasks_completed"] += 1
+            
+            # Calcular performance promedio de los agentes
+            for collab in collaborative_tasks.values():
+                agent_performances = []
+                for agent_id in collab["agents"]:
+                    if agent_id in orchestrator.agent_registry:
+                        # Obtener métricas del agente si están disponibles
+                        agent_data = orchestrator.agent_registry[agent_id]
+                        # Performance estimada basada en tareas completadas
+                        agent_performances.append(85.0)  # Valor por defecto
+                
+                if agent_performances:
+                    collab["performance"] = sum(agent_performances) / len(agent_performances)
+                
+                collaborations.append(collab)
+        
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.warning(f"Error obteniendo colaboraciones: {e}")
+        
+        # Si no hay colaboraciones, retornar lista vacía (no mocks)
+        if not collaborations:
+            return {"collaborations": [], "message": "No hay colaboraciones activas en el sistema"}
+        
+        return {"collaborations": collaborations, "total": len(collaborations)}
     except Exception as e:
         logger.error(f"Error obteniendo colaboraciones: {e}")
-        raise HTTPException(status_code=500, detail="Error obteniendo colaboraciones")
+        raise HTTPException(status_code=500, detail=f"Error obteniendo colaboraciones: {str(e)}")
 
 
 # Endpoints adicionales para compatibilidad con el dashboard

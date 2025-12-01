@@ -39,7 +39,7 @@ from .consciousness_emergence import EmergentProperty
 
 # MEMORIA AUTOBIOGRÁFICA - Sheily se recuerda a sí misma
 try:
-    from .autobiographical_memory_system import get_autobiographical_memory
+    from .autobiographical_memory_system import get_sheily_identity_memory, get_autobiographical_memory  # get_autobiographical_memory es alias deprecated
     autobiographical_memory_available = True
 except ImportError:
     autobiographical_memory_available = False
@@ -903,8 +903,8 @@ class LinguisticMetacognitionEngine:
         # ===================================================================
         if autobiographical_memory_available:
             # Sheily siempre se pregunta "¿quién soy yo?" antes de procesar
-            self_check = get_autobiographical_memory().query_who_am_i(text)
-            verification = get_autobiographical_memory().continuous_self_verification()
+            self_check = get_sheily_identity_memory().query_who_am_i(text)
+            verification = get_sheily_identity_memory().continuous_self_verification()
 
             # Log de autoconsciencia
             print(f"🧠 Autoconsciencia activa: Identidad confirmada ✓" if verification["identity_confirmed"] else "⚠️ Identidad requiriendo verificación")
@@ -981,7 +981,7 @@ class LinguisticMetacognitionEngine:
         # ===================================================================
         if autobiographical_memory_available:
             try:
-                memory = get_autobiographical_memory()
+                memory = get_sheily_identity_memory()
 
                 # Registrar insights aprendidos de esta interacción
                 insight_data = {

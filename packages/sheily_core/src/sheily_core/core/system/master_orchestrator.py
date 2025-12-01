@@ -807,11 +807,23 @@ class MasterMCPOrchestrator:
 
         elif action_type == "scale_agents":
             # Scaling logic would involve external orchestration
-            pass
+            agent_type = action.get("agent_type")
+            count = action.get("count", 1)
+            logger.info(f"⚖️ Scaling request: {agent_type} +{count}")
+            # In a real K8s env, this would call the K8s API
+            # For now, we simulate by logging the event
+            await self._emit_event("scaling_triggered", {"agent_type": agent_type, "count": count})
 
         elif action_type == "failover_task":
             task_id = action.get("task_id")
             # Implement task failover logic
+            if task_id in self.active_tasks:
+                task = self.active_tasks[task_id]
+                logger.warning(f"🔄 Initiating failover for task {task_id}")
+                # Re-queue task with high priority
+                task.priority = TaskPriority.CRITICAL
+                await self.task_queue.put(task)
+                await self._emit_event("task_failover", {"task_id": task_id})
 
     async def _check_emergency_protocols(self):
         """Check and activate emergency protocols if needed"""
@@ -875,11 +887,49 @@ class MasterMCPOrchestrator:
     # ================================
 
     async def _wait_for_task(self, task_id: str) -> Dict[str, Any]:
-        """Wait for task completion"""
-        # This would be implemented with proper async coordination
-        # For now, return a placeholder
-        await asyncio.sleep(0.1)
-        return {"status": "completed", "result": "placeholder"}
+        """Wait for task completion using event-driven coordination"""
+        # Create a future to wait for task completion
+        completion_future = asyncio.Future()
+
+        # Set up event handler for this specific task
+        def task_completion_handler(event):
+            if event["data"].get("task_id") == task_id:
+                if event["type"] == "task_completed":
+                    completion_future.set_result({
+                        "status": "completed",
+                        "result": event["data"].get("result", {}),
+                        "processing_time": event["data"].get("processing_time", 0),
+                        "agent_id": event["data"].get("agent_id")
+                    })
+                elif event["type"] == "task_failed":
+                    completion_future.set_exception(Exception(
+                        event["data"].get("error", "Task execution failed")
+                    ))
+
+        # Register temporary handler for this task
+        self.register_event_handler("task_completed", task_completion_handler)
+        self.register_event_handler("task_failed", task_completion_handler)
+
+        try:
+            # Wait for task completion
+            result = await completion_future
+            return result
+
+        except Exception as e:
+            logger.error(f"Error waiting for task {task_id}: {e}")
+            return {
+                "status": "failed",
+                "error": str(e),
+                "task_id": task_id
+            }
+
+        finally:
+            # Clean up event handlers
+            try:
+                self.event_handlers["task_completed"].remove(task_completion_handler)
+                self.event_handlers["task_failed"].remove(task_completion_handler)
+            except ValueError:
+                pass  # Handler might have been removed already
 
     def _get_agent_health_overview(self) -> Dict[str, Any]:
         """Get overview of agent health status"""

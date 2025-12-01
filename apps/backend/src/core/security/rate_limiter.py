@@ -86,28 +86,30 @@ class RateLimiter:
     """
     Rate limiter avanzado para Sheily AI
     Soporta múltiples algoritmos y configuraciones
+    REAL IMPLEMENTATION - Redis is REQUIRED, no fallbacks
     """
 
     def __init__(self, redis_client=None, enable_redis: bool = True):
-        self.redis_client = redis_client
-        self.enable_redis = enable_redis
+        """
+        Initialize rate limiter.
 
-        # Almacenamiento en memoria (fallback si no hay Redis)
-        self._memory_storage: Dict[str, RateLimitState] = {}
+        IMPORTANT: Redis is REQUIRED for production.
+        If redis_client is None, system will fail fast.
+        """
+        if redis_client is None:
+            raise RuntimeError(
+                "Redis client is required for RateLimiter. "
+                "NO FALLBACKS - System cannot start without Redis. "
+                "Configure REDIS_URL environment variable."
+            )
+
+        self.redis_client = redis_client
+        self.enable_redis = True  # Always True in production
 
         # Reglas de rate limiting por defecto
         self.rules = self._load_default_rules()
 
-        # Configuración
-        self.max_memory_entries = 10000
-        self.cleanup_interval = 300  # 5 minutos
-
-        # Iniciar cleanup task
-        if enable_redis and redis_client:
-            logger.info("🔥 Rate Limiter initialized with Redis backend")
-        else:
-            logger.info("🔥 Rate Limiter initialized with in-memory storage")
-            asyncio.create_task(self._periodic_cleanup())
+        logger.info("✓ Rate Limiter initialized with Redis backend (NO FALLBACKS)")
 
     def _load_default_rules(self) -> Dict[str, RateLimitRule]:
         """Cargar reglas por defecto"""
@@ -227,40 +229,45 @@ class RateLimiter:
         return f"ratelimit:{identifier}:{key}"
 
     async def _get_state(self, state_key: str) -> RateLimitState:
-        """Obtener estado actual desde almacenamiento"""
-        if self.enable_redis and self.redis_client:
-            # Intentar obtener desde Redis
-            try:
-                data = await self.redis_client.get(state_key)
-                if data:
-                    state_data = json.loads(data)
-                    return RateLimitState(**state_data)
-            except Exception as e:
-                logger.warning(f"Redis error getting state: {e}")
-
-        # Fallback a memoria
-        return self._memory_storage.get(state_key, RateLimitState(key=state_key))
+        """
+        Obtener estado actual desde Redis.
+        REAL IMPLEMENTATION - NO FALLBACKS, Redis is required
+        """
+        try:
+            data = await self.redis_client.get(state_key)
+            if data:
+                state_data = json.loads(data)
+                return RateLimitState(**state_data)
+            return RateLimitState(key=state_key)
+        except Exception as e:
+            logger.error(f"Redis error getting state: {e}")
+            raise RuntimeError(
+                f"Failed to get rate limit state from Redis: {e}. "
+                "NO FALLBACKS - Rate limiter requires Redis."
+            )
 
     async def _update_state(self, state_key: str, state: RateLimitState):
-        """Actualizar estado en almacenamiento"""
-        if self.enable_redis and self.redis_client:
-            # Guardar en Redis con expiración
-            try:
-                data = {
-                    "key": state.key,
-                    "requests": state.requests,
-                    "window_start": state.window_start,
-                    "tokens": state.tokens,
-                    "last_refill": state.last_refill,
-                }
-                await self.redis_client.setex(
-                    state_key, 3600, json.dumps(data)
-                )  # 1 hora TTL
-            except Exception as e:
-                logger.warning(f"Redis error updating state: {e}")
-
-        # También guardar en memoria como backup
-        self._memory_storage[state_key] = state
+        """
+        Actualizar estado en Redis.
+        REAL IMPLEMENTATION - NO FALLBACKS, Redis is required
+        """
+        try:
+            data = {
+                "key": state.key,
+                "requests": state.requests,
+                "window_start": state.window_start,
+                "tokens": state.tokens,
+                "last_refill": state.last_refill,
+            }
+            await self.redis_client.setex(
+                state_key, 3600, json.dumps(data)
+            )  # 1 hora TTL
+        except Exception as e:
+            logger.error(f"Redis error updating state: {e}")
+            raise RuntimeError(
+                f"Failed to update rate limit state in Redis: {e}. "
+                "NO FALLBACKS - Rate limiter requires Redis."
+            )
 
     def _check_fixed_window(
         self, state: RateLimitState, rule: RateLimitRule
@@ -376,45 +383,11 @@ class RateLimiter:
                 limit_exceeded=True,
             )
 
-    async def _periodic_cleanup(self):
-        """Limpieza periódica de estados antiguos en memoria"""
-        while True:
-            try:
-                current_time = time.time()
-                to_remove = []
-
-                for key, state in self._memory_storage.items():
-                    # Remover estados antiguos (más de 1 hora)
-                    if current_time - state.window_start > 3600:
-                        to_remove.append(key)
-
-                for key in to_remove:
-                    del self._memory_storage[key]
-
-                # Limitar tamaño del diccionario
-                if len(self._memory_storage) > self.max_memory_entries:
-                    # Remover entradas más antiguas
-                    sorted_items = sorted(
-                        self._memory_storage.items(), key=lambda x: x[1].window_start
-                    )
-                    to_remove = [
-                        k
-                        for k, v in sorted_items[
-                            : len(sorted_items) - self.max_memory_entries
-                        ]
-                    ]
-                    for key in to_remove:
-                        del self._memory_storage[key]
-
-            except Exception as e:
-                logger.error(f"Error in periodic cleanup: {e}")
-
-            await asyncio.sleep(self.cleanup_interval)
 
     def add_rule(self, rule: RateLimitRule):
         """Añadir una nueva regla de rate limiting"""
         self.rules[rule.name] = rule
-        logger.info(f"✅ Added rate limit rule: {rule.name}")
+        logger.info(f"[OK] Added rate limit rule: {rule.name}")
 
     def remove_rule(self, rule_name: str):
         """Remover una regla de rate limiting"""
@@ -426,8 +399,7 @@ class RateLimiter:
         """Obtener estadísticas del rate limiter"""
         return {
             "rules_count": len(self.rules),
-            "memory_entries": len(self._memory_storage),
-            "redis_enabled": self.enable_redis and self.redis_client is not None,
+            "redis_enabled": True,  # Always True - Redis is required
             "rules": list(self.rules.keys()),
         }
 
@@ -531,13 +503,13 @@ def rate_limit(rule_name: str = "api_general"):
 
 if __name__ == "__main__":
     # Demo del sistema de rate limiting
-    print("🔥 SHEILY AI - RATE LIMITING SYSTEM DEMO")
+    print("[FIRE] SHEILY AI - RATE LIMITING SYSTEM DEMO")
     print("=" * 60)
 
     async def demo():
         rate_limiter = RateLimiter(enable_redis=False)
 
-        print("📊 Testing Fixed Window Algorithm (5 requests per minute)")
+        print("[CHART] Testing Fixed Window Algorithm (5 requests per minute)")
         rule = RateLimitRule(
             name="test_fixed",
             scope=RateLimitScope.IP,
@@ -558,7 +530,7 @@ if __name__ == "__main__":
             if not result.allowed:
                 print(f"  Rate limit exceeded! Retry after {result.retry_after}s")
 
-        print("\n🚀 Testing Token Bucket Algorithm (10 requests per minute, burst=3)")
+        print("\n[START] Testing Token Bucket Algorithm (10 requests per minute, burst=3)")
         rule_tb = RateLimitRule(
             name="test_token_bucket",
             scope=RateLimitScope.USER,
@@ -581,8 +553,8 @@ if __name__ == "__main__":
             # Simular tiempo entre requests
             await asyncio.sleep(0.1)
 
-        print("\n✅ Rate Limiting System Demo Complete!")
-        print("🔥 Sistema listo para prevenir abuso de APIs")
+        print("\n[OK] Rate Limiting System Demo Complete!")
+        print("[FIRE] Sistema listo para prevenir abuso de APIs")
 
     # Ejecutar demo
     asyncio.run(demo())

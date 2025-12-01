@@ -1,5 +1,5 @@
 {
-  "model_path": "models/llama-3.2-3b/Llama-3.2-3B-Instruct-f16.gguf",
+  "model_path": "models/gemma-2-2b-it-Q4_K_M.gguf",
   "model_type": "llama",
   "context_size": 16384,
   "threads": 4,

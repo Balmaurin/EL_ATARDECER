@@ -86,10 +86,10 @@ class DatabaseManager:
             async with self._engine.begin() as conn:
                 await conn.execute("SELECT 1")
 
-            print(f"✅ Database connected successfully to PostgreSQL")
+            print(f"[OK] Database connected successfully to PostgreSQL")
 
         except Exception as e:
-            print(f"❌ Database connection failed: {e}")
+            print(f"[ERROR] Database connection failed: {e}")
             raise
 
     async def close(self) -> None:
@@ -228,11 +228,11 @@ class DatabaseManager:
                 )
 
                 await session.commit()
-                print(f"✅ Tenant schema prepared for tenant: {tenant_id}")
+                print(f"[OK] Tenant schema prepared for tenant: {tenant_id}")
 
             except Exception as e:
                 await session.rollback()
-                print(f"❌ Failed to create tenant schema: {e}")
+                print(f"[ERROR] Failed to create tenant schema: {e}")
                 raise
 
     async def get_tenant_stats(self, tenant_id: str) -> Dict[str, Any]:
@@ -295,7 +295,7 @@ class DatabaseManager:
                 }
 
             except Exception as e:
-                print(f"❌ Error getting tenant stats: {e}")
+                print(f"[ERROR] Error getting tenant stats: {e}")
                 return {
                     "tenant_id": tenant_id,
                     "error": str(e),

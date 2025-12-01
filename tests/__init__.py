@@ -1,6 +1,6 @@
 """
 EL-AMANECER-V4 - ENTERPRISE TEST SUITE
-==========================================
+=============================================
 
 Suite de testing empresarial multinacional para SHEILY AI Enterprise.
 Cumple con estándares de calidad de Google, Meta, Microsoft y OpenAI.
@@ -8,14 +8,14 @@ Cumple con estándares de calidad de Google, Meta, Microsoft y OpenAI.
 ARCHITECTURE:
 ├── enterprise/        # Highest-level E2E tests
 ├── integration/       # System component integration
-├── unit/             # Individual component tests
-├── performance/      # Benchmarks & profiling
-├── security/         # Vulnerability & penetration tests
-├── chaos/            # Reliability & resilience testing
-├── ml_validation/    # AI/ML model validation & conformance
-├── scalability/      # Load testing & capacity analysis
-├── monitoring/       # Test telemetry & metrics
-└── ci_cd/            # CI/CD integration & automation
+├── unit/              # Individual component tests
+├── performance/       # Benchmarks & profiling
+├── security/          # Vulnerability & penetration tests
+├── chaos/             # Reliability & resilience testing
+├── ml_validation/     # AI/ML model validation & conformance
+├── scalability/       # Load testing & capacity analysis
+├── monitoring/        # Test telemetry & metrics
+└── ci_cd/             # CI/CD integration & automation
 
 PROFESSIONAL STANDARDS:
 - 100% code coverage mínimo

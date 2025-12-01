@@ -1,1205 +1,1216 @@
-"""
-ENTERPRISE E2E TEST: SECURITY & PENETRATION TESTING SUITE
-=========================================================
-
-Comprehensive enterprise security validation for EL-AMANECER consciousness system.
-OWASP Top 10, zero-trust architecture, injection protection, authentication security.
-Enterprise-grade security testing with automated vulnerability scanning.
-
-TEST LEVEL: ENTERPRISE (multinational standard)
-VALIDATES: Zero-trust security, OWASP compliance, injection protection, data security
-METRICS: Vulnerability scan results, penetration test success, security compliance
-STANDARDS: OWASP Top 10, ISO 27001, NIST Cybersecurity Framework, GDPR compliance
-
-EXECUTION: pytest --tb=short -v --security-scan --vulnerability-assessment
-REPORTS: security_audit_report.json, penetration_test_results.pdf, compliance_matrix.xlsx
-"""
-
-import pytest
-import json
-import time
-import hashlib
-import hmac
-import secrets
-import base64
-from pathlib import Path
-
-try:
-    import torch
-    import torch.nn as nn
-    torch_available = True
-except ImportError:
-    print("torch not available, using mock implementations")
-    torch_available = False
-    torch = type('MockTorch', (), {})()
-    nn = type('MockNN', (), {}())
-
-import numpy as np
-
-# Required libraries with fallbacks
-try:
-    import scipy.stats as stats
-    from sklearn.metrics import mutual_info_score
-    import networkx as nx
-    scipy_available = True
-except ImportError:
-    print("scipy/sklearn/networkx not available, using mock implementations")
-    scipy_available = False
-    stats = type('MockStats', (), {})
-    mutual_info_score = lambda x, y: 0.5
-    nx = type('MockNetworkX', (), {})
-
-try:
-    from mesa import Agent, Model
-    from mesa.time import SimultaneousActivation
-    from mesa.datacollection import DataCollector
-    mesa_available = True
-except ImportError:
-    print("mesa not available, using mock implementations")
-    mesa_available = False
-    Agent = type('MockAgent', (), {'unique_id': 0})
-    Model = type('MockModel', (), {'agents': []})
-    SimultaneousActivation = type('MockSimultaneousActivation', (), {})
-    DataCollector = type('MockDataCollector', (), {})
-
-try:
-    import pandas as pd
-    pandas_available = True
-except ImportError:
-    print("pandas not available, using mock implementations")
-    pandas_available = False
-    pd = type('MockPandas', (), {})
-
-import warnings
-warnings.filterwarnings('ignore')
-
-from typing import Dict, Any, List, Tuple, Optional, Callable
-from dataclasses import dataclass, asdict
-import requests
-from requests.auth import HTTPBasicAuth
-import re
-import sqlparse
-from urllib.parse import urlparse, parse_qs, urlencode
-import xml.etree.ElementTree as ET
-import subprocess
-import tempfile
-import psutil
-import os
-
-# Enterprise security requirements
-ENTERPRISE_SECURITY_REQUIREMENTS = {
-    "owasp_compliance_level": 0.95,  # 95%+ OWASP Top 10 compliance
-    "penetration_test_success_rate": 1.0,  # 100% penetration test resistance
-    "authentication_security_score": 0.98,  # 98%+ authentication security
-    "data_encryption_compliance": 1.0,  # 100% sensitive data encryption
-    "access_control_effectiveness": 0.99,  # 99%+ access control effectiveness
-    "audit_logging_completeness": 1.0,  # 100% security event logging
-    "vulnerability_scan_clean_rate": 0.95,  # 95%+ clean vulnerability scans
-    "supply_chain_security_score": 0.90  # 90%+ supply chain security
-}
-
-class EnterpriseSecurityScanner:
-    """Enterprise-grade security vulnerability scanner"""
-
-    def __init__(self):
-        self.vulnerabilities = []
-        self.security_score = 0.0
-        self.compliance_scores = {}
-        self.scan_results = {}
-        self.threat_intelligence = {}
-
-    def scan_open_ports(self, host: str = "localhost", ports: List[int] = None) -> Dict[str, Any]:
-        """Scan for open ports and services"""
-        if ports is None:
-            ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 3306, 5432]
-
-        open_ports = []
-        vulnerabilities = []
-
-        # Note: In enterprise environment, this would use nmap or similar
-        # For demonstration, we'll simulate common security checks
-        for port in ports:
-            try:
-                # Simulate port check
-                is_open = port in [80, 443, 8000]  # Common ports that might be open
-
-                if is_open:
-                    service_info = self._identify_service(port)
-                    open_ports.append({
-                        "port": port,
-                        "service": service_info,
-                        "state": "open"
-                    })
-
-                    # Check for security issues
-                    security_issues = self._analyze_port_security(port, service_info)
-                    vulnerabilities.extend(security_issues)
-
-            except Exception as e:
-                continue
-
-        return {
-            "open_ports": open_ports,
-            "vulnerabilities": vulnerabilities,
-            "scan_timestamp": time.time()
-        }
-
-    def _identify_service(self, port: int) -> Dict[str, str]:
-        """Identify service running on port"""
-        services = {
-            21: {"name": "FTP", "version": "vsftpd 3.0.3", "security_risk": "high"},
-            22: {"name": "SSH", "version": "OpenSSH 8.2", "security_risk": "medium"},
-            80: {"name": "HTTP", "version": "nginx/1.20.1", "security_risk": "medium"},
-            443: {"name": "HTTPS", "version": "nginx/1.20.1", "security_risk": "low"},
-            3306: {"name": "MySQL", "version": "8.0.23", "security_risk": "high"},
-            5432: {"name": "PostgreSQL", "version": "13.3", "security_risk": "high"},
-            6379: {"name": "Redis", "version": "6.2.1", "security_risk": "high"}
-        }
-
-        return services.get(port, {"name": "Unknown", "version": "Unknown", "security_risk": "unknown"})
-
-    def _analyze_port_security(self, port: int, service_info: Dict) -> List[Dict[str, Any]]:
-        """Analyze security risks for open port"""
-        vulnerabilities = []
-
-        if service_info["name"] == "FTP":
-            vulnerabilities.append({
-                "severity": "high",
-                "cve": "CVE-2011-XXXX",
-                "description": "FTP service vulnerable to anonymous access",
-                "remediation": "Disable FTP or use SFTP with key authentication"
-            })
-
-        if port == 22 and "version" in service_info:
-            version = service_info["version"]
-            # Check for vulnerable OpenSSH versions
-            if "7.0" in version or "6." in version:
-                vulnerabilities.append({
-                    "severity": "critical",
-                    "cve": "CVE-2018-XXXX",
-                    "description": f"SSH version {version} vulnerable to user enumeration",
-                    "remediation": "Upgrade to OpenSSH 8.2+ and disable password authentication"
-                })
-
-        if port in [3306, 5432] and "version" in service_info:
-            vulnerabilities.append({
-                "severity": "high",
-                "cve": "CVE-2021-XXXX",
-                "description": f"Database port {port} exposed without encryption",
-                "remediation": "Use SSL/TLS encryption and network segmentation"
-            })
-
-        return vulnerabilities
-
-    def scan_web_vulnerabilities(self, base_url: str = "http://localhost:8000") -> Dict[str, Any]:
-        """Comprehensive web vulnerability scanning (OWASP Top 10)"""
-        vulnerabilities = []
-
-        # A01:2021-Broken Access Control
-        access_control_issues = self._test_broken_access_control(base_url)
-        vulnerabilities.extend(access_control_issues)
-
-        # A02:2021-Cryptographic Failures
-        crypto_issues = self._test_cryptographic_failures(base_url)
-        vulnerabilities.extend(crypto_issues)
-
-        # A03:2021-Injection
-        injection_issues = self._test_injection_vulnerabilities(base_url)
-        vulnerabilities.extend(injection_issues)
-
-        # A04:2021-Insecure Design
-        design_issues = self._test_insecure_design(base_url)
-        vulnerabilities.extend(design_issues)
-
-        # A05:2021-Security Misconfiguration
-        config_issues = self._test_security_misconfiguration(base_url)
-        vulnerabilities.extend(config_issues)
-
-        # A06:2021-Vulnerable Components
-        component_issues = self._test_vulnerable_components(base_url)
-        vulnerabilities.extend(component_issues)
-
-        return {
-            "vulnerabilities_found": len(vulnerabilities),
-            "vulnerabilities": vulnerabilities,
-            "owasp_coverage": ["A01", "A02", "A03", "A04", "A05", "A06"],
-            "scan_timestamp": time.time()
-        }
-
-    def _test_broken_access_control(self, base_url: str) -> List[Dict[str, Any]]:
-        """Test for broken access control vulnerabilities"""
-        vulnerabilities = []
-
-        # Test URL-based access control bypass
-        test_urls = [
-            f"{base_url}/admin/users",  # Admin endpoint
-            f"{base_url}/api/admin/delete",  # Privileged operation
-            f"{base_url}/consciencia/private",  # Private consciousness data
-        ]
-
-        for url in test_urls:
-            try:
-                response = requests.get(url, timeout=5)
-
-                # Check if access control is properly implemented
-                if response.status_code != 401 and response.status_code != 403:
-                    vulnerabilities.append({
-                        "owasp_category": "A01:2021-Broken Access Control",
-                        "severity": "high" if "admin" in url else "medium",
-                        "url": url,
-                        "description": f"Potential broken access control - {response.status_code} response",
-                        "remediation": "Implement proper access control and authorization checks"
-                    })
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return vulnerabilities
-
-    def _test_cryptographic_failures(self, base_url: str) -> List[Dict[str, Any]]:
-        """Test for cryptographic failures"""
-        vulnerabilities = []
-
-        try:
-            # Test HTTPS enforcement
-            http_url = base_url.replace("https://", "http://")
-            response = requests.get(http_url, timeout=5, allow_redirects=False)
-
-            if response.status_code != 301 and response.status_code != 302:
-                vulnerabilities.append({
-                    "owasp_category": "A02:2021-Cryptographic Failures",
-                    "severity": "medium",
-                    "description": "HTTP accessible without HTTPS redirect",
-                    "remediation": "Enforce HTTPS and implement HSTS headers"
-                })
-
-        except requests.exceptions.RequestException:
-            pass
-
-        return vulnerabilities
-
-    def _test_injection_vulnerabilities(self, base_url: str) -> List[Dict[str, Any]]:
-        """Test for injection vulnerabilities (SQL, NoSQL, OS command)"""
-        vulnerabilities = []
-
-        # SQL Injection tests
-        sql_payloads = [
-            "' OR '1'='1",
-            "'; DROP TABLE users; --",
-            "admin' --",  # Comment injection
-            "1 UNION SELECT password FROM users"  # Union-based injection
-        ]
-
-        for payload in sql_payloads:
-            test_data = {"query": payload, "input": payload}
-            try:
-                response = requests.post(f"{base_url}/api/search", json=test_data, timeout=5)
-
-                # Check for SQL error responses
-                if any(keyword in response.text.lower() for keyword in
-                       ["sql syntax", "mysql error", "postgresql error", "sqlite error"]):
-                    vulnerabilities.append({
-                        "owasp_category": "A03:2021-Injection",
-                        "severity": "critical",
-                        "payload": payload,
-                        "description": "Potential SQL injection vulnerability detected",
-                        "remediation": "Use prepared statements and input sanitization"
-                    })
-
-            except requests.exceptions.RequestException:
-                continue
-
-        # Command Injection tests
-        command_payloads = [
-            "; cat /etc/passwd",
-            "$(whoami)",
-            "`id`",
-            "| netstat -an"
-        ]
-
-        for payload in command_payloads:
-            test_data = {"command": payload}
-            try:
-                response = requests.post(f"{base_url}/api/execute", json=test_data, timeout=3)
-
-                # Check for command execution indicators
-                if any(indicator in response.text.lower() for indicator in
-                       ["root:", "uid=", "groups=", "linux", "/bin/bash"]):
-                    vulnerabilities.append({
-                        "owasp_category": "A03:2021-Injection",
-                        "severity": "critical",
-                        "payload": payload,
-                        "description": "Potential command injection vulnerability detected",
-                        "remediation": "Validate and sanitize all user inputs"
-                    })
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return vulnerabilities
-
-    def _test_insecure_design(self, base_url: str) -> List[Dict[str, Any]]:
-        """Test for insecure design patterns"""
-        vulnerabilities = []
-
-        # Test for predictable resource IDs
-        for resource_id in range(1, 11):
-            try:
-                response = requests.get(f"{base_url}/api/resource/{resource_id}", timeout=3)
-                if response.status_code == 200:
-                    # Check if resource exposes sensitive information
-                    data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
-
-                    if any(sensitive in str(data).lower() for sensitive in
-                           ["password", "token", "secret", "key", "private"]):
-                        vulnerabilities.append({
-                            "owasp_category": "A04:2021-Insecure Design",
-                            "severity": "high",
-                            "resource_id": resource_id,
-                            "description": "Predictable resource ID exposes sensitive information",
-                            "remediation": "Use UUIDs or cryptographic random IDs"
-                        })
-
-            except (requests.exceptions.RequestException, ValueError):
-                continue
-
-        return vulnerabilities
-
-    def _test_security_misconfiguration(self, base_url: str) -> List[Dict[str, Any]]:
-        """Test for security misconfigurations"""
-        vulnerabilities = []
-
-        # Check for common misconfigurations
-        common_paths = [
-            ".env",
-            ".git/config",
-            "backup.sql",
-            "config.ini",
-            "debug.log",
-            "error_log",
-            "server-status",
-            "phpinfo.php",
-            ".DS_Store"
-        ]
-
-        for path in common_paths:
-            try:
-                response = requests.get(f"{base_url}/{path}", timeout=3)
-
-                if response.status_code == 200:
-                    vulnerabilities.append({
-                        "owasp_category": "A05:2021-Security Misconfiguration",
-                        "severity": "medium",
-                        "path": path,
-                        "description": f"Sensitive file {path} accessible",
-                        "remediation": "Configure proper file permissions and web server security"
-                    })
-
-            except requests.exceptions.RequestException:
-                continue
-
-        # Check for verbose error messages
-        try:
-            response = requests.get(f"{base_url}/nonexistent", timeout=3)
-
-            if "traceback" in response.text.lower() or "exception" in response.text.lower():
-                vulnerabilities.append({
-                    "owasp_category": "A05:2021-Security Misconfiguration",
-                    "severity": "low",
-                    "description": "Verbose error messages expose system information",
-                    "remediation": "Configure production error handling"
-                })
-
-        except requests.exceptions.RequestException:
-            pass
-
-        return vulnerabilities
-
-    def _test_vulnerable_components(self, base_url: str) -> List[Dict[str, Any]]:
-        """Test for vulnerable software components"""
-        vulnerabilities = []
-
-        try:
-            # Check server headers for version information
-            response = requests.get(base_url, timeout=5)
-
-            server_header = response.headers.get('Server', '')
-            if server_header:
-                # Check for known vulnerable versions
-                if 'apache/2.2' in server_header.lower():
-                    vulnerabilities.append({
-                        "owasp_category": "A06:2021-Vulnerable Components",
-                        "severity": "high",
-                        "component": "Apache HTTP Server",
-                        "version": server_header,
-                        "cve": "CVE-2017-9798",
-                        "description": "Apache HTTP Server 2.2 is end-of-life and vulnerable",
-                        "remediation": "Upgrade to supported Apache version"
-                    })
-
-                elif 'nginx/1.16' in server_header.lower():
-                    vulnerabilities.append({
-                        "owasp_category": "A06:2021-Vulnerable Components",
-                        "severity": "medium",
-                        "component": "Nginx",
-                        "version": server_header,
-                        "description": "Nginx 1.16 has known vulnerabilities",
-                        "remediation": "Upgrade to latest stable version"
-                    })
-
-        except requests.exceptions.RequestException:
-            pass
-
-        return vulnerabilities
-
-    def perform_dependency_audit(self) -> Dict[str, Any]:
-        """Audit Python dependencies for vulnerabilities"""
-        vulnerabilities = []
-
-        try:
-            # Run safety check
-            result = subprocess.run(
-                ["safety", "check", "--json"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-
-            if result.returncode == 0:
-                safety_data = json.loads(result.stdout)
-                vulnerabilities = safety_data.get("vulnerabilities", [])
-            else:
-                # Fallback: check requirements.txt for known vulnerable packages
-                with open("requirements.txt", "r") as f:
-                    content = f.read()
-
-                vulnerable_packages = {
-                    "jinja2<3.1.0": "CVE-2022-XXXX",
-                    "requests<2.25.0": "CVE-2021-XXXX",
-                    "flask<1.1.0": "CVE-2020-XXXX"
-                }
-
-                for package_spec, cve in vulnerable_packages.items():
-                    if package_spec.split('<')[0] in content:
-                        # Check if vulnerable version is installed
-                        package_name = package_spec.split('<')[0]
-                        if self._is_vulnerable_version_installed(package_name, package_spec):
-                            vulnerabilities.append({
-                                "package": package_name,
-                                "vulnerability": cve,
-                                "severity": "high",
-                                "description": f"Vulnerable {package_name} version in requirements.txt"
-                            })
-
-        except (subprocess.SubprocessError, FileNotFoundError, json.JSONDecodeError) as e:
-            vulnerabilities.append({
-                "package": "dependency_audit",
-                "vulnerability": "audit_failure",
-                "severity": "low",
-                "description": f"Dependency audit failed: {str(e)}"
-            })
-
-        return {
-            "vulnerabilities": vulnerabilities,
-            "total_packages_checked": len(vulnerabilities),
-            "audit_timestamp": time.time()
-        }
-
-    def _is_vulnerable_version_installed(self, package_name: str, version_spec: str) -> bool:
-        """Check if vulnerable package version is actually installed"""
-        try:
-            result = subprocess.run(
-                ["pip", "show", package_name],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-
-            if result.returncode == 0:
-                for line in result.stdout.split('\n'):
-                    if line.startswith('Version:'):
-                        installed_version = line.split(':')[1].strip()
-                        # Simple version comparison (in production, use proper version parsing)
-                        return installed_version in version_spec
-
-        except subprocess.SubprocessError:
-            pass
-
-        return False
-
-    def generate_security_report(self, output_path: Path) -> Dict[str, Any]:
-        """Generate comprehensive enterprise security report"""
-        # Run all security scans
-        port_scan = self.scan_open_ports()
-        web_scan = self.scan_web_vulnerabilities()
-        dependency_audit = self.perform_dependency_audit()
-
-        # Aggregate vulnerabilities
-        all_vulnerabilities = (
-            port_scan.get("vulnerabilities", []) +
-            web_scan.get("vulnerabilities", []) +
-            dependency_audit.get("vulnerabilities", [])
-        )
-
-        # Calculate security metrics
-        vulnerability_counts = {}
-        severity_weights = {"critical": 10, "high": 7, "medium": 4, "low": 2, "info": 1}
-
-        for vuln in all_vulnerabilities:
-            severity = vuln.get("severity", "low")
-            vuln_category = vuln.get("owasp_category", "unknown")
-            vulnerability_counts[vuln_category] = vulnerability_counts.get(vuln_category, 0) + 1
-
-            # Calculate weighted risk score
-            weight = severity_weights.get(severity, 1)
-            # Accumulate security score reduction
-
-        # Calculate overall security score (starts at 100, reduced by vulnerabilities)
-        base_security_score = 100.0
-        vulnerability_penalty = len(all_vulnerabilities) * 2  # 2 points per vulnerability
-        security_score = max(0, base_security_score - vulnerability_penalty)
-
-        # OWASP compliance calculation
-        owasp_categories_tested = ["A01", "A02", "A03", "A04", "A05", "A06"]
-        owasp_categories_covered = len(set(vuln.get("owasp_category", "").split(":")[0] for vuln in all_vulnerabilities))
-        owasp_compliance = owasp_categories_covered / len(owasp_categories_tested)
-
-        report = {
-            "summary": {
-                "vulnerabilities_found": len(all_vulnerabilities),
-                "security_score": round(security_score, 2),
-                "owasp_compliance_score": round(owasp_compliance * 100, 2),
-                "scan_timestamp": time.time(),
-                "risk_level": "low" if security_score >= 80 else "medium" if security_score >= 60 else "high" if security_score >= 40 else "critical"
-            },
-            "vulnerability_breakdown": {
-                "by_severity": dict(vulnerability_counts),
-                "by_category": vulnerability_counts,
-                "critical_count": len([v for v in all_vulnerabilities if v.get("severity") == "critical"]),
-                "high_count": len([v for v in all_vulnerabilities if v.get("severity") == "high"])
-            },
-            "compliance_scores": {
-                "owasp_top_10_coverage": owasp_compliance,
-                "owasp_categories_tested": owasp_categories_covered,
-                "owasp_categories_available": len(owasp_categories_tested)
-            },
-            "quality_gates": {
-                "owasp_compliance_gate": owasp_compliance >= ENTERPRISE_SECURITY_REQUIREMENTS["owasp_compliance_level"],
-                "security_score_gate": security_score >= 85.0,  # Enterprise minimum
-                "critical_vulnerability_gate": len([v for v in all_vulnerabilities if v.get("severity") == "critical"]) == 0,
-                "high_vulnerability_gate": len([v for v in all_vulnerabilities if v.get("severity") == "high"]) <= 3
-            },
-            "enterprise_grading": {},  # Populated below
-            "detailed_scans": {
-                "port_scan": port_scan,
-                "web_vulnerability_scan": web_scan,
-                "dependency_audit": dependency_audit
-            }
-        }
-
-        # Calculate enterprise grade
-        gates_passed = sum(report["quality_gates"].values())
-        total_gates = len(report["quality_gates"])
-
-        if all(report["quality_gates"].values()):
-            grade = "AAA (Production Security Ready)"
-            readiness_score = 1.0
-        elif gates_passed >= total_gates * 0.75:
-            grade = "AA (Security Enhanced)"
-            readiness_score = 0.85
-        elif gates_passed >= total_gates * 0.5:
-            grade = "A (Basic Security Implemented)"
-            readiness_score = 0.65
-        else:
-            grade = "B (Security Improvements Required)"
-            readiness_score = 0.4
-
-        report["enterprise_grading"] = {
-            "grade": grade,
-            "readiness_score": readiness_score,
-            "quality_gates_passed": gates_passed,
-            "total_quality_gates": total_gates
-        }
-
-        # Save report
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(report, f, indent=2, ensure_ascii=False)
-
-        return report
-
-@dataclass
-class PenetrationTestResult:
-    """Results from penetration testing attempts"""
-    test_name: str
-    success: bool
-    duration_ms: float
-    vulnerability_exploited: bool
-    payload_used: str
-    impact_assessment: str
-    remediation: str
-
-class EnterprisePenetrationTester:
-    """Enterprise penetration testing suite"""
-
-    def __init__(self, target_url: str = "http://localhost:8000"):
-        self.target_url = target_url
-        self.session = requests.Session()
-        self.vulnerabilities_exploited = []
-        self.test_results = []
-
-    def run_full_penetration_test(self) -> Dict[str, Any]:
-        """Run comprehensive penetration testing suite"""
-        print("🎯 Starting enterprise penetration testing...")
-
-        test_results = []
-
-        # Authentication bypass tests
-        test_results.extend(self.test_authentication_bypass())
-
-        # Injection attacks
-        test_results.extend(self.test_sql_injection())
-        test_results.extend(self.test_command_injection())
-        test_results.extend(self.test_xss_attacks())
-
-        # Authorization bypass
-        test_results.extend(self.test_authorization_bypass())
-
-        # Data exposure tests
-        test_results.extend(self.test_data_exposure())
-
-        # Analyze results
-        successful_exploits = len([r for r in test_results if r.vulnerability_exploited])
-        total_tests = len(test_results)
-
-        penetration_report = {
-            "total_tests": total_tests,
-            "successful_exploits": successful_exploits,
-            "exploit_success_rate": successful_exploits / total_tests if total_tests > 0 else 0,
-            "security_rating": "secure" if successful_exploits == 0 else "vulnerable",
-            "critical_exploits": len([r for r in test_results if r.vulnerability_exploited and "critical" in r.impact_assessment.lower()]),
-            "test_details": [asdict(result) for result in test_results],
-            "timestamp": time.time()
-        }
-
-        return penetration_report
-
-    def test_authentication_bypass(self) -> List[PenetrationTestResult]:
-        """Test authentication bypass vulnerabilities"""
-        results = []
-
-        test_cases = [
-            {
-                "name": "Dictionary Attack",
-                "payload": {"username": "admin", "password": "password123"},
-                "expected": False  # Should fail
-            },
-            {
-                "name": "SQL Injection Login",
-                "payload": {"username": "' OR '1'='1", "password": "' OR '1'='1"},
-                "expected": False
-            },
-            {
-                "name": "Admin Bypass",
-                "payload": {"username": "admin'; --", "password": "anything"},
-                "expected": False
-            }
-        ]
-
-        for test_case in test_cases:
-            start_time = time.perf_counter()
-            try:
-                response = self.session.post(
-                    f"{self.target_url}/auth/login",
-                    json=test_case["payload"],
-                    timeout=5
-                )
-
-                success = response.status_code == 200 and not test_case["expected"]
-                vulnerability_exploited = success and not test_case["expected"]
-
-                result = PenetrationTestResult(
-                    test_name=f"auth_bypass_{test_case['name'].lower().replace(' ', '_')}",
-                    success=success,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=vulnerability_exploited,
-                    payload_used=json.dumps(test_case["payload"]),
-                    impact_assessment="Authentication bypass allows unauthorized access" if vulnerability_exploited else "Authentication properly secured",
-                    remediation="Implement proper authentication validation" if vulnerability_exploited else "Authentication secure"
-                )
-
-                results.append(result)
-
-            except requests.exceptions.RequestException as e:
-                results.append(PenetrationTestResult(
-                    test_name=f"auth_bypass_{test_case['name'].lower().replace(' ', '_')}",
-                    success=False,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=False,
-                    payload_used=json.dumps(test_case["payload"]),
-                    impact_assessment=f"Connection error: {str(e)}",
-                    remediation="Check service availability"
-                ))
-
-        return results
-
-    def test_sql_injection(self) -> List[PenetrationTestResult]:
-        """Test SQL injection vulnerabilities"""
-        results = []
-
-        sql_payloads = [
-            "' OR '1'='1'; --",
-            "'; DROP TABLE users; --",
-            "' UNION SELECT password FROM users; --",
-            "admin'; SELECT * FROM users; --"
-        ]
-
-        for payload in sql_payloads:
-            start_time = time.perf_counter()
-            try:
-                # Test in search endpoint
-                response = self.session.get(
-                    f"{self.target_url}/api/search?q={payload}",
-                    timeout=5
-                )
-
-                # Check for SQL error indicators or unusual responses
-                vulnerability_indicators = [
-                    "sql syntax error",
-                    "mysql error",
-                    "postgresql error",
-                    "sqlite error",
-                    "syntax error",
-                    "unclosed quotation mark"
-                ]
-
-                has_sql_error = any(indicator in response.text.lower() for indicator in vulnerability_indicators)
-                vulnerability_exploited = has_sql_error or response.status_code == 500
-
-                result = PenetrationTestResult(
-                    test_name="sql_injection_search",
-                    success=response.status_code == 200,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=vulnerability_exploited,
-                    payload_used=payload,
-                    impact_assessment="SQL injection successful - database compromise possible" if vulnerability_exploited else "SQL injection blocked",
-                    remediation="Use prepared statements and ORM" if vulnerability_exploited else "SQL injection protection active"
-                )
-
-                results.append(result)
-
-                # Test authentication endpoint
-                auth_response = self.session.post(
-                    f"{self.target_url}/auth/login",
-                    json={"username": payload, "password": "test"},
-                    timeout=5
-                )
-
-                if auth_response.status_code != 401:  # Should be unauthorized
-                    results.append(PenetrationTestResult(
-                        test_name="sql_injection_auth",
-                        success=True,
-                        duration_ms=(time.perf_counter() - start_time) * 1000,
-                        vulnerability_exploited=True,
-                        payload_used=payload,
-                        impact_assessment="SQL injection in authentication - account takeover possible",
-                        remediation="Input sanitization required"
-                    ))
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return results
-
-    def test_command_injection(self) -> List[PenetrationTestResult]:
-        """Test command injection vulnerabilities"""
-        results = []
-
-        command_payloads = [
-            "; whoami",
-            "$(echo vulnerable)",
-            "`ping -c 1 localhost`",
-            "| cat /etc/hostname"
-        ]
-
-        for payload in command_payloads:
-            start_time = time.perf_counter()
-            try:
-                # Test in potentially vulnerable endpoints
-                response = self.session.post(
-                    f"{self.target_url}/api/execute",
-                    json={"command": payload},
-                    timeout=5
-                )
-
-                # Look for command execution indicators
-                execution_indicators = [
-                    "root", "www-data", "ubuntu", "centos", "localhost",
-                    "uid=", "gid=", "groups="
-                ]
-
-                has_execution_indicators = any(indicator in response.text.lower() for indicator in execution_indicators)
-                vulnerability_exploited = has_execution_indicators
-
-                result = PenetrationTestResult(
-                    test_name="command_injection_test",
-                    success=response.status_code in [200, 201],
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=vulnerability_exploited,
-                    payload_used=payload,
-                    impact_assessment="Command injection successful - system compromise possible" if vulnerability_exploited else "Command injection blocked",
-                    remediation="Command sanitization required" if vulnerability_exploited else "Command injection protection active"
-                )
-
-                results.append(result)
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return results
-
-    def test_xss_attacks(self) -> List[PenetrationTestResult]:
-        """Test Cross-Site Scripting (XSS) vulnerabilities"""
-        results = []
-
-        xss_payloads = [
-            "<script>alert('xss')</script>",
-            "<img src=x onerror=alert('xss')>",
-            "javascript:alert('xss')",
-            "<iframe src='javascript:alert(\"xss\")'></iframe>"
-        ]
-
-        for payload in xss_payloads:
-            start_time = time.perf_counter()
-            try:
-                # Test via various input mechanisms
-                response = self.session.post(
-                    f"{self.target_url}/api/feedback",
-                    json={"message": payload, "user": "test"},
-                    timeout=5
-                )
-
-                # Check if payload is reflected unsanitized
-                vulnerability_exploited = payload in response.text or "<script>" in response.text
-
-                result = PenetrationTestResult(
-                    test_name="xss_reflected_test",
-                    success=response.status_code == 200,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=vulnerability_exploited,
-                    payload_used=payload,
-                    impact_assessment="XSS successful - client-side attack possible" if vulnerability_exploited else "XSS blocked",
-                    remediation="Output encoding required" if vulnerability_exploited else "XSS protection active"
-                )
-
-                results.append(result)
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return results
-
-    def test_authorization_bypass(self) -> List[PenetrationTestResult]:
-        """Test authorization bypass vulnerabilities"""
-        results = []
-
-        # Attempt IDOR (Insecure Direct Object Reference)
-        test_ids = ["1", "2", "admin", "superuser"]
-
-        for test_id in test_ids:
-            start_time = time.perf_counter()
-            try:
-                response = self.session.get(
-                    f"{self.target_url}/api/user/{test_id}/profile",
-                    timeout=5
-                )
-
-                # Check if can access other users' data
-                vulnerability_exploited = response.status_code == 200 and test_id != "1"  # Assuming logged in as user 1
-
-                result = PenetrationTestResult(
-                    test_name="authorization_idor_test",
-                    success=response.status_code == 200,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=vulnerability_exploited,
-                    payload_used=f"user_id={test_id}",
-                    impact_assessment="IDOR successful - unauthorized data access" if vulnerability_exploited else "Authorization properly enforced",
-                    remediation="Object-level authorization required" if vulnerability_exploited else "Authorization secure"
-                )
-
-                results.append(result)
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return results
-
-    def test_data_exposure(self) -> List[PenetrationTestResult]:
-        """Test sensitive data exposure vulnerabilities"""
-        results = []
-
-        sensitive_endpoints = [
-            ".env",
-            ".git/config",
-            "backup.db",
-            "config.json",
-            "secrets.json",
-            "debug.log"
-        ]
-
-        for endpoint in sensitive_endpoints:
-            start_time = time.perf_counter()
-            try:
-                response = self.session.get(
-                    f"{self.target_url}/{endpoint}",
-                    timeout=5
-                )
-
-                vulnerability_exploited = response.status_code == 200
-
-                result = PenetrationTestResult(
-                    test_name="sensitive_data_exposure",
-                    success=vulnerability_exploited,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    vulnerability_exploited=vulnerability_exploited,
-                    payload_used=endpoint,
-                    impact_assessment="Sensitive file exposure - data breach risk" if vulnerability_exploited else "Sensitive files protected",
-                    remediation="File access restrictions required" if vulnerability_exploited else "Data exposure protection active"
-                )
-
-                results.append(result)
-
-            except requests.exceptions.RequestException:
-                continue
-
-        return results
-
-# ===========================
-# ENTERPRISE SECURITY TESTS
-# ===============================
-
-@pytest.fixture(scope="module")
-def security_scanner():
-    """Fixture for enterprise security scanner"""
-    return EnterpriseSecurityScanner()
-
-@pytest.fixture(scope="module")
-def penetration_tester():
-    """Fixture for enterprise penetration tester"""
-    return EnterprisePenetrationTester()
-
-class TestEnterpriseSecurityValidation:
-    """Enterprise security validation tests"""
-
-    def setup_method(self):
-        """Enterprise security setup"""
-        self.security_scanner = EnterpriseSecurityScanner()
-        self.penetration_tester = EnterprisePenetrationTester()
-
-    def teardown_method(self):
-        """Enterprise security cleanup"""
-        print("🔒 Enterprise security test completed")
-
-    def test_owasp_compliance_scanning(self, security_scanner):
-        """Test 1: OWASP Top 10 compliance via comprehensive vulnerability scanning"""
-        print("🔍 Running OWASP Top 10 compliance scan...")
-
-        web_scan_results = security_scanner.scan_web_vulnerabilities()
-
-        # Validate scan comprehensiveness
-        assert len(web_scan_results["owasp_coverage"]) >= 6, "Incomplete OWASP coverage"
-
-        vulnerability_count = web_scan_results["vulnerabilities_found"]
-        print(f"📊 OWASP scan found {vulnerability_count} vulnerabilities")
-
-        # Enterprise OWASP compliance gate
-        # In production systems, this would be much stricter
-        max_allowed_vulns = 5  # Realistic for development/testing
-        assert vulnerability_count <= max_allowed_vulns, f"Too many OWASP vulnerabilities: {vulnerability_count}"
-
-    def test_network_security_assessment(self, security_scanner):
-        """Test 2: Network security assessment and port scanning"""
-        print("🌐 Running network security assessment...")
-
-        port_scan_results = security_scanner.scan_open_ports()
-
-        open_ports = port_scan_results["open_ports"]
-        port_vulnerabilities = port_scan_results["vulnerabilities"]
-
-        # Analyze security posture
-        high_risk_ports = [22, 21, 23, 3306, 5432, 6379]  # Common vulnerable services
-        critical_ports_open = len([p for p in open_ports if p["port"] in high_risk_ports])
-
-        # Enterprise network security gates
-        assert critical_ports_open == 0, f"Critical ports exposed: {critical_ports_open} high-risk ports open"
-
-        print(f"📡 Network scan: {len(open_ports)} ports open, {len(port_vulnerabilities)} vulnerabilities")
-
-        # Security validation for exposed services
-        for vuln in port_vulnerabilities:
-            if vuln["severity"] == "critical":
-                assert False, f"Critical port vulnerability: {vuln['description']}"
-
-    def test_penetration_testing_resistance(self, penetration_tester):
-        """Test 3: Enterprise penetration testing resistance validation"""
-        print("🎯 Running penetration testing suite...")
-
-        penetration_results = penetration_tester.run_full_penetration_test()
-
-        successful_exploits = penetration_results["successful_exploits"]
-        total_tests = penetration_results["total_tests"]
-
-        exploit_rate = penetration_results["exploit_success_rate"]
-
-        print(f"🛡️ Penetration testing: {successful_exploits}/{total_tests} exploits successful ({exploit_rate:.1%})")
-
-        # Enterprise penetration testing gates
-        assert exploit_rate <= 0.05, f"Penetration success rate too high: {exploit_rate:.1%} (max 5%)"
-        assert penetration_results["critical_exploits"] == 0, f"Critical exploits successful: {penetration_results['critical_exploits']}"
-
-    def test_dependency_security_audit(self, security_scanner):
-        """Test 4: Dependency vulnerability audit and supply chain security"""
-        print("📦 Running dependency security audit...")
-
-        audit_results = security_scanner.perform_dependency_audit()
-
-        vulnerabilities = audit_results["vulnerabilities"]
-        high_severity_count = len([v for v in vulnerabilities if v.get("severity") == "high"])
-
-        print(f"🔐 Dependency audit: {len(vulnerabilities)} vulnerabilities found, {high_severity_count} high severity")
-
-        # Enterprise dependency security gates
-        assert high_severity_count == 0, f"High severity dependency vulnerabilities: {high_severity_count}"
-        assert len(vulnerabilities) <= 10, f"Too many dependency vulnerabilities: {len(vulnerabilities)}"
-
-    def test_authentication_security_comprehensive(self):
-        """Test 5: Enterprise comprehensive authentication security validation"""
-        print("🔐 Running authentication security validation...")
-
-        # Test various authentication scenarios
-        test_credentials = [
-            {"username": "admin", "password": "admin123"},
-            {"username": "", "password": ""},
-            {"username": "test@example.com", "password": "simplepass"},
-            {"username": "a"*100, "password": "b"*100},  # Length limits
-        ]
-
-        auth_failures = 0
-        security_issues = []
-
-        for creds in test_credentials:
-            try:
-                response = requests.post(
-                    "http://localhost:8000/auth/login",
-                    json=creds,
-                    timeout=5
-                )
-
-                # Should fail for all test credentials
-                if response.status_code == 200:
-                    auth_failures += 1
-                    security_issues.append(f"Authentication bypass with credentials: {creds}")
-
-                # Check for weak password policies
-                if creds["password"] == "simplepass" and "weak" not in str(response.json()).lower():
-                    # Password policy enforcement check
-                    pass
-
-            except requests.exceptions.RequestException:
-                continue
-
-        # Enterprise authentication gates
-        assert auth_failures == 0, f"Authentication security failures: {auth_failures} ({security_issues})"
-
-        print("✅ Authentication security validation passed")
-
-    def test_data_security_and_privacy(self):
-        """Test 6: Enterprise data security and privacy validation"""
-        print("🛡️ Running data security and privacy validation...")
-
-        # Test data exposure scenarios
-        test_endpoints = [
-            "/api/user/profile",
-            "/api/system/info",
-            "/api/debug/logs",
-            "/api/config/secrets"
-        ]
-
-        privacy_violations = []
-
-        for endpoint in test_endpoints:
-            try:
-                response = requests.get(f"http://localhost:8000{endpoint}", timeout=5)
-
-                # Check for sensitive data exposure
-                sensitive_indicators = [
-                    "password", "secret", "key", "token", "credit_card",
-                    "ssn", "social_security", "personal_info"
-                ]
-
-                response_text = response.text.lower()
-                exposed_data = [indicator for indicator in sensitive_indicators if indicator in response_text]
-
-                if exposed_data:
-                    privacy_violations.append({
-                        "endpoint": endpoint,
-                        "exposed_data": exposed_data,
-                        "status_code": response.status_code
-                    })
-
-            except requests.exceptions.RequestException:
-                continue
-
-        # Enterprise data privacy gates
-        assert len(privacy_violations) == 0, f"Data privacy violations: {privacy_violations}"
-
-        print("✅ Data security and privacy validation passed")
-
-    @pytest.fixture(scope="module", autouse=True)
-    def enterprise_security_reporting(self, tmp_path_factory):
-        """Enterprise security reporting fixture"""
-        yield
-
-        # Generate comprehensive enterprise security report
-        report_dir = tmp_path_factory.getbasetemp()
-        security_report = report_dir / "enterprise_security_report.json"
-
-        # Run security scanner for final report
-        scanner = EnterpriseSecurityScanner()
-        final_report = scanner.generate_security_report(security_report)
-
-        # Print executive security summary
-        print("\n🛡️ ENTERPRISE SECURITY VALIDATION REPORT")
-        print("=" * 60)
-        print(f"🎯 Security Score: {final_report['summary']['security_score']}/100")
-        print(f"📊 OWASP Compliance: {final_report['summary']['owasp_compliance_score']}%")
-        print(f"💥 Vulnerabilities Found: {final_report['summary']['vulnerabilities_found']}")
-        print(f"🏆 Enterprise Security Grade: {final_report['enterprise_grading']['grade']}")
-        print(f"🔥 Risk Level: {final_report['summary']['risk_level'].upper()}")
-
-        # Print quality gates
-        gates = final_report["quality_gates"]
-        print(f"🎯 Quality Gates: {'ALL PASSED ✅' if all(gates.values()) else 'ISSUES DETECTED ⚠️'}")
-
-        for gate_name, passed in gates.items():
-            status = "✅" if passed else "❌"
-            gate_display = gate_name.replace('_', ' ').title()
-            print(f"   {status} {gate_display}")
-
-        print(f"\n📄 Detailed Security Report: {security_report}")
-
-if __name__ == "__main__":
-    # Run enterprise security testing suite
-    print("🛡️ RUNNING EL-AMANECER ENTERPRISE SECURITY VALIDATION")
-    print("="*70)
-
-    pytest.main([
-        __file__,
-        "-v", "--tb=short",
-        "--durations=10",
-        "--cov=packages.consciousness",
-        f"--cov-report=html:tests/results/security_coverage.html",
-        f"--cov-report=json:tests/results/security_coverage.json"
-    ])
-
-    print("🏁 ENTERPRISE SECURITY TESTING COMPLETE")
+[CHART]"[CHART]"[CHART]"[CHART]
+[CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART] [CHART]E[CHART]2[CHART]E[CHART] [CHART]T[CHART]E[CHART]S[CHART]T[CHART]:[CHART] [CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART] [CHART]&[CHART] [CHART]P[CHART]E[CHART]N[CHART]E[CHART]T[CHART]R[CHART]A[CHART]T[CHART]I[CHART]O[CHART]N[CHART] [CHART]T[CHART]E[CHART]S[CHART]T[CHART]I[CHART]N[CHART]G[CHART] [CHART]S[CHART]U[CHART]I[CHART]T[CHART]E[CHART]
+[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]
+[CHART]
+[CHART]C[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]E[CHART]L[CHART]-[CHART]A[CHART]M[CHART]A[CHART]N[CHART]E[CHART]C[CHART]E[CHART]R[CHART] [CHART]c[CHART]o[CHART]n[CHART]s[CHART]c[CHART]i[CHART]o[CHART]u[CHART]s[CHART]n[CHART]e[CHART]s[CHART]s[CHART] [CHART]s[CHART]y[CHART]s[CHART]t[CHART]e[CHART]m[CHART].[CHART]
+[CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]T[CHART]o[CHART]p[CHART] [CHART]1[CHART]0[CHART],[CHART] [CHART]z[CHART]e[CHART]r[CHART]o[CHART]-[CHART]t[CHART]r[CHART]u[CHART]s[CHART]t[CHART] [CHART]a[CHART]r[CHART]c[CHART]h[CHART]i[CHART]t[CHART]e[CHART]c[CHART]t[CHART]u[CHART]r[CHART]e[CHART],[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART],[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART].[CHART]
+[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]-[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]a[CHART]u[CHART]t[CHART]o[CHART]m[CHART]a[CHART]t[CHART]e[CHART]d[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART].[CHART]
+[CHART]
+[CHART]T[CHART]E[CHART]S[CHART]T[CHART] [CHART]L[CHART]E[CHART]V[CHART]E[CHART]L[CHART]:[CHART] [CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART] [CHART]([CHART]m[CHART]u[CHART]l[CHART]t[CHART]i[CHART]n[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]a[CHART]l[CHART] [CHART]s[CHART]t[CHART]a[CHART]n[CHART]d[CHART]a[CHART]r[CHART]d[CHART])[CHART]
+[CHART]V[CHART]A[CHART]L[CHART]I[CHART]D[CHART]A[CHART]T[CHART]E[CHART]S[CHART]:[CHART] [CHART]Z[CHART]e[CHART]r[CHART]o[CHART]-[CHART]t[CHART]r[CHART]u[CHART]s[CHART]t[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART],[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART],[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART],[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]
+[CHART]M[CHART]E[CHART]T[CHART]R[CHART]I[CHART]C[CHART]S[CHART]:[CHART] [CHART]V[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART],[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART],[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]
+[CHART]S[CHART]T[CHART]A[CHART]N[CHART]D[CHART]A[CHART]R[CHART]D[CHART]S[CHART]:[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]T[CHART]o[CHART]p[CHART] [CHART]1[CHART]0[CHART],[CHART] [CHART]I[CHART]S[CHART]O[CHART] [CHART]2[CHART]7[CHART]0[CHART]0[CHART]1[CHART],[CHART] [CHART]N[CHART]I[CHART]S[CHART]T[CHART] [CHART]C[CHART]y[CHART]b[CHART]e[CHART]r[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]F[CHART]r[CHART]a[CHART]m[CHART]e[CHART]w[CHART]o[CHART]r[CHART]k[CHART],[CHART] [CHART]G[CHART]D[CHART]P[CHART]R[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]
+[CHART]
+[CHART]E[CHART]X[CHART]E[CHART]C[CHART]U[CHART]T[CHART]I[CHART]O[CHART]N[CHART]:[CHART] [CHART]p[CHART]y[CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]-[CHART]-[CHART]t[CHART]b[CHART]=[CHART]s[CHART]h[CHART]o[CHART]r[CHART]t[CHART] [CHART]-[CHART]v[CHART] [CHART]-[CHART]-[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]-[CHART]s[CHART]c[CHART]a[CHART]n[CHART] [CHART]-[CHART]-[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]-[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]
+[CHART]R[CHART]E[CHART]P[CHART]O[CHART]R[CHART]T[CHART]S[CHART]:[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART],[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]p[CHART]d[CHART]f[CHART],[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]m[CHART]a[CHART]t[CHART]r[CHART]i[CHART]x[CHART].[CHART]x[CHART]l[CHART]s[CHART]x[CHART]
+[CHART]"[CHART]"[CHART]"[CHART]
+[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]p[CHART]y[CHART]t[CHART]e[CHART]s[CHART]t[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]h[CHART]a[CHART]s[CHART]h[CHART]l[CHART]i[CHART]b[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]h[CHART]m[CHART]a[CHART]c[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]s[CHART]e[CHART]c[CHART]r[CHART]e[CHART]t[CHART]s[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]6[CHART]4[CHART]
+[CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]p[CHART]a[CHART]t[CHART]h[CHART]l[CHART]i[CHART]b[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]P[CHART]a[CHART]t[CHART]h[CHART]
+[CHART]
+[CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]t[CHART]o[CHART]r[CHART]c[CHART]h[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]t[CHART]o[CHART]r[CHART]c[CHART]h[CHART].[CHART]n[CHART]n[CHART] [CHART]a[CHART]s[CHART] [CHART]n[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]o[CHART]r[CHART]c[CHART]h[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]T[CHART]r[CHART]u[CHART]e[CHART]
+[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]I[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]t[CHART]o[CHART]r[CHART]c[CHART]h[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART],[CHART] [CHART]u[CHART]s[CHART]i[CHART]n[CHART]g[CHART] [CHART]m[CHART]o[CHART]c[CHART]k[CHART] [CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]o[CHART]r[CHART]c[CHART]h[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]o[CHART]r[CHART]c[CHART]h[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]T[CHART]o[CHART]r[CHART]c[CHART]h[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART])[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]n[CHART]n[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]N[CHART]N[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART]([CHART])[CHART])[CHART]
+[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]n[CHART]u[CHART]m[CHART]p[CHART]y[CHART] [CHART]a[CHART]s[CHART] [CHART]n[CHART]p[CHART]
+[CHART]
+[CHART]#[CHART] [CHART]R[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART] [CHART]l[CHART]i[CHART]b[CHART]r[CHART]a[CHART]r[CHART]i[CHART]e[CHART]s[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]f[CHART]a[CHART]l[CHART]l[CHART]b[CHART]a[CHART]c[CHART]k[CHART]s[CHART]
+[CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]s[CHART]c[CHART]i[CHART]p[CHART]y[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]s[CHART] [CHART]a[CHART]s[CHART] [CHART]s[CHART]t[CHART]a[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]s[CHART]k[CHART]l[CHART]e[CHART]a[CHART]r[CHART]n[CHART].[CHART]m[CHART]e[CHART]t[CHART]r[CHART]i[CHART]c[CHART]s[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]m[CHART]u[CHART]t[CHART]u[CHART]a[CHART]l[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]n[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART]x[CHART] [CHART]a[CHART]s[CHART] [CHART]n[CHART]x[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]c[CHART]i[CHART]p[CHART]y[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]T[CHART]r[CHART]u[CHART]e[CHART]
+[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]I[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]s[CHART]c[CHART]i[CHART]p[CHART]y[CHART]/[CHART]s[CHART]k[CHART]l[CHART]e[CHART]a[CHART]r[CHART]n[CHART]/[CHART]n[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART]x[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART],[CHART] [CHART]u[CHART]s[CHART]i[CHART]n[CHART]g[CHART] [CHART]m[CHART]o[CHART]c[CHART]k[CHART] [CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]c[CHART]i[CHART]p[CHART]y[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]S[CHART]t[CHART]a[CHART]t[CHART]s[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]m[CHART]u[CHART]t[CHART]u[CHART]a[CHART]l[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]l[CHART]a[CHART]m[CHART]b[CHART]d[CHART]a[CHART] [CHART]x[CHART],[CHART] [CHART]y[CHART]:[CHART] [CHART]0[CHART].[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]n[CHART]x[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]N[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART]X[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART])[CHART]
+[CHART]
+[CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]m[CHART]e[CHART]s[CHART]a[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]A[CHART]g[CHART]e[CHART]n[CHART]t[CHART],[CHART] [CHART]M[CHART]o[CHART]d[CHART]e[CHART]l[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]m[CHART]e[CHART]s[CHART]a[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]S[CHART]i[CHART]m[CHART]u[CHART]l[CHART]t[CHART]a[CHART]n[CHART]e[CHART]o[CHART]u[CHART]s[CHART]A[CHART]c[CHART]t[CHART]i[CHART]v[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]m[CHART]e[CHART]s[CHART]a[CHART].[CHART]d[CHART]a[CHART]t[CHART]a[CHART]c[CHART]o[CHART]l[CHART]l[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]D[CHART]a[CHART]t[CHART]a[CHART]C[CHART]o[CHART]l[CHART]l[CHART]e[CHART]c[CHART]t[CHART]o[CHART]r[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]m[CHART]e[CHART]s[CHART]a[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]T[CHART]r[CHART]u[CHART]e[CHART]
+[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]I[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]m[CHART]e[CHART]s[CHART]a[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART],[CHART] [CHART]u[CHART]s[CHART]i[CHART]n[CHART]g[CHART] [CHART]m[CHART]o[CHART]c[CHART]k[CHART] [CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]m[CHART]e[CHART]s[CHART]a[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]A[CHART]g[CHART]e[CHART]n[CHART]t[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]A[CHART]g[CHART]e[CHART]n[CHART]t[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]'[CHART]u[CHART]n[CHART]i[CHART]q[CHART]u[CHART]e[CHART]_[CHART]i[CHART]d[CHART]'[CHART]:[CHART] [CHART]0[CHART]}[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]M[CHART]o[CHART]d[CHART]e[CHART]l[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]M[CHART]o[CHART]d[CHART]e[CHART]l[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]'[CHART]a[CHART]g[CHART]e[CHART]n[CHART]t[CHART]s[CHART]'[CHART]:[CHART] [CHART][[CHART]][CHART]}[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]S[CHART]i[CHART]m[CHART]u[CHART]l[CHART]t[CHART]a[CHART]n[CHART]e[CHART]o[CHART]u[CHART]s[CHART]A[CHART]c[CHART]t[CHART]i[CHART]v[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]S[CHART]i[CHART]m[CHART]u[CHART]l[CHART]t[CHART]a[CHART]n[CHART]e[CHART]o[CHART]u[CHART]s[CHART]A[CHART]c[CHART]t[CHART]i[CHART]v[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]D[CHART]a[CHART]t[CHART]a[CHART]C[CHART]o[CHART]l[CHART]l[CHART]e[CHART]c[CHART]t[CHART]o[CHART]r[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]D[CHART]a[CHART]t[CHART]a[CHART]C[CHART]o[CHART]l[CHART]l[CHART]e[CHART]c[CHART]t[CHART]o[CHART]r[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART])[CHART]
+[CHART]
+[CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]p[CHART]a[CHART]n[CHART]d[CHART]a[CHART]s[CHART] [CHART]a[CHART]s[CHART] [CHART]p[CHART]d[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]n[CHART]d[CHART]a[CHART]s[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]T[CHART]r[CHART]u[CHART]e[CHART]
+[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]I[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]p[CHART]a[CHART]n[CHART]d[CHART]a[CHART]s[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART],[CHART] [CHART]u[CHART]s[CHART]i[CHART]n[CHART]g[CHART] [CHART]m[CHART]o[CHART]c[CHART]k[CHART] [CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]n[CHART]d[CHART]a[CHART]s[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]=[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]d[CHART] [CHART]=[CHART] [CHART]t[CHART]y[CHART]p[CHART]e[CHART]([CHART]'[CHART]M[CHART]o[CHART]c[CHART]k[CHART]P[CHART]a[CHART]n[CHART]d[CHART]a[CHART]s[CHART]'[CHART],[CHART] [CHART]([CHART])[CHART],[CHART] [CHART]{[CHART]}[CHART])[CHART]
+[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]w[CHART]a[CHART]r[CHART]n[CHART]i[CHART]n[CHART]g[CHART]s[CHART]
+[CHART]w[CHART]a[CHART]r[CHART]n[CHART]i[CHART]n[CHART]g[CHART]s[CHART].[CHART]f[CHART]i[CHART]l[CHART]t[CHART]e[CHART]r[CHART]w[CHART]a[CHART]r[CHART]n[CHART]i[CHART]n[CHART]g[CHART]s[CHART]([CHART]'[CHART]i[CHART]g[CHART]n[CHART]o[CHART]r[CHART]e[CHART]'[CHART])[CHART]
+[CHART]
+[CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]t[CHART]y[CHART]p[CHART]i[CHART]n[CHART]g[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART],[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART],[CHART] [CHART]T[CHART]u[CHART]p[CHART]l[CHART]e[CHART],[CHART] [CHART]O[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]a[CHART]l[CHART],[CHART] [CHART]C[CHART]a[CHART]l[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART]
+[CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART],[CHART] [CHART]a[CHART]s[CHART]d[CHART]i[CHART]c[CHART]t[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART]
+[CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]a[CHART]u[CHART]t[CHART]h[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]H[CHART]T[CHART]T[CHART]P[CHART]B[CHART]a[CHART]s[CHART]i[CHART]c[CHART]A[CHART]u[CHART]t[CHART]h[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]r[CHART]e[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]s[CHART]q[CHART]l[CHART]p[CHART]a[CHART]r[CHART]s[CHART]e[CHART]
+[CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]u[CHART]r[CHART]l[CHART]l[CHART]i[CHART]b[CHART].[CHART]p[CHART]a[CHART]r[CHART]s[CHART]e[CHART] [CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]u[CHART]r[CHART]l[CHART]p[CHART]a[CHART]r[CHART]s[CHART]e[CHART],[CHART] [CHART]p[CHART]a[CHART]r[CHART]s[CHART]e[CHART]_[CHART]q[CHART]s[CHART],[CHART] [CHART]u[CHART]r[CHART]l[CHART]e[CHART]n[CHART]c[CHART]o[CHART]d[CHART]e[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]x[CHART]m[CHART]l[CHART].[CHART]e[CHART]t[CHART]r[CHART]e[CHART]e[CHART].[CHART]E[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]T[CHART]r[CHART]e[CHART]e[CHART] [CHART]a[CHART]s[CHART] [CHART]E[CHART]T[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]s[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]t[CHART]e[CHART]m[CHART]p[CHART]f[CHART]i[CHART]l[CHART]e[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]p[CHART]s[CHART]u[CHART]t[CHART]i[CHART]l[CHART]
+[CHART]i[CHART]m[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]o[CHART]s[CHART]
+[CHART]
+[CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART]
+[CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART]_[CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART]_[CHART]R[CHART]E[CHART]Q[CHART]U[CHART]I[CHART]R[CHART]E[CHART]M[CHART]E[CHART]N[CHART]T[CHART]S[CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]l[CHART]e[CHART]v[CHART]e[CHART]l[CHART]"[CHART]:[CHART] [CHART]0[CHART].[CHART]9[CHART]5[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]9[CHART]5[CHART]%[CHART]+[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]T[CHART]o[CHART]p[CHART] [CHART]1[CHART]0[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]1[CHART].[CHART]0[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]1[CHART]0[CHART]0[CHART]%[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]r[CHART]e[CHART]s[CHART]i[CHART]s[CHART]t[CHART]a[CHART]n[CHART]c[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]"[CHART]:[CHART] [CHART]0[CHART].[CHART]9[CHART]8[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]9[CHART]8[CHART]%[CHART]+[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]a[CHART]t[CHART]a[CHART]_[CHART]e[CHART]n[CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]"[CHART]:[CHART] [CHART]1[CHART].[CHART]0[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]1[CHART]0[CHART]0[CHART]%[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]e[CHART]n[CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]_[CHART]e[CHART]f[CHART]f[CHART]e[CHART]c[CHART]t[CHART]i[CHART]v[CHART]e[CHART]n[CHART]e[CHART]s[CHART]s[CHART]"[CHART]:[CHART] [CHART]0[CHART].[CHART]9[CHART]9[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]9[CHART]9[CHART]%[CHART]+[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART] [CHART]e[CHART]f[CHART]f[CHART]e[CHART]c[CHART]t[CHART]i[CHART]v[CHART]e[CHART]n[CHART]e[CHART]s[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]_[CHART]l[CHART]o[CHART]g[CHART]g[CHART]i[CHART]n[CHART]g[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]e[CHART]t[CHART]e[CHART]n[CHART]e[CHART]s[CHART]s[CHART]"[CHART]:[CHART] [CHART]1[CHART].[CHART]0[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]1[CHART]0[CHART]0[CHART]%[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]e[CHART]v[CHART]e[CHART]n[CHART]t[CHART] [CHART]l[CHART]o[CHART]g[CHART]g[CHART]i[CHART]n[CHART]g[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]c[CHART]l[CHART]e[CHART]a[CHART]n[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]0[CHART].[CHART]9[CHART]5[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]9[CHART]5[CHART]%[CHART]+[CHART] [CHART]c[CHART]l[CHART]e[CHART]a[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]u[CHART]p[CHART]p[CHART]l[CHART]y[CHART]_[CHART]c[CHART]h[CHART]a[CHART]i[CHART]n[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]"[CHART]:[CHART] [CHART]0[CHART].[CHART]9[CHART]0[CHART] [CHART] [CHART]#[CHART] [CHART]9[CHART]0[CHART]%[CHART]+[CHART] [CHART]s[CHART]u[CHART]p[CHART]p[CHART]l[CHART]y[CHART] [CHART]c[CHART]h[CHART]a[CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]
+[CHART]}[CHART]
+[CHART]
+[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]S[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]-[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]"[CHART]"[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]_[CHART]i[CHART]n[CHART]i[CHART]t[CHART]_[CHART]_[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]0[CHART].[CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]h[CHART]r[CHART]e[CHART]a[CHART]t[CHART]_[CHART]i[CHART]n[CHART]t[CHART]e[CHART]l[CHART]l[CHART]i[CHART]g[CHART]e[CHART]n[CHART]c[CHART]e[CHART] [CHART]=[CHART] [CHART]{[CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]h[CHART]o[CHART]s[CHART]t[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART] [CHART]=[CHART] [CHART]"[CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]"[CHART],[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]:[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]i[CHART]n[CHART]t[CHART]][CHART] [CHART]=[CHART] [CHART]N[CHART]o[CHART]n[CHART]e[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]S[CHART]c[CHART]a[CHART]n[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]i[CHART]s[CHART] [CHART]N[CHART]o[CHART]n[CHART]e[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]2[CHART]1[CHART],[CHART] [CHART]2[CHART]2[CHART],[CHART] [CHART]2[CHART]3[CHART],[CHART] [CHART]2[CHART]5[CHART],[CHART] [CHART]5[CHART]3[CHART],[CHART] [CHART]8[CHART]0[CHART],[CHART] [CHART]1[CHART]1[CHART]0[CHART],[CHART] [CHART]1[CHART]4[CHART]3[CHART],[CHART] [CHART]4[CHART]4[CHART]3[CHART],[CHART] [CHART]9[CHART]9[CHART]3[CHART],[CHART] [CHART]9[CHART]9[CHART]5[CHART],[CHART] [CHART]3[CHART]3[CHART]0[CHART]6[CHART],[CHART] [CHART]5[CHART]4[CHART]3[CHART]2[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]N[CHART]o[CHART]t[CHART]e[CHART]:[CHART] [CHART]I[CHART]n[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]e[CHART]n[CHART]v[CHART]i[CHART]r[CHART]o[CHART]n[CHART]m[CHART]e[CHART]n[CHART]t[CHART],[CHART] [CHART]t[CHART]h[CHART]i[CHART]s[CHART] [CHART]w[CHART]o[CHART]u[CHART]l[CHART]d[CHART] [CHART]u[CHART]s[CHART]e[CHART] [CHART]n[CHART]m[CHART]a[CHART]p[CHART] [CHART]o[CHART]r[CHART] [CHART]s[CHART]i[CHART]m[CHART]i[CHART]l[CHART]a[CHART]r[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]F[CHART]o[CHART]r[CHART] [CHART]d[CHART]e[CHART]m[CHART]o[CHART]n[CHART]s[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART],[CHART] [CHART]w[CHART]e[CHART]'[CHART]l[CHART]l[CHART] [CHART]s[CHART]i[CHART]m[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]i[CHART]m[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]s[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART] [CHART]=[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART][[CHART]8[CHART]0[CHART],[CHART] [CHART]4[CHART]4[CHART]3[CHART],[CHART] [CHART]8[CHART]0[CHART]0[CHART]0[CHART]][CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]o[CHART]m[CHART]m[CHART]o[CHART]n[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]t[CHART]h[CHART]a[CHART]t[CHART] [CHART]m[CHART]i[CHART]g[CHART]h[CHART]t[CHART] [CHART]b[CHART]e[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]i[CHART]s[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]i[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]f[CHART]y[CHART]_[CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]([CHART]p[CHART]o[CHART]r[CHART]t[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]o[CHART]r[CHART]t[CHART]"[CHART]:[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]"[CHART]:[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]t[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]o[CHART]p[CHART]e[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]a[CHART]n[CHART]a[CHART]l[CHART]y[CHART]z[CHART]e[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]([CHART]p[CHART]o[CHART]r[CHART]t[CHART],[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]s[CHART] [CHART]e[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]"[CHART]:[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]:[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART]s[CHART]t[CHART]a[CHART]m[CHART]p[CHART]"[CHART]:[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]i[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]f[CHART]y[CHART]_[CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]:[CHART] [CHART]i[CHART]n[CHART]t[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]s[CHART]t[CHART]r[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]I[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]f[CHART]y[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART] [CHART]r[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]o[CHART]n[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]2[CHART]1[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]F[CHART]T[CHART]P[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]v[CHART]s[CHART]f[CHART]t[CHART]p[CHART]d[CHART] [CHART]3[CHART].[CHART]0[CHART].[CHART]3[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]2[CHART]2[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]S[CHART]S[CHART]H[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]O[CHART]p[CHART]e[CHART]n[CHART]S[CHART]S[CHART]H[CHART] [CHART]8[CHART].[CHART]2[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]8[CHART]0[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]H[CHART]T[CHART]T[CHART]P[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]n[CHART]g[CHART]i[CHART]n[CHART]x[CHART]/[CHART]1[CHART].[CHART]2[CHART]0[CHART].[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]4[CHART]4[CHART]3[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]H[CHART]T[CHART]T[CHART]P[CHART]S[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]n[CHART]g[CHART]i[CHART]n[CHART]x[CHART]/[CHART]1[CHART].[CHART]2[CHART]0[CHART].[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]l[CHART]o[CHART]w[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]3[CHART]3[CHART]0[CHART]6[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]M[CHART]y[CHART]S[CHART]Q[CHART]L[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]8[CHART].[CHART]0[CHART].[CHART]2[CHART]3[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]5[CHART]4[CHART]3[CHART]2[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]P[CHART]o[CHART]s[CHART]t[CHART]g[CHART]r[CHART]e[CHART]S[CHART]Q[CHART]L[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]1[CHART]3[CHART].[CHART]3[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]6[CHART]3[CHART]7[CHART]9[CHART]:[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]R[CHART]e[CHART]d[CHART]i[CHART]s[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]6[CHART].[CHART]2[CHART].[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]p[CHART]o[CHART]r[CHART]t[CHART],[CHART] [CHART]{[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]n[CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]n[CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART]:[CHART] [CHART]"[CHART]u[CHART]n[CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART]"[CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]a[CHART]n[CHART]a[CHART]l[CHART]y[CHART]z[CHART]e[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]:[CHART] [CHART]i[CHART]n[CHART]t[CHART],[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART]:[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]A[CHART]n[CHART]a[CHART]l[CHART]y[CHART]z[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]r[CHART]i[CHART]s[CHART]k[CHART]s[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART][[CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]][CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]F[CHART]T[CHART]P[CHART]"[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]v[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]1[CHART]1[CHART]-[CHART]X[CHART]X[CHART]X[CHART]X[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]F[CHART]T[CHART]P[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]t[CHART]o[CHART] [CHART]a[CHART]n[CHART]o[CHART]n[CHART]y[CHART]m[CHART]o[CHART]u[CHART]s[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]D[CHART]i[CHART]s[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]F[CHART]T[CHART]P[CHART] [CHART]o[CHART]r[CHART] [CHART]u[CHART]s[CHART]e[CHART] [CHART]S[CHART]F[CHART]T[CHART]P[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]k[CHART]e[CHART]y[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]2[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART][[CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]O[CHART]p[CHART]e[CHART]n[CHART]S[CHART]S[CHART]H[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]"[CHART]7[CHART].[CHART]0[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]o[CHART]r[CHART] [CHART]"[CHART]6[CHART].[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]v[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]1[CHART]8[CHART]-[CHART]X[CHART]X[CHART]X[CHART]X[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]f[CHART]"[CHART]S[CHART]S[CHART]H[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]{[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]}[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]t[CHART]o[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART] [CHART]e[CHART]n[CHART]u[CHART]m[CHART]e[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]p[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]t[CHART]o[CHART] [CHART]O[CHART]p[CHART]e[CHART]n[CHART]S[CHART]S[CHART]H[CHART] [CHART]8[CHART].[CHART]2[CHART]+[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]d[CHART]i[CHART]s[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART][[CHART]3[CHART]3[CHART]0[CHART]6[CHART],[CHART] [CHART]5[CHART]4[CHART]3[CHART]2[CHART]][CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]v[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]X[CHART]X[CHART]X[CHART]X[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]f[CHART]"[CHART]D[CHART]a[CHART]t[CHART]a[CHART]b[CHART]a[CHART]s[CHART]e[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]{[CHART]p[CHART]o[CHART]r[CHART]t[CHART]}[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART]o[CHART]u[CHART]t[CHART] [CHART]e[CHART]n[CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]s[CHART]e[CHART] [CHART]S[CHART]S[CHART]L[CHART]/[CHART]T[CHART]L[CHART]S[CHART] [CHART]e[CHART]n[CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]n[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART] [CHART]s[CHART]e[CHART]g[CHART]m[CHART]e[CHART]n[CHART]t[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]w[CHART]e[CHART]b[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART] [CHART]=[CHART] [CHART]"[CHART]h[CHART]t[CHART]t[CHART]p[CHART]:[CHART]/[CHART]/[CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]:[CHART]8[CHART]0[CHART]0[CHART]0[CHART]"[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]C[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]w[CHART]e[CHART]b[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]([CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]T[CHART]o[CHART]p[CHART] [CHART]1[CHART]0[CHART])[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]0[CHART]1[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]B[CHART]r[CHART]o[CHART]k[CHART]e[CHART]n[CHART] [CHART]A[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]C[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]b[CHART]r[CHART]o[CHART]k[CHART]e[CHART]n[CHART]_[CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]0[CHART]2[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]C[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]g[CHART]r[CHART]a[CHART]p[CHART]h[CHART]i[CHART]c[CHART] [CHART]F[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]g[CHART]r[CHART]a[CHART]p[CHART]h[CHART]i[CHART]c[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]0[CHART]3[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]0[CHART]4[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]I[CHART]n[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART] [CHART]D[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]n[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART]_[CHART]d[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]d[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]0[CHART]5[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]M[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]m[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]0[CHART]6[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]V[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]C[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]s[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]_[CHART]f[CHART]o[CHART]u[CHART]n[CHART]d[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]:[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]g[CHART]e[CHART]"[CHART]:[CHART] [CHART][[CHART]"[CHART]A[CHART]0[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]2[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]3[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]4[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]5[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]6[CHART]"[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART]s[CHART]t[CHART]a[CHART]m[CHART]p[CHART]"[CHART]:[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]b[CHART]r[CHART]o[CHART]k[CHART]e[CHART]n[CHART]_[CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]b[CHART]r[CHART]o[CHART]k[CHART]e[CHART]n[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]U[CHART]R[CHART]L[CHART]-[CHART]b[CHART]a[CHART]s[CHART]e[CHART]d[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]/[CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART]"[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]d[CHART]m[CHART]i[CHART]n[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]/[CHART]d[CHART]e[CHART]l[CHART]e[CHART]t[CHART]e[CHART]"[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]P[CHART]r[CHART]i[CHART]v[CHART]i[CHART]l[CHART]e[CHART]g[CHART]e[CHART]d[CHART] [CHART]o[CHART]p[CHART]e[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]c[CHART]o[CHART]n[CHART]s[CHART]c[CHART]i[CHART]e[CHART]n[CHART]c[CHART]i[CHART]a[CHART]/[CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]t[CHART]e[CHART]"[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]P[CHART]r[CHART]i[CHART]v[CHART]a[CHART]t[CHART]e[CHART] [CHART]c[CHART]o[CHART]n[CHART]s[CHART]c[CHART]i[CHART]o[CHART]u[CHART]s[CHART]n[CHART]e[CHART]s[CHART]s[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]u[CHART]r[CHART]l[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]u[CHART]r[CHART]l[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART] [CHART]i[CHART]s[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART]l[CHART]y[CHART] [CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]e[CHART]d[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]![CHART]=[CHART] [CHART]4[CHART]0[CHART]1[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]![CHART]=[CHART] [CHART]4[CHART]0[CHART]3[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]1[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]B[CHART]r[CHART]o[CHART]k[CHART]e[CHART]n[CHART] [CHART]A[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]C[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]u[CHART]r[CHART]l[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]u[CHART]r[CHART]l[CHART]"[CHART]:[CHART] [CHART]u[CHART]r[CHART]l[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]f[CHART]"[CHART]P[CHART]o[CHART]t[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART] [CHART]b[CHART]r[CHART]o[CHART]k[CHART]e[CHART]n[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART] [CHART]-[CHART] [CHART]{[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART]}[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]I[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]r[CHART]o[CHART]l[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]s[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]g[CHART]r[CHART]a[CHART]p[CHART]h[CHART]i[CHART]c[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]g[CHART]r[CHART]a[CHART]p[CHART]h[CHART]i[CHART]c[CHART] [CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]H[CHART]T[CHART]T[CHART]P[CHART]S[CHART] [CHART]e[CHART]n[CHART]f[CHART]o[CHART]r[CHART]c[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]h[CHART]t[CHART]t[CHART]p[CHART]_[CHART]u[CHART]r[CHART]l[CHART] [CHART]=[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART].[CHART]r[CHART]e[CHART]p[CHART]l[CHART]a[CHART]c[CHART]e[CHART]([CHART]"[CHART]h[CHART]t[CHART]t[CHART]p[CHART]s[CHART]:[CHART]/[CHART]/[CHART]"[CHART],[CHART] [CHART]"[CHART]h[CHART]t[CHART]t[CHART]p[CHART]:[CHART]/[CHART]/[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]h[CHART]t[CHART]t[CHART]p[CHART]_[CHART]u[CHART]r[CHART]l[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART],[CHART] [CHART]a[CHART]l[CHART]l[CHART]o[CHART]w[CHART]_[CHART]r[CHART]e[CHART]d[CHART]i[CHART]r[CHART]e[CHART]c[CHART]t[CHART]s[CHART]=[CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]![CHART]=[CHART] [CHART]3[CHART]0[CHART]1[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]![CHART]=[CHART] [CHART]3[CHART]0[CHART]2[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]2[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]C[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]g[CHART]r[CHART]a[CHART]p[CHART]h[CHART]i[CHART]c[CHART] [CHART]F[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]H[CHART]T[CHART]T[CHART]P[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]i[CHART]b[CHART]l[CHART]e[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART]o[CHART]u[CHART]t[CHART] [CHART]H[CHART]T[CHART]T[CHART]P[CHART]S[CHART] [CHART]r[CHART]e[CHART]d[CHART]i[CHART]r[CHART]e[CHART]c[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]E[CHART]n[CHART]f[CHART]o[CHART]r[CHART]c[CHART]e[CHART] [CHART]H[CHART]T[CHART]T[CHART]P[CHART]S[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART] [CHART]H[CHART]S[CHART]T[CHART]S[CHART] [CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART]s[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]([CHART]S[CHART]Q[CHART]L[CHART],[CHART] [CHART]N[CHART]o[CHART]S[CHART]Q[CHART]L[CHART],[CHART] [CHART]O[CHART]S[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART])[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]Q[CHART]L[CHART] [CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]q[CHART]l[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]'[CHART] [CHART]O[CHART]R[CHART] [CHART]'[CHART]1[CHART]'[CHART]=[CHART]'[CHART]1[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]'[CHART];[CHART] [CHART]D[CHART]R[CHART]O[CHART]P[CHART] [CHART]T[CHART]A[CHART]B[CHART]L[CHART]E[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART];[CHART] [CHART]-[CHART]-[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]'[CHART] [CHART]-[CHART]-[CHART]"[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]o[CHART]m[CHART]m[CHART]e[CHART]n[CHART]t[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]1[CHART] [CHART]U[CHART]N[CHART]I[CHART]O[CHART]N[CHART] [CHART]S[CHART]E[CHART]L[CHART]E[CHART]C[CHART]T[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]F[CHART]R[CHART]O[CHART]M[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART]"[CHART] [CHART] [CHART]#[CHART] [CHART]U[CHART]n[CHART]i[CHART]o[CHART]n[CHART]-[CHART]b[CHART]a[CHART]s[CHART]e[CHART]d[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]q[CHART]l[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]=[CHART] [CHART]{[CHART]"[CHART]q[CHART]u[CHART]e[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART] [CHART]"[CHART]i[CHART]n[CHART]p[CHART]u[CHART]t[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]s[CHART]e[CHART]a[CHART]r[CHART]c[CHART]h[CHART]"[CHART],[CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]S[CHART]Q[CHART]L[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]n[CHART]y[CHART]([CHART]k[CHART]e[CHART]y[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]k[CHART]e[CHART]y[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]i[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART][[CHART]"[CHART]s[CHART]q[CHART]l[CHART] [CHART]s[CHART]y[CHART]n[CHART]t[CHART]a[CHART]x[CHART]"[CHART],[CHART] [CHART]"[CHART]m[CHART]y[CHART]s[CHART]q[CHART]l[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]o[CHART]s[CHART]t[CHART]g[CHART]r[CHART]e[CHART]s[CHART]q[CHART]l[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]q[CHART]l[CHART]i[CHART]t[CHART]e[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART]][CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]3[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]P[CHART]o[CHART]t[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART] [CHART]S[CHART]Q[CHART]L[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]d[CHART]e[CHART]t[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]s[CHART]e[CHART] [CHART]p[CHART]r[CHART]e[CHART]p[CHART]a[CHART]r[CHART]e[CHART]d[CHART] [CHART]s[CHART]t[CHART]a[CHART]t[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]n[CHART]p[CHART]u[CHART]t[CHART] [CHART]s[CHART]a[CHART]n[CHART]i[CHART]t[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART];[CHART] [CHART]c[CHART]a[CHART]t[CHART] [CHART]/[CHART]e[CHART]t[CHART]c[CHART]/[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]$[CHART]([CHART]w[CHART]h[CHART]o[CHART]a[CHART]m[CHART]i[CHART])[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]`[CHART]i[CHART]d[CHART]`[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]|[CHART] [CHART]n[CHART]e[CHART]t[CHART]s[CHART]t[CHART]a[CHART]t[CHART] [CHART]-[CHART]a[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]=[CHART] [CHART]{[CHART]"[CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]e[CHART]"[CHART],[CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]3[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]n[CHART]y[CHART]([CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART][[CHART]"[CHART]r[CHART]o[CHART]o[CHART]t[CHART]:[CHART]"[CHART],[CHART] [CHART]"[CHART]u[CHART]i[CHART]d[CHART]=[CHART]"[CHART],[CHART] [CHART]"[CHART]g[CHART]r[CHART]o[CHART]u[CHART]p[CHART]s[CHART]=[CHART]"[CHART],[CHART] [CHART]"[CHART]l[CHART]i[CHART]n[CHART]u[CHART]x[CHART]"[CHART],[CHART] [CHART]"[CHART]/[CHART]b[CHART]i[CHART]n[CHART]/[CHART]b[CHART]a[CHART]s[CHART]h[CHART]"[CHART]][CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]3[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]P[CHART]o[CHART]t[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]d[CHART]e[CHART]t[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]V[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]e[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]s[CHART]a[CHART]n[CHART]i[CHART]t[CHART]i[CHART]z[CHART]e[CHART] [CHART]a[CHART]l[CHART]l[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART] [CHART]i[CHART]n[CHART]p[CHART]u[CHART]t[CHART]s[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]n[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART]_[CHART]d[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART] [CHART]d[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART] [CHART]p[CHART]a[CHART]t[CHART]t[CHART]e[CHART]r[CHART]n[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]r[CHART]e[CHART]d[CHART]i[CHART]c[CHART]t[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART] [CHART]I[CHART]D[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART]_[CHART]i[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]a[CHART]n[CHART]g[CHART]e[CHART]([CHART]1[CHART],[CHART] [CHART]1[CHART]1[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART]/[CHART]{[CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART]_[CHART]i[CHART]d[CHART]}[CHART]"[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]3[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]s[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]i[CHART]n[CHART]f[CHART]o[CHART]r[CHART]m[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART]([CHART])[CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]'[CHART]c[CHART]o[CHART]n[CHART]t[CHART]e[CHART]n[CHART]t[CHART]-[CHART]t[CHART]y[CHART]p[CHART]e[CHART]'[CHART],[CHART] [CHART]'[CHART]'[CHART])[CHART].[CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]s[CHART]w[CHART]i[CHART]t[CHART]h[CHART]([CHART]'[CHART]a[CHART]p[CHART]p[CHART]l[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]/[CHART]j[CHART]s[CHART]o[CHART]n[CHART]'[CHART])[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]{[CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]n[CHART]y[CHART]([CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]t[CHART]r[CHART]([CHART]d[CHART]a[CHART]t[CHART]a[CHART])[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]i[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART][[CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART],[CHART] [CHART]"[CHART]t[CHART]o[CHART]k[CHART]e[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]r[CHART]e[CHART]t[CHART]"[CHART],[CHART] [CHART]"[CHART]k[CHART]e[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]t[CHART]e[CHART]"[CHART]][CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]4[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]I[CHART]n[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART] [CHART]D[CHART]e[CHART]s[CHART]i[CHART]g[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART]_[CHART]i[CHART]d[CHART]"[CHART]:[CHART] [CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART]_[CHART]i[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]P[CHART]r[CHART]e[CHART]d[CHART]i[CHART]c[CHART]t[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]r[CHART]e[CHART]s[CHART]o[CHART]u[CHART]r[CHART]c[CHART]e[CHART] [CHART]I[CHART]D[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]s[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]i[CHART]n[CHART]f[CHART]o[CHART]r[CHART]m[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]s[CHART]e[CHART] [CHART]U[CHART]U[CHART]I[CHART]D[CHART]s[CHART] [CHART]o[CHART]r[CHART] [CHART]c[CHART]r[CHART]y[CHART]p[CHART]t[CHART]o[CHART]g[CHART]r[CHART]a[CHART]p[CHART]h[CHART]i[CHART]c[CHART] [CHART]r[CHART]a[CHART]n[CHART]d[CHART]o[CHART]m[CHART] [CHART]I[CHART]D[CHART]s[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]([CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART],[CHART] [CHART]V[CHART]a[CHART]l[CHART]u[CHART]e[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]m[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]m[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]o[CHART]n[CHART] [CHART]m[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]o[CHART]n[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART].[CHART]e[CHART]n[CHART]v[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART].[CHART]g[CHART]i[CHART]t[CHART]/[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]b[CHART]a[CHART]c[CHART]k[CHART]u[CHART]p[CHART].[CHART]s[CHART]q[CHART]l[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART].[CHART]i[CHART]n[CHART]i[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]b[CHART]u[CHART]g[CHART].[CHART]l[CHART]o[CHART]g[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]_[CHART]l[CHART]o[CHART]g[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]-[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]h[CHART]p[CHART]i[CHART]n[CHART]f[CHART]o[CHART].[CHART]p[CHART]h[CHART]p[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART].[CHART]D[CHART]S[CHART]_[CHART]S[CHART]t[CHART]o[CHART]r[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]t[CHART]h[CHART] [CHART]i[CHART]n[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]o[CHART]n[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]{[CHART]p[CHART]a[CHART]t[CHART]h[CHART]}[CHART]"[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]3[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]5[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]M[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]t[CHART]h[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]t[CHART]h[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]f[CHART]"[CHART]S[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]f[CHART]i[CHART]l[CHART]e[CHART] [CHART]{[CHART]p[CHART]a[CHART]t[CHART]h[CHART]}[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]i[CHART]b[CHART]l[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]e[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART] [CHART]f[CHART]i[CHART]l[CHART]e[CHART] [CHART]p[CHART]e[CHART]r[CHART]m[CHART]i[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART]s[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]w[CHART]e[CHART]b[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]e[CHART]r[CHART]b[CHART]o[CHART]s[CHART]e[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]m[CHART]e[CHART]s[CHART]s[CHART]a[CHART]g[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]f[CHART]"[CHART]{[CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]n[CHART]o[CHART]n[CHART]e[CHART]x[CHART]i[CHART]s[CHART]t[CHART]e[CHART]n[CHART]t[CHART]"[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]3[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]"[CHART]t[CHART]r[CHART]a[CHART]c[CHART]e[CHART]b[CHART]a[CHART]c[CHART]k[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]o[CHART]r[CHART] [CHART]"[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]5[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]M[CHART]i[CHART]s[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]l[CHART]o[CHART]w[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]V[CHART]e[CHART]r[CHART]b[CHART]o[CHART]s[CHART]e[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]m[CHART]e[CHART]s[CHART]s[CHART]a[CHART]g[CHART]e[CHART]s[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART] [CHART]s[CHART]y[CHART]s[CHART]t[CHART]e[CHART]m[CHART] [CHART]i[CHART]n[CHART]f[CHART]o[CHART]r[CHART]m[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]u[CHART]r[CHART]e[CHART] [CHART]p[CHART]r[CHART]o[CHART]d[CHART]u[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]h[CHART]a[CHART]n[CHART]d[CHART]l[CHART]i[CHART]n[CHART]g[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]s[CHART]o[CHART]f[CHART]t[CHART]w[CHART]a[CHART]r[CHART]e[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART] [CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART]s[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]n[CHART]f[CHART]o[CHART]r[CHART]m[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]u[CHART]r[CHART]l[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]_[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]'[CHART]S[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]'[CHART],[CHART] [CHART]'[CHART]'[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]_[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]'[CHART]a[CHART]p[CHART]a[CHART]c[CHART]h[CHART]e[CHART]/[CHART]2[CHART].[CHART]2[CHART]'[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]_[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]6[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]V[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]C[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]p[CHART]a[CHART]c[CHART]h[CHART]e[CHART] [CHART]H[CHART]T[CHART]T[CHART]P[CHART] [CHART]S[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]_[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]v[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]1[CHART]7[CHART]-[CHART]9[CHART]7[CHART]9[CHART]8[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]p[CHART]a[CHART]c[CHART]h[CHART]e[CHART] [CHART]H[CHART]T[CHART]T[CHART]P[CHART] [CHART]S[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART] [CHART]2[CHART].[CHART]2[CHART] [CHART]i[CHART]s[CHART] [CHART]e[CHART]n[CHART]d[CHART]-[CHART]o[CHART]f[CHART]-[CHART]l[CHART]i[CHART]f[CHART]e[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]p[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]t[CHART]o[CHART] [CHART]s[CHART]u[CHART]p[CHART]p[CHART]o[CHART]r[CHART]t[CHART]e[CHART]d[CHART] [CHART]A[CHART]p[CHART]a[CHART]c[CHART]h[CHART]e[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]l[CHART]i[CHART]f[CHART] [CHART]'[CHART]n[CHART]g[CHART]i[CHART]n[CHART]x[CHART]/[CHART]1[CHART].[CHART]1[CHART]6[CHART]'[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]_[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]0[CHART]6[CHART]:[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]V[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]C[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]o[CHART]m[CHART]p[CHART]o[CHART]n[CHART]e[CHART]n[CHART]t[CHART]"[CHART]:[CHART] [CHART]"[CHART]N[CHART]g[CHART]i[CHART]n[CHART]x[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]e[CHART]r[CHART]_[CHART]h[CHART]e[CHART]a[CHART]d[CHART]e[CHART]r[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]N[CHART]g[CHART]i[CHART]n[CHART]x[CHART] [CHART]1[CHART].[CHART]1[CHART]6[CHART] [CHART]h[CHART]a[CHART]s[CHART] [CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]"[CHART]U[CHART]p[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]t[CHART]o[CHART] [CHART]l[CHART]a[CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]s[CHART]t[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]p[CHART]e[CHART]r[CHART]f[CHART]o[CHART]r[CHART]m[CHART]_[CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]A[CHART]u[CHART]d[CHART]i[CHART]t[CHART] [CHART]P[CHART]y[CHART]t[CHART]h[CHART]o[CHART]n[CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]i[CHART]e[CHART]s[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]R[CHART]u[CHART]n[CHART] [CHART]s[CHART]a[CHART]f[CHART]e[CHART]t[CHART]y[CHART] [CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]s[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART].[CHART]r[CHART]u[CHART]n[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART][[CHART]"[CHART]s[CHART]a[CHART]f[CHART]e[CHART]t[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]"[CHART],[CHART] [CHART]"[CHART]-[CHART]-[CHART]j[CHART]s[CHART]o[CHART]n[CHART]"[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]a[CHART]p[CHART]t[CHART]u[CHART]r[CHART]e[CHART]_[CHART]o[CHART]u[CHART]t[CHART]p[CHART]u[CHART]t[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]x[CHART]t[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]3[CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART].[CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]a[CHART]f[CHART]e[CHART]t[CHART]y[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]=[CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART].[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART].[CHART]s[CHART]t[CHART]d[CHART]o[CHART]u[CHART]t[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]a[CHART]f[CHART]e[CHART]t[CHART]y[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART],[CHART] [CHART][[CHART]][CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]F[CHART]a[CHART]l[CHART]l[CHART]b[CHART]a[CHART]c[CHART]k[CHART]:[CHART] [CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART].[CHART]t[CHART]x[CHART]t[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]([CHART]"[CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART].[CHART]t[CHART]x[CHART]t[CHART]"[CHART],[CHART] [CHART]"[CHART]r[CHART]"[CHART])[CHART] [CHART]a[CHART]s[CHART] [CHART]f[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]e[CHART]n[CHART]t[CHART] [CHART]=[CHART] [CHART]f[CHART].[CHART]r[CHART]e[CHART]a[CHART]d[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]_[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]j[CHART]i[CHART]n[CHART]j[CHART]a[CHART]2[CHART]<[CHART]3[CHART].[CHART]1[CHART].[CHART]0[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]2[CHART]2[CHART]-[CHART]X[CHART]X[CHART]X[CHART]X[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART]<[CHART]2[CHART].[CHART]2[CHART]5[CHART].[CHART]0[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]2[CHART]1[CHART]-[CHART]X[CHART]X[CHART]X[CHART]X[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]f[CHART]l[CHART]a[CHART]s[CHART]k[CHART]<[CHART]1[CHART].[CHART]1[CHART].[CHART]0[CHART]"[CHART]:[CHART] [CHART]"[CHART]C[CHART]V[CHART]E[CHART]-[CHART]2[CHART]0[CHART]2[CHART]0[CHART]-[CHART]X[CHART]X[CHART]X[CHART]X[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]s[CHART]p[CHART]e[CHART]c[CHART],[CHART] [CHART]c[CHART]v[CHART]e[CHART] [CHART]i[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]_[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]s[CHART].[CHART]i[CHART]t[CHART]e[CHART]m[CHART]s[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]s[CHART]p[CHART]e[CHART]c[CHART].[CHART]s[CHART]p[CHART]l[CHART]i[CHART]t[CHART]([CHART]'[CHART]<[CHART]'[CHART])[CHART][[CHART]0[CHART]][CHART] [CHART]i[CHART]n[CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]e[CHART]n[CHART]t[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]s[CHART] [CHART]i[CHART]n[CHART]s[CHART]t[CHART]a[CHART]l[CHART]l[CHART]e[CHART]d[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]s[CHART]p[CHART]e[CHART]c[CHART].[CHART]s[CHART]p[CHART]l[CHART]i[CHART]t[CHART]([CHART]'[CHART]<[CHART]'[CHART])[CHART][[CHART]0[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]_[CHART]i[CHART]s[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]_[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]n[CHART]s[CHART]t[CHART]a[CHART]l[CHART]l[CHART]e[CHART]d[CHART]([CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART],[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]s[CHART]p[CHART]e[CHART]c[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]c[CHART]v[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]f[CHART]"[CHART]V[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]{[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]}[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART].[CHART]t[CHART]x[CHART]t[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]([CHART]s[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART].[CHART]S[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART],[CHART] [CHART]F[CHART]i[CHART]l[CHART]e[CHART]N[CHART]o[CHART]t[CHART]F[CHART]o[CHART]u[CHART]n[CHART]d[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART],[CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART].[CHART]J[CHART]S[CHART]O[CHART]N[CHART]D[CHART]e[CHART]c[CHART]o[CHART]d[CHART]e[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART])[CHART] [CHART]a[CHART]s[CHART] [CHART]e[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]"[CHART]l[CHART]o[CHART]w[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]:[CHART] [CHART]f[CHART]"[CHART]D[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART] [CHART]f[CHART]a[CHART]i[CHART]l[CHART]e[CHART]d[CHART]:[CHART] [CHART]{[CHART]s[CHART]t[CHART]r[CHART]([CHART]e[CHART])[CHART]}[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]:[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]s[CHART]_[CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]e[CHART]d[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART]s[CHART]t[CHART]a[CHART]m[CHART]p[CHART]"[CHART]:[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]i[CHART]s[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]_[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]n[CHART]s[CHART]t[CHART]a[CHART]l[CHART]l[CHART]e[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]_[CHART]s[CHART]p[CHART]e[CHART]c[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]b[CHART]o[CHART]o[CHART]l[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]s[CHART] [CHART]a[CHART]c[CHART]t[CHART]u[CHART]a[CHART]l[CHART]l[CHART]y[CHART] [CHART]i[CHART]n[CHART]s[CHART]t[CHART]a[CHART]l[CHART]l[CHART]e[CHART]d[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]s[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART].[CHART]r[CHART]u[CHART]n[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART][[CHART]"[CHART]p[CHART]i[CHART]p[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]h[CHART]o[CHART]w[CHART]"[CHART],[CHART] [CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]a[CHART]p[CHART]t[CHART]u[CHART]r[CHART]e[CHART]_[CHART]o[CHART]u[CHART]t[CHART]p[CHART]u[CHART]t[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]x[CHART]t[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]1[CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART].[CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]l[CHART]i[CHART]n[CHART]e[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART].[CHART]s[CHART]t[CHART]d[CHART]o[CHART]u[CHART]t[CHART].[CHART]s[CHART]p[CHART]l[CHART]i[CHART]t[CHART]([CHART]'[CHART]\[CHART]n[CHART]'[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]l[CHART]i[CHART]n[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]s[CHART]w[CHART]i[CHART]t[CHART]h[CHART]([CHART]'[CHART]V[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]:[CHART]'[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]n[CHART]s[CHART]t[CHART]a[CHART]l[CHART]l[CHART]e[CHART]d[CHART]_[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]=[CHART] [CHART]l[CHART]i[CHART]n[CHART]e[CHART].[CHART]s[CHART]p[CHART]l[CHART]i[CHART]t[CHART]([CHART]'[CHART]:[CHART]'[CHART])[CHART][[CHART]1[CHART]][CHART].[CHART]s[CHART]t[CHART]r[CHART]i[CHART]p[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]a[CHART]r[CHART]i[CHART]s[CHART]o[CHART]n[CHART] [CHART]([CHART]i[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]d[CHART]u[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART],[CHART] [CHART]u[CHART]s[CHART]e[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]a[CHART]r[CHART]s[CHART]i[CHART]n[CHART]g[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]i[CHART]n[CHART]s[CHART]t[CHART]a[CHART]l[CHART]l[CHART]e[CHART]d[CHART]_[CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]n[CHART] [CHART]v[CHART]e[CHART]r[CHART]s[CHART]i[CHART]o[CHART]n[CHART]_[CHART]s[CHART]p[CHART]e[CHART]c[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]s[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART].[CHART]S[CHART]u[CHART]b[CHART]p[CHART]r[CHART]o[CHART]c[CHART]e[CHART]s[CHART]s[CHART]E[CHART]r[CHART]r[CHART]o[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART],[CHART] [CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]:[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]f[CHART]a[CHART]i[CHART]l[CHART]e[CHART]d[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]g[CHART]e[CHART]n[CHART]e[CHART]r[CHART]a[CHART]t[CHART]e[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]o[CHART]u[CHART]t[CHART]p[CHART]u[CHART]t[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART]:[CHART] [CHART]P[CHART]a[CHART]t[CHART]h[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]G[CHART]e[CHART]n[CHART]e[CHART]r[CHART]a[CHART]t[CHART]e[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]R[CHART]u[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]w[CHART]e[CHART]b[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]w[CHART]e[CHART]b[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]o[CHART]r[CHART]m[CHART]_[CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]g[CHART]g[CHART]r[CHART]e[CHART]g[CHART]a[CHART]t[CHART]e[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART],[CHART] [CHART][[CHART]][CHART])[CHART] [CHART]+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]w[CHART]e[CHART]b[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART],[CHART] [CHART][[CHART]][CHART])[CHART] [CHART]+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART],[CHART] [CHART][[CHART]][CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]a[CHART]l[CHART]c[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]m[CHART]e[CHART]t[CHART]r[CHART]i[CHART]c[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]w[CHART]e[CHART]i[CHART]g[CHART]h[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART]:[CHART] [CHART]1[CHART]0[CHART],[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]:[CHART] [CHART]7[CHART],[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART]:[CHART] [CHART]4[CHART],[CHART] [CHART]"[CHART]l[CHART]o[CHART]w[CHART]"[CHART]:[CHART] [CHART]2[CHART],[CHART] [CHART]"[CHART]i[CHART]n[CHART]f[CHART]o[CHART]"[CHART]:[CHART] [CHART]1[CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]=[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]l[CHART]o[CHART]w[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART] [CHART]=[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]u[CHART]n[CHART]k[CHART]n[CHART]o[CHART]w[CHART]n[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]s[CHART][[CHART]v[CHART]u[CHART]l[CHART]n[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]][CHART] [CHART]=[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART],[CHART] [CHART]0[CHART])[CHART] [CHART]+[CHART] [CHART]1[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]a[CHART]l[CHART]c[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]w[CHART]e[CHART]i[CHART]g[CHART]h[CHART]t[CHART]e[CHART]d[CHART] [CHART]r[CHART]i[CHART]s[CHART]k[CHART] [CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]w[CHART]e[CHART]i[CHART]g[CHART]h[CHART]t[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]w[CHART]e[CHART]i[CHART]g[CHART]h[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART],[CHART] [CHART]1[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]c[CHART]c[CHART]u[CHART]m[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]r[CHART]e[CHART]d[CHART]u[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]a[CHART]l[CHART]c[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]l[CHART]l[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]([CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]s[CHART] [CHART]a[CHART]t[CHART] [CHART]1[CHART]0[CHART]0[CHART],[CHART] [CHART]r[CHART]e[CHART]d[CHART]u[CHART]c[CHART]e[CHART]d[CHART] [CHART]b[CHART]y[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]1[CHART]0[CHART]0[CHART].[CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]p[CHART]e[CHART]n[CHART]a[CHART]l[CHART]t[CHART]y[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART] [CHART]*[CHART] [CHART]2[CHART] [CHART] [CHART]#[CHART] [CHART]2[CHART] [CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]s[CHART] [CHART]p[CHART]e[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]m[CHART]a[CHART]x[CHART]([CHART]0[CHART],[CHART] [CHART]b[CHART]a[CHART]s[CHART]e[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]-[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]p[CHART]e[CHART]n[CHART]a[CHART]l[CHART]t[CHART]y[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]c[CHART]a[CHART]l[CHART]c[CHART]u[CHART]l[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART][[CHART]"[CHART]A[CHART]0[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]2[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]3[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]4[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]5[CHART]"[CHART],[CHART] [CHART]"[CHART]A[CHART]0[CHART]6[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]s[CHART]e[CHART]t[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]"[CHART])[CHART].[CHART]s[CHART]p[CHART]l[CHART]i[CHART]t[CHART]([CHART]"[CHART]:[CHART]"[CHART])[CHART][[CHART]0[CHART]][CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]=[CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]e[CHART]d[CHART] [CHART]/[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]d[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]u[CHART]m[CHART]m[CHART]a[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]_[CHART]f[CHART]o[CHART]u[CHART]n[CHART]d[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]"[CHART]:[CHART] [CHART]r[CHART]o[CHART]u[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART],[CHART] [CHART]2[CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]"[CHART]:[CHART] [CHART]r[CHART]o[CHART]u[CHART]n[CHART]d[CHART]([CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART],[CHART] [CHART]2[CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART]s[CHART]t[CHART]a[CHART]m[CHART]p[CHART]"[CHART]:[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART]([CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]i[CHART]s[CHART]k[CHART]_[CHART]l[CHART]e[CHART]v[CHART]e[CHART]l[CHART]"[CHART]:[CHART] [CHART]"[CHART]l[CHART]o[CHART]w[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]>[CHART]=[CHART] [CHART]8[CHART]0[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]m[CHART]e[CHART]d[CHART]i[CHART]u[CHART]m[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]>[CHART]=[CHART] [CHART]6[CHART]0[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]>[CHART]=[CHART] [CHART]4[CHART]0[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]b[CHART]r[CHART]e[CHART]a[CHART]k[CHART]d[CHART]o[CHART]w[CHART]n[CHART]"[CHART]:[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]b[CHART]y[CHART]_[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]:[CHART] [CHART]d[CHART]i[CHART]c[CHART]t[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]s[CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]b[CHART]y[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]y[CHART]"[CHART]:[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]v[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART]][CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]v[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]][CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]s[CHART]"[CHART]:[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]t[CHART]o[CHART]p[CHART]_[CHART]1[CHART]0[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]g[CHART]e[CHART]"[CHART]:[CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]d[CHART]"[CHART]:[CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]l[CHART]e[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]a[CHART]t[CHART]e[CHART]g[CHART]o[CHART]r[CHART]i[CHART]e[CHART]s[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]d[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]"[CHART]:[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]>[CHART]=[CHART] [CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART]_[CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART]_[CHART]R[CHART]E[CHART]Q[CHART]U[CHART]I[CHART]R[CHART]E[CHART]M[CHART]E[CHART]N[CHART]T[CHART]S[CHART][[CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]l[CHART]e[CHART]v[CHART]e[CHART]l[CHART]"[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]>[CHART]=[CHART] [CHART]8[CHART]5[CHART].[CHART]0[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]m[CHART]i[CHART]n[CHART]i[CHART]m[CHART]u[CHART]m[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]v[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART]][CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]v[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]l[CHART]l[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]][CHART])[CHART] [CHART]<[CHART]=[CHART] [CHART]3[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]_[CHART]g[CHART]r[CHART]a[CHART]d[CHART]i[CHART]n[CHART]g[CHART]"[CHART]:[CHART] [CHART]{[CHART]}[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]P[CHART]o[CHART]p[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART]d[CHART] [CHART]b[CHART]e[CHART]l[CHART]o[CHART]w[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]t[CHART]a[CHART]i[CHART]l[CHART]e[CHART]d[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]s[CHART]"[CHART]:[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]"[CHART]:[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]w[CHART]e[CHART]b[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]"[CHART]:[CHART] [CHART]w[CHART]e[CHART]b[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]"[CHART]:[CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]a[CHART]l[CHART]c[CHART]u[CHART]l[CHART]a[CHART]t[CHART]e[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]_[CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]s[CHART]u[CHART]m[CHART]([CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]"[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]"[CHART]][CHART].[CHART]v[CHART]a[CHART]l[CHART]u[CHART]e[CHART]s[CHART]([CHART])[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]"[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]"[CHART]][CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]l[CHART]l[CHART]([CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]"[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]"[CHART]][CHART].[CHART]v[CHART]a[CHART]l[CHART]u[CHART]e[CHART]s[CHART]([CHART])[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]=[CHART] [CHART]"[CHART]A[CHART]A[CHART]A[CHART] [CHART]([CHART]P[CHART]r[CHART]o[CHART]d[CHART]u[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]R[CHART]e[CHART]a[CHART]d[CHART]y[CHART])[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]a[CHART]d[CHART]i[CHART]n[CHART]e[CHART]s[CHART]s[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]1[CHART].[CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]l[CHART]i[CHART]f[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]_[CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART] [CHART]>[CHART]=[CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART] [CHART]*[CHART] [CHART]0[CHART].[CHART]7[CHART]5[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]=[CHART] [CHART]"[CHART]A[CHART]A[CHART] [CHART]([CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]E[CHART]n[CHART]h[CHART]a[CHART]n[CHART]c[CHART]e[CHART]d[CHART])[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]a[CHART]d[CHART]i[CHART]n[CHART]e[CHART]s[CHART]s[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]0[CHART].[CHART]8[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]l[CHART]i[CHART]f[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]_[CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART] [CHART]>[CHART]=[CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART] [CHART]*[CHART] [CHART]0[CHART].[CHART]5[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]=[CHART] [CHART]"[CHART]A[CHART] [CHART]([CHART]B[CHART]a[CHART]s[CHART]i[CHART]c[CHART] [CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]I[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]e[CHART]d[CHART])[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]a[CHART]d[CHART]i[CHART]n[CHART]e[CHART]s[CHART]s[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]0[CHART].[CHART]6[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART] [CHART]=[CHART] [CHART]"[CHART]B[CHART] [CHART]([CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]I[CHART]m[CHART]p[CHART]r[CHART]o[CHART]v[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART] [CHART]R[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART])[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]a[CHART]d[CHART]i[CHART]n[CHART]e[CHART]s[CHART]s[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART] [CHART]=[CHART] [CHART]0[CHART].[CHART]4[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]"[CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]_[CHART]g[CHART]r[CHART]a[CHART]d[CHART]i[CHART]n[CHART]g[CHART]"[CHART]][CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART]"[CHART]:[CHART] [CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]e[CHART]a[CHART]d[CHART]i[CHART]n[CHART]e[CHART]s[CHART]s[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]"[CHART]:[CHART] [CHART]r[CHART]e[CHART]a[CHART]d[CHART]i[CHART]n[CHART]e[CHART]s[CHART]s[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]_[CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART]"[CHART]:[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]_[CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]"[CHART]:[CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]a[CHART]v[CHART]e[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]u[CHART]t[CHART]p[CHART]u[CHART]t[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART].[CHART]p[CHART]a[CHART]r[CHART]e[CHART]n[CHART]t[CHART].[CHART]m[CHART]k[CHART]d[CHART]i[CHART]r[CHART]([CHART]p[CHART]a[CHART]r[CHART]e[CHART]n[CHART]t[CHART]s[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART] [CHART]e[CHART]x[CHART]i[CHART]s[CHART]t[CHART]_[CHART]o[CHART]k[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]([CHART]o[CHART]u[CHART]t[CHART]p[CHART]u[CHART]t[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART],[CHART] [CHART]'[CHART]w[CHART]'[CHART],[CHART] [CHART]e[CHART]n[CHART]c[CHART]o[CHART]d[CHART]i[CHART]n[CHART]g[CHART]=[CHART]'[CHART]u[CHART]t[CHART]f[CHART]-[CHART]8[CHART]'[CHART])[CHART] [CHART]a[CHART]s[CHART] [CHART]f[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART].[CHART]d[CHART]u[CHART]m[CHART]p[CHART]([CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART],[CHART] [CHART]f[CHART],[CHART] [CHART]i[CHART]n[CHART]d[CHART]e[CHART]n[CHART]t[CHART]=[CHART]2[CHART],[CHART] [CHART]e[CHART]n[CHART]s[CHART]u[CHART]r[CHART]e[CHART]_[CHART]a[CHART]s[CHART]c[CHART]i[CHART]i[CHART]=[CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]
+[CHART]
+[CHART]@[CHART]d[CHART]a[CHART]t[CHART]a[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART]
+[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]f[CHART]r[CHART]o[CHART]m[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]a[CHART]t[CHART]t[CHART]e[CHART]m[CHART]p[CHART]t[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]:[CHART] [CHART]b[CHART]o[CHART]o[CHART]l[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]:[CHART] [CHART]f[CHART]l[CHART]o[CHART]a[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]:[CHART] [CHART]b[CHART]o[CHART]o[CHART]l[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART]
+[CHART]
+[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]s[CHART]u[CHART]i[CHART]t[CHART]e[CHART]"[CHART]"[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]_[CHART]_[CHART]i[CHART]n[CHART]i[CHART]t[CHART]_[CHART]_[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]:[CHART] [CHART]s[CHART]t[CHART]r[CHART] [CHART]=[CHART] [CHART]"[CHART]h[CHART]t[CHART]t[CHART]p[CHART]:[CHART]/[CHART]/[CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]:[CHART]8[CHART]0[CHART]0[CHART]0[CHART]"[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART] [CHART]=[CHART] [CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]S[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]r[CHART]u[CHART]n[CHART]_[CHART]f[CHART]u[CHART]l[CHART]l[CHART]_[CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]D[CHART]i[CHART]c[CHART]t[CHART][[CHART]s[CHART]t[CHART]r[CHART],[CHART] [CHART]A[CHART]n[CHART]y[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]R[CHART]u[CHART]n[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]s[CHART]u[CHART]i[CHART]t[CHART]e[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART][[CHART]T[CHART]A[CHART]R[CHART]G[CHART]E[CHART]T[CHART]][CHART] [CHART]S[CHART]t[CHART]a[CHART]r[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]([CHART])[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]t[CHART]t[CHART]a[CHART]c[CHART]k[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]s[CHART]q[CHART]l[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]([CHART])[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]([CHART])[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]x[CHART]s[CHART]s[CHART]_[CHART]a[CHART]t[CHART]t[CHART]a[CHART]c[CHART]k[CHART]s[CHART]([CHART])[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]([CHART])[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]D[CHART]a[CHART]t[CHART]a[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]t[CHART]e[CHART]n[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART]_[CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART]([CHART])[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]n[CHART]a[CHART]l[CHART]y[CHART]z[CHART]e[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]r[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART].[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]][CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]"[CHART]:[CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART]"[CHART]:[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]_[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART]"[CHART]:[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART] [CHART]/[CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART] [CHART]>[CHART] [CHART]0[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]a[CHART]t[CHART]i[CHART]n[CHART]g[CHART]"[CHART]:[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART]"[CHART]:[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]r[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART].[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART].[CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART]][CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]e[CHART]t[CHART]a[CHART]i[CHART]l[CHART]s[CHART]"[CHART]:[CHART] [CHART][[CHART]a[CHART]s[CHART]d[CHART]i[CHART]c[CHART]t[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]t[CHART]i[CHART]m[CHART]e[CHART]s[CHART]t[CHART]a[CHART]m[CHART]p[CHART]"[CHART]:[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]D[CHART]i[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]a[CHART]r[CHART]y[CHART] [CHART]A[CHART]t[CHART]t[CHART]a[CHART]c[CHART]k[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]:[CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]1[CHART]2[CHART]3[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]x[CHART]p[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART]:[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]h[CHART]o[CHART]u[CHART]l[CHART]d[CHART] [CHART]f[CHART]a[CHART]i[CHART]l[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]S[CHART]Q[CHART]L[CHART] [CHART]I[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]L[CHART]o[CHART]g[CHART]i[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]:[CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]'[CHART] [CHART]O[CHART]R[CHART] [CHART]'[CHART]1[CHART]'[CHART]=[CHART]'[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]'[CHART] [CHART]O[CHART]R[CHART] [CHART]'[CHART]1[CHART]'[CHART]=[CHART]'[CHART]1[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]x[CHART]p[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART]:[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]A[CHART]d[CHART]m[CHART]i[CHART]n[CHART] [CHART]B[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]:[CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]'[CHART];[CHART] [CHART]-[CHART]-[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]n[CHART]y[CHART]t[CHART]h[CHART]i[CHART]n[CHART]g[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]x[CHART]p[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART]:[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]u[CHART]t[CHART]h[CHART]/[CHART]l[CHART]o[CHART]g[CHART]i[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]"[CHART]e[CHART]x[CHART]p[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]"[CHART]e[CHART]x[CHART]p[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]f[CHART]"[CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]_[CHART]{[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]'[CHART]n[CHART]a[CHART]m[CHART]e[CHART]'[CHART]][CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART].[CHART]r[CHART]e[CHART]p[CHART]l[CHART]a[CHART]c[CHART]e[CHART]([CHART]'[CHART] [CHART]'[CHART],[CHART] [CHART]'[CHART]_[CHART]'[CHART])[CHART]}[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]j[CHART]s[CHART]o[CHART]n[CHART].[CHART]d[CHART]u[CHART]m[CHART]p[CHART]s[CHART]([CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]][CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART] [CHART]a[CHART]l[CHART]l[CHART]o[CHART]w[CHART]s[CHART] [CHART]u[CHART]n[CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]e[CHART]d[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART]l[CHART]y[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]I[CHART]m[CHART]p[CHART]l[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]s[CHART] [CHART]e[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]f[CHART]"[CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]_[CHART]{[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]'[CHART]n[CHART]a[CHART]m[CHART]e[CHART]'[CHART]][CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART].[CHART]r[CHART]e[CHART]p[CHART]l[CHART]a[CHART]c[CHART]e[CHART]([CHART]'[CHART] [CHART]'[CHART],[CHART] [CHART]'[CHART]_[CHART]'[CHART])[CHART]}[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]j[CHART]s[CHART]o[CHART]n[CHART].[CHART]d[CHART]u[CHART]m[CHART]p[CHART]s[CHART]([CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]a[CHART]s[CHART]e[CHART][[CHART]"[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]"[CHART]][CHART])[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]f[CHART]"[CHART]C[CHART]o[CHART]n[CHART]n[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]:[CHART] [CHART]{[CHART]s[CHART]t[CHART]r[CHART]([CHART]e[CHART])[CHART]}[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART] [CHART]a[CHART]v[CHART]a[CHART]i[CHART]l[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]s[CHART]q[CHART]l[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]S[CHART]Q[CHART]L[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]q[CHART]l[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]'[CHART] [CHART]O[CHART]R[CHART] [CHART]'[CHART]1[CHART]'[CHART]=[CHART]'[CHART]1[CHART]'[CHART];[CHART] [CHART]-[CHART]-[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]'[CHART];[CHART] [CHART]D[CHART]R[CHART]O[CHART]P[CHART] [CHART]T[CHART]A[CHART]B[CHART]L[CHART]E[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART];[CHART] [CHART]-[CHART]-[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]'[CHART] [CHART]U[CHART]N[CHART]I[CHART]O[CHART]N[CHART] [CHART]S[CHART]E[CHART]L[CHART]E[CHART]C[CHART]T[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]F[CHART]R[CHART]O[CHART]M[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART];[CHART] [CHART]-[CHART]-[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]'[CHART];[CHART] [CHART]S[CHART]E[CHART]L[CHART]E[CHART]C[CHART]T[CHART] [CHART]*[CHART] [CHART]F[CHART]R[CHART]O[CHART]M[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART];[CHART] [CHART]-[CHART]-[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]q[CHART]l[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]a[CHART]r[CHART]c[CHART]h[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]s[CHART]e[CHART]a[CHART]r[CHART]c[CHART]h[CHART]?[CHART]q[CHART]=[CHART]{[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]}[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]S[CHART]Q[CHART]L[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART] [CHART]o[CHART]r[CHART] [CHART]u[CHART]n[CHART]u[CHART]s[CHART]u[CHART]a[CHART]l[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]q[CHART]l[CHART] [CHART]s[CHART]y[CHART]n[CHART]t[CHART]a[CHART]x[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]m[CHART]y[CHART]s[CHART]q[CHART]l[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]o[CHART]s[CHART]t[CHART]g[CHART]r[CHART]e[CHART]s[CHART]q[CHART]l[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]q[CHART]l[CHART]i[CHART]t[CHART]e[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]y[CHART]n[CHART]t[CHART]a[CHART]x[CHART] [CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]u[CHART]n[CHART]c[CHART]l[CHART]o[CHART]s[CHART]e[CHART]d[CHART] [CHART]q[CHART]u[CHART]o[CHART]t[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]m[CHART]a[CHART]r[CHART]k[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]h[CHART]a[CHART]s[CHART]_[CHART]s[CHART]q[CHART]l[CHART]_[CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]=[CHART] [CHART]a[CHART]n[CHART]y[CHART]([CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]h[CHART]a[CHART]s[CHART]_[CHART]s[CHART]q[CHART]l[CHART]_[CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART] [CHART]o[CHART]r[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]5[CHART]0[CHART]0[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]"[CHART]s[CHART]q[CHART]l[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]s[CHART]e[CHART]a[CHART]r[CHART]c[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]S[CHART]Q[CHART]L[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART] [CHART]-[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART]b[CHART]a[CHART]s[CHART]e[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]o[CHART]m[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]o[CHART]s[CHART]s[CHART]i[CHART]b[CHART]l[CHART]e[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]S[CHART]Q[CHART]L[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]l[CHART]o[CHART]c[CHART]k[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]U[CHART]s[CHART]e[CHART] [CHART]p[CHART]r[CHART]e[CHART]p[CHART]a[CHART]r[CHART]e[CHART]d[CHART] [CHART]s[CHART]t[CHART]a[CHART]t[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART]s[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]O[CHART]R[CHART]M[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]S[CHART]Q[CHART]L[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]c[CHART]t[CHART]i[CHART]v[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]u[CHART]t[CHART]h[CHART]/[CHART]l[CHART]o[CHART]g[CHART]i[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]t[CHART]e[CHART]s[CHART]t[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]![CHART]=[CHART] [CHART]4[CHART]0[CHART]1[CHART]:[CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]h[CHART]o[CHART]u[CHART]l[CHART]d[CHART] [CHART]b[CHART]e[CHART] [CHART]u[CHART]n[CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]e[CHART]d[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]"[CHART]s[CHART]q[CHART]l[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]a[CHART]u[CHART]t[CHART]h[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]S[CHART]Q[CHART]L[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]-[CHART] [CHART]a[CHART]c[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART] [CHART]t[CHART]a[CHART]k[CHART]e[CHART]o[CHART]v[CHART]e[CHART]r[CHART] [CHART]p[CHART]o[CHART]s[CHART]s[CHART]i[CHART]b[CHART]l[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]I[CHART]n[CHART]p[CHART]u[CHART]t[CHART] [CHART]s[CHART]a[CHART]n[CHART]i[CHART]t[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART];[CHART] [CHART]w[CHART]h[CHART]o[CHART]a[CHART]m[CHART]i[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]$[CHART]([CHART]e[CHART]c[CHART]h[CHART]o[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART])[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]`[CHART]p[CHART]i[CHART]n[CHART]g[CHART] [CHART]-[CHART]c[CHART] [CHART]1[CHART] [CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]`[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]|[CHART] [CHART]c[CHART]a[CHART]t[CHART] [CHART]/[CHART]e[CHART]t[CHART]c[CHART]/[CHART]h[CHART]o[CHART]s[CHART]t[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]p[CHART]o[CHART]t[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART]l[CHART]y[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]{[CHART]"[CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]L[CHART]o[CHART]o[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]r[CHART]o[CHART]o[CHART]t[CHART]"[CHART],[CHART] [CHART]"[CHART]w[CHART]w[CHART]w[CHART]-[CHART]d[CHART]a[CHART]t[CHART]a[CHART]"[CHART],[CHART] [CHART]"[CHART]u[CHART]b[CHART]u[CHART]n[CHART]t[CHART]u[CHART]"[CHART],[CHART] [CHART]"[CHART]c[CHART]e[CHART]n[CHART]t[CHART]o[CHART]s[CHART]"[CHART],[CHART] [CHART]"[CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]u[CHART]i[CHART]d[CHART]=[CHART]"[CHART],[CHART] [CHART]"[CHART]g[CHART]i[CHART]d[CHART]=[CHART]"[CHART],[CHART] [CHART]"[CHART]g[CHART]r[CHART]o[CHART]u[CHART]p[CHART]s[CHART]=[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]h[CHART]a[CHART]s[CHART]_[CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART] [CHART]=[CHART] [CHART]a[CHART]n[CHART]y[CHART]([CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]h[CHART]a[CHART]s[CHART]_[CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]"[CHART]c[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART]_[CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]i[CHART]n[CHART] [CHART][[CHART]2[CHART]0[CHART]0[CHART],[CHART] [CHART]2[CHART]0[CHART]1[CHART]][CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]C[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART] [CHART]-[CHART] [CHART]s[CHART]y[CHART]s[CHART]t[CHART]e[CHART]m[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]o[CHART]m[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]o[CHART]s[CHART]s[CHART]i[CHART]b[CHART]l[CHART]e[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]C[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]l[CHART]o[CHART]c[CHART]k[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]C[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]s[CHART]a[CHART]n[CHART]i[CHART]t[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]C[CHART]o[CHART]m[CHART]m[CHART]a[CHART]n[CHART]d[CHART] [CHART]i[CHART]n[CHART]j[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]c[CHART]t[CHART]i[CHART]v[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]x[CHART]s[CHART]s[CHART]_[CHART]a[CHART]t[CHART]t[CHART]a[CHART]c[CHART]k[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]C[CHART]r[CHART]o[CHART]s[CHART]s[CHART]-[CHART]S[CHART]i[CHART]t[CHART]e[CHART] [CHART]S[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]([CHART]X[CHART]S[CHART]S[CHART])[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]x[CHART]s[CHART]s[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]<[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]>[CHART]a[CHART]l[CHART]e[CHART]r[CHART]t[CHART]([CHART]'[CHART]x[CHART]s[CHART]s[CHART]'[CHART])[CHART]<[CHART]/[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]>[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]<[CHART]i[CHART]m[CHART]g[CHART] [CHART]s[CHART]r[CHART]c[CHART]=[CHART]x[CHART] [CHART]o[CHART]n[CHART]e[CHART]r[CHART]r[CHART]o[CHART]r[CHART]=[CHART]a[CHART]l[CHART]e[CHART]r[CHART]t[CHART]([CHART]'[CHART]x[CHART]s[CHART]s[CHART]'[CHART])[CHART]>[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]j[CHART]a[CHART]v[CHART]a[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]:[CHART]a[CHART]l[CHART]e[CHART]r[CHART]t[CHART]([CHART]'[CHART]x[CHART]s[CHART]s[CHART]'[CHART])[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]<[CHART]i[CHART]f[CHART]r[CHART]a[CHART]m[CHART]e[CHART] [CHART]s[CHART]r[CHART]c[CHART]=[CHART]'[CHART]j[CHART]a[CHART]v[CHART]a[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]:[CHART]a[CHART]l[CHART]e[CHART]r[CHART]t[CHART]([CHART]\[CHART]"[CHART]x[CHART]s[CHART]s[CHART]\[CHART]"[CHART])[CHART]'[CHART]>[CHART]<[CHART]/[CHART]i[CHART]f[CHART]r[CHART]a[CHART]m[CHART]e[CHART]>[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]x[CHART]s[CHART]s[CHART]_[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]v[CHART]i[CHART]a[CHART] [CHART]v[CHART]a[CHART]r[CHART]i[CHART]o[CHART]u[CHART]s[CHART] [CHART]i[CHART]n[CHART]p[CHART]u[CHART]t[CHART] [CHART]m[CHART]e[CHART]c[CHART]h[CHART]a[CHART]n[CHART]i[CHART]s[CHART]m[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]f[CHART]e[CHART]e[CHART]d[CHART]b[CHART]a[CHART]c[CHART]k[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]{[CHART]"[CHART]m[CHART]e[CHART]s[CHART]s[CHART]a[CHART]g[CHART]e[CHART]"[CHART]:[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART] [CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]"[CHART]:[CHART] [CHART]"[CHART]t[CHART]e[CHART]s[CHART]t[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]s[CHART] [CHART]r[CHART]e[CHART]f[CHART]l[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART] [CHART]u[CHART]n[CHART]s[CHART]a[CHART]n[CHART]i[CHART]t[CHART]i[CHART]z[CHART]e[CHART]d[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART] [CHART]o[CHART]r[CHART] [CHART]"[CHART]<[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]>[CHART]"[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]"[CHART]x[CHART]s[CHART]s[CHART]_[CHART]r[CHART]e[CHART]f[CHART]l[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]X[CHART]S[CHART]S[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART] [CHART]-[CHART] [CHART]c[CHART]l[CHART]i[CHART]e[CHART]n[CHART]t[CHART]-[CHART]s[CHART]i[CHART]d[CHART]e[CHART] [CHART]a[CHART]t[CHART]t[CHART]a[CHART]c[CHART]k[CHART] [CHART]p[CHART]o[CHART]s[CHART]s[CHART]i[CHART]b[CHART]l[CHART]e[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]X[CHART]S[CHART]S[CHART] [CHART]b[CHART]l[CHART]o[CHART]c[CHART]k[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]O[CHART]u[CHART]t[CHART]p[CHART]u[CHART]t[CHART] [CHART]e[CHART]n[CHART]c[CHART]o[CHART]d[CHART]i[CHART]n[CHART]g[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]X[CHART]S[CHART]S[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]c[CHART]t[CHART]i[CHART]v[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]t[CHART]t[CHART]e[CHART]m[CHART]p[CHART]t[CHART] [CHART]I[CHART]D[CHART]O[CHART]R[CHART] [CHART]([CHART]I[CHART]n[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART] [CHART]D[CHART]i[CHART]r[CHART]e[CHART]c[CHART]t[CHART] [CHART]O[CHART]b[CHART]j[CHART]e[CHART]c[CHART]t[CHART] [CHART]R[CHART]e[CHART]f[CHART]e[CHART]r[CHART]e[CHART]n[CHART]c[CHART]e[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]d[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]"[CHART]1[CHART]"[CHART],[CHART] [CHART]"[CHART]2[CHART]"[CHART],[CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]u[CHART]p[CHART]e[CHART]r[CHART]u[CHART]s[CHART]e[CHART]r[CHART]"[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]d[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]u[CHART]s[CHART]e[CHART]r[CHART]/[CHART]{[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]d[CHART]}[CHART]/[CHART]p[CHART]r[CHART]o[CHART]f[CHART]i[CHART]l[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]i[CHART]f[CHART] [CHART]c[CHART]a[CHART]n[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]o[CHART]t[CHART]h[CHART]e[CHART]r[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART]s[CHART]'[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]d[CHART] [CHART]![CHART]=[CHART] [CHART]"[CHART]1[CHART]"[CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]s[CHART]s[CHART]u[CHART]m[CHART]i[CHART]n[CHART]g[CHART] [CHART]l[CHART]o[CHART]g[CHART]g[CHART]e[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]a[CHART]s[CHART] [CHART]u[CHART]s[CHART]e[CHART]r[CHART] [CHART]1[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]"[CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]i[CHART]d[CHART]o[CHART]r[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]f[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]_[CHART]i[CHART]d[CHART]=[CHART]{[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]i[CHART]d[CHART]}[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]I[CHART]D[CHART]O[CHART]R[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART] [CHART]-[CHART] [CHART]u[CHART]n[CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]e[CHART]d[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]p[CHART]e[CHART]r[CHART]l[CHART]y[CHART] [CHART]e[CHART]n[CHART]f[CHART]o[CHART]r[CHART]c[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]O[CHART]b[CHART]j[CHART]e[CHART]c[CHART]t[CHART]-[CHART]l[CHART]e[CHART]v[CHART]e[CHART]l[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]o[CHART]r[CHART]i[CHART]z[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART]_[CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART] [CHART]-[CHART]>[CHART] [CHART]L[CHART]i[CHART]s[CHART]t[CHART][[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]][CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART]_[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART].[CHART]e[CHART]n[CHART]v[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART].[CHART]g[CHART]i[CHART]t[CHART]/[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]b[CHART]a[CHART]c[CHART]k[CHART]u[CHART]p[CHART].[CHART]d[CHART]b[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]r[CHART]e[CHART]t[CHART]s[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]d[CHART]e[CHART]b[CHART]u[CHART]g[CHART].[CHART]l[CHART]o[CHART]g[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART]_[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]s[CHART]s[CHART]i[CHART]o[CHART]n[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]{[CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]a[CHART]r[CHART]g[CHART]e[CHART]t[CHART]_[CHART]u[CHART]r[CHART]l[CHART]}[CHART]/[CHART]{[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]}[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART] [CHART]=[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]R[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]=[CHART]"[CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART]_[CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]m[CHART]s[CHART]=[CHART]([CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART] [CHART]-[CHART] [CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART])[CHART] [CHART]*[CHART] [CHART]1[CHART]0[CHART]0[CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART]=[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]y[CHART]l[CHART]o[CHART]a[CHART]d[CHART]_[CHART]u[CHART]s[CHART]e[CHART]d[CHART]=[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]m[CHART]p[CHART]a[CHART]c[CHART]t[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]=[CHART]"[CHART]S[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]f[CHART]i[CHART]l[CHART]e[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART] [CHART]-[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]b[CHART]r[CHART]e[CHART]a[CHART]c[CHART]h[CHART] [CHART]r[CHART]i[CHART]s[CHART]k[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]S[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]f[CHART]i[CHART]l[CHART]e[CHART]s[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]e[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]m[CHART]e[CHART]d[CHART]i[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]=[CHART]"[CHART]F[CHART]i[CHART]l[CHART]e[CHART] [CHART]a[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]r[CHART]e[CHART]s[CHART]t[CHART]r[CHART]i[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]i[CHART]r[CHART]e[CHART]d[CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART]D[CHART]a[CHART]t[CHART]a[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART] [CHART]p[CHART]r[CHART]o[CHART]t[CHART]e[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]a[CHART]c[CHART]t[CHART]i[CHART]v[CHART]e[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]
+[CHART]
+[CHART]#[CHART] [CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]
+[CHART]#[CHART] [CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART] [CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART] [CHART]T[CHART]E[CHART]S[CHART]T[CHART]S[CHART]
+[CHART]#[CHART] [CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]=[CHART]
+[CHART]
+[CHART]@[CHART]p[CHART]y[CHART]t[CHART]e[CHART]s[CHART]t[CHART].[CHART]f[CHART]i[CHART]x[CHART]t[CHART]u[CHART]r[CHART]e[CHART]([CHART]s[CHART]c[CHART]o[CHART]p[CHART]e[CHART]=[CHART]"[CHART]m[CHART]o[CHART]d[CHART]u[CHART]l[CHART]e[CHART]"[CHART])[CHART]
+[CHART]d[CHART]e[CHART]f[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]F[CHART]i[CHART]x[CHART]t[CHART]u[CHART]r[CHART]e[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]S[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART]
+[CHART]@[CHART]p[CHART]y[CHART]t[CHART]e[CHART]s[CHART]t[CHART].[CHART]f[CHART]i[CHART]x[CHART]t[CHART]u[CHART]r[CHART]e[CHART]([CHART]s[CHART]c[CHART]o[CHART]p[CHART]e[CHART]=[CHART]"[CHART]m[CHART]o[CHART]d[CHART]u[CHART]l[CHART]e[CHART]"[CHART])[CHART]
+[CHART]d[CHART]e[CHART]f[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]F[CHART]i[CHART]x[CHART]t[CHART]u[CHART]r[CHART]e[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]t[CHART]u[CHART]r[CHART]n[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART]
+[CHART]c[CHART]l[CHART]a[CHART]s[CHART]s[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]V[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]"[CHART]"[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]s[CHART]e[CHART]t[CHART]u[CHART]p[CHART]_[CHART]m[CHART]e[CHART]t[CHART]h[CHART]o[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]m[CHART]e[CHART]t[CHART]h[CHART]o[CHART]d[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]s[CHART]e[CHART]t[CHART]u[CHART]p[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]m[CHART]e[CHART]t[CHART]r[CHART]i[CHART]c[CHART]s[CHART] [CHART]t[CHART]r[CHART]a[CHART]c[CHART]k[CHART]i[CHART]n[CHART]g[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]A[CHART]r[CHART]g[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]m[CHART]e[CHART]t[CHART]h[CHART]o[CHART]d[CHART]:[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]m[CHART]e[CHART]t[CHART]h[CHART]o[CHART]d[CHART] [CHART]b[CHART]e[CHART]i[CHART]n[CHART]g[CHART] [CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]e[CHART]d[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]t[CHART]a[CHART]r[CHART]t[CHART]_[CHART]t[CHART]i[CHART]m[CHART]e[CHART] [CHART]=[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART].[CHART]t[CHART]i[CHART]m[CHART]e[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]m[CHART]e[CHART]t[CHART]r[CHART]i[CHART]c[CHART]s[CHART] [CHART]=[CHART] [CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]'[CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]_[CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]e[CHART]d[CHART]'[CHART]:[CHART] [CHART]0[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]'[CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]_[CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]'[CHART]:[CHART] [CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART] [CHART]=[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]S[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]l[CHART]f[CHART].[CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART] [CHART]=[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]T[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]a[CHART]r[CHART]d[CHART]o[CHART]w[CHART]n[CHART]_[CHART]m[CHART]e[CHART]t[CHART]h[CHART]o[CHART]d[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]c[CHART]l[CHART]e[CHART]a[CHART]n[CHART]u[CHART]p[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🔒[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]e[CHART]t[CHART]e[CHART]d[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]1[CHART]:[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]T[CHART]o[CHART]p[CHART] [CHART]1[CHART]0[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]v[CHART]i[CHART]a[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🔍[CHART] [CHART]R[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]T[CHART]o[CHART]p[CHART] [CHART]1[CHART]0[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]w[CHART]e[CHART]b[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART].[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]w[CHART]e[CHART]b[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]V[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]e[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART]n[CHART]e[CHART]s[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]w[CHART]e[CHART]b[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]g[CHART]e[CHART]"[CHART]][CHART])[CHART] [CHART]>[CHART]=[CHART] [CHART]6[CHART],[CHART] [CHART]"[CHART]I[CHART]n[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]e[CHART]t[CHART]e[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]g[CHART]e[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART] [CHART]=[CHART] [CHART]w[CHART]e[CHART]b[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]_[CHART]f[CHART]o[CHART]u[CHART]n[CHART]d[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART][[CHART]C[CHART]H[CHART]A[CHART]R[CHART]T[CHART]][CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART] [CHART]f[CHART]o[CHART]u[CHART]n[CHART]d[CHART] [CHART]{[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]}[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]I[CHART]n[CHART] [CHART]p[CHART]r[CHART]o[CHART]d[CHART]u[CHART]c[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]y[CHART]s[CHART]t[CHART]e[CHART]m[CHART]s[CHART],[CHART] [CHART]t[CHART]h[CHART]i[CHART]s[CHART] [CHART]w[CHART]o[CHART]u[CHART]l[CHART]d[CHART] [CHART]b[CHART]e[CHART] [CHART]m[CHART]u[CHART]c[CHART]h[CHART] [CHART]s[CHART]t[CHART]r[CHART]i[CHART]c[CHART]t[CHART]e[CHART]r[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]m[CHART]a[CHART]x[CHART]_[CHART]a[CHART]l[CHART]l[CHART]o[CHART]w[CHART]e[CHART]d[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]s[CHART] [CHART]=[CHART] [CHART]5[CHART] [CHART] [CHART]#[CHART] [CHART]R[CHART]e[CHART]a[CHART]l[CHART]i[CHART]s[CHART]t[CHART]i[CHART]c[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]d[CHART]e[CHART]v[CHART]e[CHART]l[CHART]o[CHART]p[CHART]m[CHART]e[CHART]n[CHART]t[CHART]/[CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART] [CHART]<[CHART]=[CHART] [CHART]m[CHART]a[CHART]x[CHART]_[CHART]a[CHART]l[CHART]l[CHART]o[CHART]w[CHART]e[CHART]d[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]s[CHART],[CHART] [CHART]f[CHART]"[CHART]T[CHART]o[CHART]o[CHART] [CHART]m[CHART]a[CHART]n[CHART]y[CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]:[CHART] [CHART]{[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]}[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]n[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]2[CHART]:[CHART] [CHART]N[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🌐[CHART] [CHART]R[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]n[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]s[CHART]s[CHART]m[CHART]e[CHART]n[CHART]t[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART].[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]A[CHART]n[CHART]a[CHART]l[CHART]y[CHART]z[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]p[CHART]o[CHART]s[CHART]t[CHART]u[CHART]r[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]2[CHART]2[CHART],[CHART] [CHART]2[CHART]1[CHART],[CHART] [CHART]2[CHART]3[CHART],[CHART] [CHART]3[CHART]3[CHART]0[CHART]6[CHART],[CHART] [CHART]5[CHART]4[CHART]3[CHART]2[CHART],[CHART] [CHART]6[CHART]3[CHART]7[CHART]9[CHART]][CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]o[CHART]m[CHART]m[CHART]o[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]l[CHART]e[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]p[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]p[CHART] [CHART]i[CHART]n[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART][[CHART]"[CHART]p[CHART]o[CHART]r[CHART]t[CHART]"[CHART]][CHART] [CHART]i[CHART]n[CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]r[CHART]i[CHART]s[CHART]k[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]][CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]n[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART],[CHART] [CHART]f[CHART]"[CHART]C[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART]:[CHART] [CHART]{[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART]_[CHART]o[CHART]p[CHART]e[CHART]n[CHART]}[CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART]-[CHART]r[CHART]i[CHART]s[CHART]k[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART]📡[CHART] [CHART]N[CHART]e[CHART]t[CHART]w[CHART]o[CHART]r[CHART]k[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]:[CHART] [CHART]{[CHART]l[CHART]e[CHART]n[CHART]([CHART]o[CHART]p[CHART]e[CHART]n[CHART]_[CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART])[CHART]}[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]s[CHART] [CHART]o[CHART]p[CHART]e[CHART]n[CHART],[CHART] [CHART]{[CHART]l[CHART]e[CHART]n[CHART]([CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART]}[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART] [CHART]s[CHART]e[CHART]r[CHART]v[CHART]i[CHART]c[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART] [CHART]i[CHART]n[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART][[CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]][CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]"[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]F[CHART]a[CHART]l[CHART]s[CHART]e[CHART],[CHART] [CHART]f[CHART]"[CHART]C[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART] [CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART]:[CHART] [CHART]{[CHART]v[CHART]u[CHART]l[CHART]n[CHART][[CHART]'[CHART]d[CHART]e[CHART]s[CHART]c[CHART]r[CHART]i[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]'[CHART]][CHART]}[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART]_[CHART]r[CHART]e[CHART]s[CHART]i[CHART]s[CHART]t[CHART]a[CHART]n[CHART]c[CHART]e[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]3[CHART]:[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]r[CHART]e[CHART]s[CHART]i[CHART]s[CHART]t[CHART]a[CHART]n[CHART]c[CHART]e[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART][[CHART]T[CHART]A[CHART]R[CHART]G[CHART]E[CHART]T[CHART]][CHART] [CHART]R[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]s[CHART]u[CHART]i[CHART]t[CHART]e[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]e[CHART]r[CHART].[CHART]r[CHART]u[CHART]n[CHART]_[CHART]f[CHART]u[CHART]l[CHART]l[CHART]_[CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]"[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART] [CHART]=[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]_[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART]"[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART]🛡[CHART]️[CHART] [CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART]:[CHART] [CHART]{[CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART]}[CHART]/[CHART]{[CHART]t[CHART]o[CHART]t[CHART]a[CHART]l[CHART]_[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]}[CHART] [CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART] [CHART]([CHART]{[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART]:[CHART].[CHART]1[CHART]%[CHART]}[CHART])[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART] [CHART]<[CHART]=[CHART] [CHART]0[CHART].[CHART]0[CHART]5[CHART],[CHART] [CHART]f[CHART]"[CHART]P[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART] [CHART]r[CHART]a[CHART]t[CHART]e[CHART] [CHART]t[CHART]o[CHART]o[CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART]:[CHART] [CHART]{[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]_[CHART]r[CHART]a[CHART]t[CHART]e[CHART]:[CHART].[CHART]1[CHART]%[CHART]}[CHART] [CHART]([CHART]m[CHART]a[CHART]x[CHART] [CHART]5[CHART]%[CHART])[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART]"[CHART]][CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART],[CHART] [CHART]f[CHART]"[CHART]C[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART] [CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART] [CHART]s[CHART]u[CHART]c[CHART]c[CHART]e[CHART]s[CHART]s[CHART]f[CHART]u[CHART]l[CHART]:[CHART] [CHART]{[CHART]p[CHART]e[CHART]n[CHART]e[CHART]t[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]'[CHART]c[CHART]r[CHART]i[CHART]t[CHART]i[CHART]c[CHART]a[CHART]l[CHART]_[CHART]e[CHART]x[CHART]p[CHART]l[CHART]o[CHART]i[CHART]t[CHART]s[CHART]'[CHART]][CHART]}[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]4[CHART]:[CHART] [CHART]D[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]s[CHART]u[CHART]p[CHART]p[CHART]l[CHART]y[CHART] [CHART]c[CHART]h[CHART]a[CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART][[CHART]P[CHART]A[CHART]C[CHART]K[CHART]A[CHART]G[CHART]E[CHART]][CHART] [CHART]R[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART].[CHART]p[CHART]e[CHART]r[CHART]f[CHART]o[CHART]r[CHART]m[CHART]_[CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART]_[CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]([CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]_[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART][[CHART]"[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART] [CHART]=[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART][[CHART]v[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]v[CHART] [CHART]i[CHART]n[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]v[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]"[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]h[CHART]i[CHART]g[CHART]h[CHART]"[CHART]][CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART]🔐[CHART] [CHART]D[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]a[CHART]u[CHART]d[CHART]i[CHART]t[CHART]:[CHART] [CHART]{[CHART]l[CHART]e[CHART]n[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART]}[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]f[CHART]o[CHART]u[CHART]n[CHART]d[CHART],[CHART] [CHART]{[CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]}[CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART] [CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART],[CHART] [CHART]f[CHART]"[CHART]H[CHART]i[CHART]g[CHART]h[CHART] [CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]:[CHART] [CHART]{[CHART]h[CHART]i[CHART]g[CHART]h[CHART]_[CHART]s[CHART]e[CHART]v[CHART]e[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]u[CHART]n[CHART]t[CHART]}[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART] [CHART]<[CHART]=[CHART] [CHART]1[CHART]0[CHART],[CHART] [CHART]f[CHART]"[CHART]T[CHART]o[CHART]o[CHART] [CHART]m[CHART]a[CHART]n[CHART]y[CHART] [CHART]d[CHART]e[CHART]p[CHART]e[CHART]n[CHART]d[CHART]e[CHART]n[CHART]c[CHART]y[CHART] [CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]:[CHART] [CHART]{[CHART]l[CHART]e[CHART]n[CHART]([CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART])[CHART]}[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]5[CHART]:[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🔐[CHART] [CHART]R[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]v[CHART]a[CHART]r[CHART]i[CHART]o[CHART]u[CHART]s[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]c[CHART]e[CHART]n[CHART]a[CHART]r[CHART]i[CHART]o[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]r[CHART]e[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]d[CHART]m[CHART]i[CHART]n[CHART]1[CHART]2[CHART]3[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]t[CHART]e[CHART]s[CHART]t[CHART]@[CHART]e[CHART]x[CHART]a[CHART]m[CHART]p[CHART]l[CHART]e[CHART].[CHART]c[CHART]o[CHART]m[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]s[CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]p[CHART]a[CHART]s[CHART]s[CHART]"[CHART]}[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]{[CHART]"[CHART]u[CHART]s[CHART]e[CHART]r[CHART]n[CHART]a[CHART]m[CHART]e[CHART]"[CHART]:[CHART] [CHART]"[CHART]a[CHART]"[CHART]*[CHART]1[CHART]0[CHART]0[CHART],[CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]:[CHART] [CHART]"[CHART]b[CHART]"[CHART]*[CHART]1[CHART]0[CHART]0[CHART]}[CHART],[CHART] [CHART] [CHART]#[CHART] [CHART]L[CHART]e[CHART]n[CHART]g[CHART]t[CHART]h[CHART] [CHART]l[CHART]i[CHART]m[CHART]i[CHART]t[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]0[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]c[CHART]r[CHART]e[CHART]d[CHART]s[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]c[CHART]r[CHART]e[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]p[CHART]o[CHART]s[CHART]t[CHART]([CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]h[CHART]t[CHART]t[CHART]p[CHART]:[CHART]/[CHART]/[CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]:[CHART]8[CHART]0[CHART]0[CHART]0[CHART]/[CHART]a[CHART]u[CHART]t[CHART]h[CHART]/[CHART]l[CHART]o[CHART]g[CHART]i[CHART]n[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]j[CHART]s[CHART]o[CHART]n[CHART]=[CHART]c[CHART]r[CHART]e[CHART]d[CHART]s[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]S[CHART]h[CHART]o[CHART]u[CHART]l[CHART]d[CHART] [CHART]f[CHART]a[CHART]i[CHART]l[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]a[CHART]l[CHART]l[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART] [CHART]c[CHART]r[CHART]e[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART] [CHART]=[CHART]=[CHART] [CHART]2[CHART]0[CHART]0[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART] [CHART]+[CHART]=[CHART] [CHART]1[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]f[CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]b[CHART]y[CHART]p[CHART]a[CHART]s[CHART]s[CHART] [CHART]w[CHART]i[CHART]t[CHART]h[CHART] [CHART]c[CHART]r[CHART]e[CHART]d[CHART]e[CHART]n[CHART]t[CHART]i[CHART]a[CHART]l[CHART]s[CHART]:[CHART] [CHART]{[CHART]c[CHART]r[CHART]e[CHART]d[CHART]s[CHART]}[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]w[CHART]e[CHART]a[CHART]k[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]p[CHART]o[CHART]l[CHART]i[CHART]c[CHART]i[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]c[CHART]r[CHART]e[CHART]d[CHART]s[CHART][[CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART]][CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]s[CHART]i[CHART]m[CHART]p[CHART]l[CHART]e[CHART]p[CHART]a[CHART]s[CHART]s[CHART]"[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]"[CHART]w[CHART]e[CHART]a[CHART]k[CHART]"[CHART] [CHART]n[CHART]o[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]t[CHART]r[CHART]([CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART]([CHART])[CHART])[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]P[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART] [CHART]p[CHART]o[CHART]l[CHART]i[CHART]c[CHART]y[CHART] [CHART]e[CHART]n[CHART]f[CHART]o[CHART]r[CHART]c[CHART]e[CHART]m[CHART]e[CHART]n[CHART]t[CHART] [CHART]c[CHART]h[CHART]e[CHART]c[CHART]k[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART],[CHART] [CHART]f[CHART]"[CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]:[CHART] [CHART]{[CHART]a[CHART]u[CHART]t[CHART]h[CHART]_[CHART]f[CHART]a[CHART]i[CHART]l[CHART]u[CHART]r[CHART]e[CHART]s[CHART]}[CHART] [CHART]([CHART]{[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]i[CHART]s[CHART]s[CHART]u[CHART]e[CHART]s[CHART]}[CHART])[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART][[CHART]O[CHART]K[CHART]][CHART] [CHART]A[CHART]u[CHART]t[CHART]h[CHART]e[CHART]n[CHART]t[CHART]i[CHART]c[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]a[CHART]n[CHART]d[CHART]_[CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]6[CHART]:[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🛡[CHART]️[CHART] [CHART]R[CHART]u[CHART]n[CHART]n[CHART]i[CHART]n[CHART]g[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART].[CHART].[CHART].[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]T[CHART]e[CHART]s[CHART]t[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART] [CHART]s[CHART]c[CHART]e[CHART]n[CHART]a[CHART]r[CHART]i[CHART]o[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]u[CHART]s[CHART]e[CHART]r[CHART]/[CHART]p[CHART]r[CHART]o[CHART]f[CHART]i[CHART]l[CHART]e[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]s[CHART]y[CHART]s[CHART]t[CHART]e[CHART]m[CHART]/[CHART]i[CHART]n[CHART]f[CHART]o[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]d[CHART]e[CHART]b[CHART]u[CHART]g[CHART]/[CHART]l[CHART]o[CHART]g[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]/[CHART]a[CHART]p[CHART]i[CHART]/[CHART]c[CHART]o[CHART]n[CHART]f[CHART]i[CHART]g[CHART]/[CHART]s[CHART]e[CHART]c[CHART]r[CHART]e[CHART]t[CHART]s[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART]_[CHART]v[CHART]i[CHART]o[CHART]l[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART] [CHART]i[CHART]n[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]_[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]s[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]t[CHART]r[CHART]y[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]g[CHART]e[CHART]t[CHART]([CHART]f[CHART]"[CHART]h[CHART]t[CHART]t[CHART]p[CHART]:[CHART]/[CHART]/[CHART]l[CHART]o[CHART]c[CHART]a[CHART]l[CHART]h[CHART]o[CHART]s[CHART]t[CHART]:[CHART]8[CHART]0[CHART]0[CHART]0[CHART]{[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]}[CHART]"[CHART],[CHART] [CHART]t[CHART]i[CHART]m[CHART]e[CHART]o[CHART]u[CHART]t[CHART]=[CHART]5[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]C[CHART]h[CHART]e[CHART]c[CHART]k[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]u[CHART]r[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART] [CHART]=[CHART] [CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]p[CHART]a[CHART]s[CHART]s[CHART]w[CHART]o[CHART]r[CHART]d[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]e[CHART]c[CHART]r[CHART]e[CHART]t[CHART]"[CHART],[CHART] [CHART]"[CHART]k[CHART]e[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]t[CHART]o[CHART]k[CHART]e[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]c[CHART]r[CHART]e[CHART]d[CHART]i[CHART]t[CHART]_[CHART]c[CHART]a[CHART]r[CHART]d[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]s[CHART]n[CHART]"[CHART],[CHART] [CHART]"[CHART]s[CHART]o[CHART]c[CHART]i[CHART]a[CHART]l[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]"[CHART],[CHART] [CHART]"[CHART]p[CHART]e[CHART]r[CHART]s[CHART]o[CHART]n[CHART]a[CHART]l[CHART]_[CHART]i[CHART]n[CHART]f[CHART]o[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART]_[CHART]t[CHART]e[CHART]x[CHART]t[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]t[CHART]e[CHART]x[CHART]t[CHART].[CHART]l[CHART]o[CHART]w[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]=[CHART] [CHART][[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]s[CHART]e[CHART]n[CHART]s[CHART]i[CHART]t[CHART]i[CHART]v[CHART]e[CHART]_[CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART]s[CHART] [CHART]i[CHART]f[CHART] [CHART]i[CHART]n[CHART]d[CHART]i[CHART]c[CHART]a[CHART]t[CHART]o[CHART]r[CHART] [CHART]i[CHART]n[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART]_[CHART]t[CHART]e[CHART]x[CHART]t[CHART]][CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]i[CHART]f[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART]_[CHART]v[CHART]i[CHART]o[CHART]l[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]a[CHART]p[CHART]p[CHART]e[CHART]n[CHART]d[CHART]([CHART]{[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART]"[CHART]:[CHART] [CHART]e[CHART]n[CHART]d[CHART]p[CHART]o[CHART]i[CHART]n[CHART]t[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART]"[CHART]:[CHART] [CHART]e[CHART]x[CHART]p[CHART]o[CHART]s[CHART]e[CHART]d[CHART]_[CHART]d[CHART]a[CHART]t[CHART]a[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART]"[CHART]:[CHART] [CHART]r[CHART]e[CHART]s[CHART]p[CHART]o[CHART]n[CHART]s[CHART]e[CHART].[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]_[CHART]c[CHART]o[CHART]d[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]}[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART] [CHART]r[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]s[CHART].[CHART]e[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART].[CHART]R[CHART]e[CHART]q[CHART]u[CHART]e[CHART]s[CHART]t[CHART]E[CHART]x[CHART]c[CHART]e[CHART]p[CHART]t[CHART]i[CHART]o[CHART]n[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]c[CHART]o[CHART]n[CHART]t[CHART]i[CHART]n[CHART]u[CHART]e[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]d[CHART]a[CHART]t[CHART]a[CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]a[CHART]s[CHART]s[CHART]e[CHART]r[CHART]t[CHART] [CHART]l[CHART]e[CHART]n[CHART]([CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART]_[CHART]v[CHART]i[CHART]o[CHART]l[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART])[CHART] [CHART]=[CHART]=[CHART] [CHART]0[CHART],[CHART] [CHART]f[CHART]"[CHART]D[CHART]a[CHART]t[CHART]a[CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART] [CHART]v[CHART]i[CHART]o[CHART]l[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]:[CHART] [CHART]{[CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART]_[CHART]v[CHART]i[CHART]o[CHART]l[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]}[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART][[CHART]O[CHART]K[CHART]][CHART] [CHART]D[CHART]a[CHART]t[CHART]a[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]a[CHART]n[CHART]d[CHART] [CHART]p[CHART]r[CHART]i[CHART]v[CHART]a[CHART]c[CHART]y[CHART] [CHART]v[CHART]a[CHART]l[CHART]i[CHART]d[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]@[CHART]p[CHART]y[CHART]t[CHART]e[CHART]s[CHART]t[CHART].[CHART]f[CHART]i[CHART]x[CHART]t[CHART]u[CHART]r[CHART]e[CHART]([CHART]s[CHART]c[CHART]o[CHART]p[CHART]e[CHART]=[CHART]"[CHART]m[CHART]o[CHART]d[CHART]u[CHART]l[CHART]e[CHART]"[CHART],[CHART] [CHART]a[CHART]u[CHART]t[CHART]o[CHART]u[CHART]s[CHART]e[CHART]=[CHART]T[CHART]r[CHART]u[CHART]e[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]d[CHART]e[CHART]f[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]i[CHART]n[CHART]g[CHART]([CHART]s[CHART]e[CHART]l[CHART]f[CHART],[CHART] [CHART]t[CHART]m[CHART]p[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART]_[CHART]f[CHART]a[CHART]c[CHART]t[CHART]o[CHART]r[CHART]y[CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]"[CHART]"[CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]f[CHART]i[CHART]x[CHART]t[CHART]u[CHART]r[CHART]e[CHART]"[CHART]"[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]y[CHART]i[CHART]e[CHART]l[CHART]d[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]G[CHART]e[CHART]n[CHART]e[CHART]r[CHART]a[CHART]t[CHART]e[CHART] [CHART]c[CHART]o[CHART]m[CHART]p[CHART]r[CHART]e[CHART]h[CHART]e[CHART]n[CHART]s[CHART]i[CHART]v[CHART]e[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]d[CHART]i[CHART]r[CHART] [CHART]=[CHART] [CHART]t[CHART]m[CHART]p[CHART]_[CHART]p[CHART]a[CHART]t[CHART]h[CHART]_[CHART]f[CHART]a[CHART]c[CHART]t[CHART]o[CHART]r[CHART]y[CHART].[CHART]g[CHART]e[CHART]t[CHART]b[CHART]a[CHART]s[CHART]e[CHART]t[CHART]e[CHART]m[CHART]p[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]=[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]_[CHART]d[CHART]i[CHART]r[CHART] [CHART]/[CHART] [CHART]"[CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART]"[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]R[CHART]u[CHART]n[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART] [CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART] [CHART]=[CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]S[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART] [CHART]=[CHART] [CHART]s[CHART]c[CHART]a[CHART]n[CHART]n[CHART]e[CHART]r[CHART].[CHART]g[CHART]e[CHART]n[CHART]e[CHART]r[CHART]a[CHART]t[CHART]e[CHART]_[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]([CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]P[CHART]r[CHART]i[CHART]n[CHART]t[CHART] [CHART]e[CHART]x[CHART]e[CHART]c[CHART]u[CHART]t[CHART]i[CHART]v[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]s[CHART]u[CHART]m[CHART]m[CHART]a[CHART]r[CHART]y[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]\[CHART]n[CHART]🛡[CHART]️[CHART] [CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART] [CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART] [CHART]V[CHART]A[CHART]L[CHART]I[CHART]D[CHART]A[CHART]T[CHART]I[CHART]O[CHART]N[CHART] [CHART]R[CHART]E[CHART]P[CHART]O[CHART]R[CHART]T[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]=[CHART]"[CHART] [CHART]*[CHART] [CHART]6[CHART]0[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART][[CHART]T[CHART]A[CHART]R[CHART]G[CHART]E[CHART]T[CHART]][CHART] [CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]S[CHART]c[CHART]o[CHART]r[CHART]e[CHART]:[CHART] [CHART]{[CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]'[CHART]s[CHART]u[CHART]m[CHART]m[CHART]a[CHART]r[CHART]y[CHART]'[CHART]][CHART][[CHART]'[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]'[CHART]][CHART]}[CHART]/[CHART]1[CHART]0[CHART]0[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART][[CHART]C[CHART]H[CHART]A[CHART]R[CHART]T[CHART]][CHART] [CHART]O[CHART]W[CHART]A[CHART]S[CHART]P[CHART] [CHART]C[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]:[CHART] [CHART]{[CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]'[CHART]s[CHART]u[CHART]m[CHART]m[CHART]a[CHART]r[CHART]y[CHART]'[CHART]][CHART][[CHART]'[CHART]o[CHART]w[CHART]a[CHART]s[CHART]p[CHART]_[CHART]c[CHART]o[CHART]m[CHART]p[CHART]l[CHART]i[CHART]a[CHART]n[CHART]c[CHART]e[CHART]_[CHART]s[CHART]c[CHART]o[CHART]r[CHART]e[CHART]'[CHART]][CHART]}[CHART]%[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART]💥[CHART] [CHART]V[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART] [CHART]F[CHART]o[CHART]u[CHART]n[CHART]d[CHART]:[CHART] [CHART]{[CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]'[CHART]s[CHART]u[CHART]m[CHART]m[CHART]a[CHART]r[CHART]y[CHART]'[CHART]][CHART][[CHART]'[CHART]v[CHART]u[CHART]l[CHART]n[CHART]e[CHART]r[CHART]a[CHART]b[CHART]i[CHART]l[CHART]i[CHART]t[CHART]i[CHART]e[CHART]s[CHART]_[CHART]f[CHART]o[CHART]u[CHART]n[CHART]d[CHART]'[CHART]][CHART]}[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART][[CHART]T[CHART]R[CHART]O[CHART]P[CHART]H[CHART]Y[CHART]][CHART] [CHART]E[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]G[CHART]r[CHART]a[CHART]d[CHART]e[CHART]:[CHART] [CHART]{[CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]'[CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART]_[CHART]g[CHART]r[CHART]a[CHART]d[CHART]i[CHART]n[CHART]g[CHART]'[CHART]][CHART][[CHART]'[CHART]g[CHART]r[CHART]a[CHART]d[CHART]e[CHART]'[CHART]][CHART]}[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART][[CHART]F[CHART]I[CHART]R[CHART]E[CHART]][CHART] [CHART]R[CHART]i[CHART]s[CHART]k[CHART] [CHART]L[CHART]e[CHART]v[CHART]e[CHART]l[CHART]:[CHART] [CHART]{[CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]'[CHART]s[CHART]u[CHART]m[CHART]m[CHART]a[CHART]r[CHART]y[CHART]'[CHART]][CHART][[CHART]'[CHART]r[CHART]i[CHART]s[CHART]k[CHART]_[CHART]l[CHART]e[CHART]v[CHART]e[CHART]l[CHART]'[CHART]][CHART].[CHART]u[CHART]p[CHART]p[CHART]e[CHART]r[CHART]([CHART])[CHART]}[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]P[CHART]r[CHART]i[CHART]n[CHART]t[CHART] [CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART] [CHART]=[CHART] [CHART]f[CHART]i[CHART]n[CHART]a[CHART]l[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART][[CHART]"[CHART]q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART]_[CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART]"[CHART]][CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART][[CHART]T[CHART]A[CHART]R[CHART]G[CHART]E[CHART]T[CHART]][CHART] [CHART]Q[CHART]u[CHART]a[CHART]l[CHART]i[CHART]t[CHART]y[CHART] [CHART]G[CHART]a[CHART]t[CHART]e[CHART]s[CHART]:[CHART] [CHART]{[CHART]'[CHART]A[CHART]L[CHART]L[CHART] [CHART]P[CHART]A[CHART]S[CHART]S[CHART]E[CHART]D[CHART] [CHART][[CHART]O[CHART]K[CHART]][CHART]'[CHART] [CHART]i[CHART]f[CHART] [CHART]a[CHART]l[CHART]l[CHART]([CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART].[CHART]v[CHART]a[CHART]l[CHART]u[CHART]e[CHART]s[CHART]([CHART])[CHART])[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]'[CHART]I[CHART]S[CHART]S[CHART]U[CHART]E[CHART]S[CHART] [CHART]D[CHART]E[CHART]T[CHART]E[CHART]C[CHART]T[CHART]E[CHART]D[CHART] [CHART][[CHART]W[CHART]A[CHART]R[CHART]N[CHART]][CHART]'[CHART]}[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]o[CHART]r[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART],[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART] [CHART]i[CHART]n[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]s[CHART].[CHART]i[CHART]t[CHART]e[CHART]m[CHART]s[CHART]([CHART])[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART] [CHART]=[CHART] [CHART]"[CHART][[CHART]O[CHART]K[CHART]][CHART]"[CHART] [CHART]i[CHART]f[CHART] [CHART]p[CHART]a[CHART]s[CHART]s[CHART]e[CHART]d[CHART] [CHART]e[CHART]l[CHART]s[CHART]e[CHART] [CHART]"[CHART][[CHART]E[CHART]R[CHART]R[CHART]O[CHART]R[CHART]][CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]_[CHART]d[CHART]i[CHART]s[CHART]p[CHART]l[CHART]a[CHART]y[CHART] [CHART]=[CHART] [CHART]g[CHART]a[CHART]t[CHART]e[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART].[CHART]r[CHART]e[CHART]p[CHART]l[CHART]a[CHART]c[CHART]e[CHART]([CHART]'[CHART]_[CHART]'[CHART],[CHART] [CHART]'[CHART] [CHART]'[CHART])[CHART].[CHART]t[CHART]i[CHART]t[CHART]l[CHART]e[CHART]([CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART] [CHART] [CHART] [CHART]{[CHART]s[CHART]t[CHART]a[CHART]t[CHART]u[CHART]s[CHART]}[CHART] [CHART]{[CHART]g[CHART]a[CHART]t[CHART]e[CHART]_[CHART]d[CHART]i[CHART]s[CHART]p[CHART]l[CHART]a[CHART]y[CHART]}[CHART]"[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]f[CHART]"[CHART]\[CHART]n[CHART]📄[CHART] [CHART]D[CHART]e[CHART]t[CHART]a[CHART]i[CHART]l[CHART]e[CHART]d[CHART] [CHART]S[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]R[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]:[CHART] [CHART]{[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]}[CHART]"[CHART])[CHART]
+[CHART]
+[CHART]i[CHART]f[CHART] [CHART]_[CHART]_[CHART]n[CHART]a[CHART]m[CHART]e[CHART]_[CHART]_[CHART] [CHART]=[CHART]=[CHART] [CHART]"[CHART]_[CHART]_[CHART]m[CHART]a[CHART]i[CHART]n[CHART]_[CHART]_[CHART]"[CHART]:[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]#[CHART] [CHART]R[CHART]u[CHART]n[CHART] [CHART]e[CHART]n[CHART]t[CHART]e[CHART]r[CHART]p[CHART]r[CHART]i[CHART]s[CHART]e[CHART] [CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART] [CHART]t[CHART]e[CHART]s[CHART]t[CHART]i[CHART]n[CHART]g[CHART] [CHART]s[CHART]u[CHART]i[CHART]t[CHART]e[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🛡[CHART]️[CHART] [CHART]R[CHART]U[CHART]N[CHART]N[CHART]I[CHART]N[CHART]G[CHART] [CHART]E[CHART]L[CHART]-[CHART]A[CHART]M[CHART]A[CHART]N[CHART]E[CHART]C[CHART]E[CHART]R[CHART] [CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART] [CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART] [CHART]V[CHART]A[CHART]L[CHART]I[CHART]D[CHART]A[CHART]T[CHART]I[CHART]O[CHART]N[CHART]"[CHART])[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]=[CHART]"[CHART]*[CHART]7[CHART]0[CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]y[CHART]t[CHART]e[CHART]s[CHART]t[CHART].[CHART]m[CHART]a[CHART]i[CHART]n[CHART]([CHART][[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]_[CHART]_[CHART]f[CHART]i[CHART]l[CHART]e[CHART]_[CHART]_[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]-[CHART]v[CHART]"[CHART],[CHART] [CHART]"[CHART]-[CHART]-[CHART]t[CHART]b[CHART]=[CHART]s[CHART]h[CHART]o[CHART]r[CHART]t[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]-[CHART]-[CHART]d[CHART]u[CHART]r[CHART]a[CHART]t[CHART]i[CHART]o[CHART]n[CHART]s[CHART]=[CHART]1[CHART]0[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]"[CHART]-[CHART]-[CHART]c[CHART]o[CHART]v[CHART]=[CHART]p[CHART]a[CHART]c[CHART]k[CHART]a[CHART]g[CHART]e[CHART]s[CHART].[CHART]c[CHART]o[CHART]n[CHART]s[CHART]c[CHART]i[CHART]o[CHART]u[CHART]s[CHART]n[CHART]e[CHART]s[CHART]s[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]-[CHART]-[CHART]c[CHART]o[CHART]v[CHART]-[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]=[CHART]h[CHART]t[CHART]m[CHART]l[CHART]:[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]/[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]/[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]g[CHART]e[CHART].[CHART]h[CHART]t[CHART]m[CHART]l[CHART]"[CHART],[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART] [CHART]f[CHART]"[CHART]-[CHART]-[CHART]c[CHART]o[CHART]v[CHART]-[CHART]r[CHART]e[CHART]p[CHART]o[CHART]r[CHART]t[CHART]=[CHART]j[CHART]s[CHART]o[CHART]n[CHART]:[CHART]t[CHART]e[CHART]s[CHART]t[CHART]s[CHART]/[CHART]r[CHART]e[CHART]s[CHART]u[CHART]l[CHART]t[CHART]s[CHART]/[CHART]s[CHART]e[CHART]c[CHART]u[CHART]r[CHART]i[CHART]t[CHART]y[CHART]_[CHART]c[CHART]o[CHART]v[CHART]e[CHART]r[CHART]a[CHART]g[CHART]e[CHART].[CHART]j[CHART]s[CHART]o[CHART]n[CHART]"[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]][CHART])[CHART]
+[CHART]
+[CHART] [CHART] [CHART] [CHART] [CHART]p[CHART]r[CHART]i[CHART]n[CHART]t[CHART]([CHART]"[CHART]🏁[CHART] [CHART]E[CHART]N[CHART]T[CHART]E[CHART]R[CHART]P[CHART]R[CHART]I[CHART]S[CHART]E[CHART] [CHART]S[CHART]E[CHART]C[CHART]U[CHART]R[CHART]I[CHART]T[CHART]Y[CHART] [CHART]T[CHART]E[CHART]S[CHART]T[CHART]I[CHART]N[CHART]G[CHART] [CHART]C[CHART]O[CHART]M[CHART]P[CHART]L[CHART]E[CHART]T[CHART]E[CHART]"[CHART])[CHART]
+[CHART]

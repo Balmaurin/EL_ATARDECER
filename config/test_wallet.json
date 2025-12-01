@@ -1,0 +1,8 @@
+{
+  "public_key": "82bWyKMFx3jEraBk53wqFz6eGgbS52nCQPwvBkL26Swb",
+  "secret_key": "bf1c1858ec3c6839e9e270fdc118666e40ea96ed2bd16497ad75bc8e521a6240",
+  "network": "devnet",
+  "description": "Wallet de autoridad para pruebas SHEILYS en devnet",
+  "created_at": "2025-11-29",
+  "warning": "Esta wallet es solo para pruebas. No contiene fondos reales."
+}

@@ -53,6 +53,19 @@ except ImportError:
     BM25_AVAILABLE = False
     BM25Okapi = None
 
+# Importar métricas Prometheus
+try:
+    from core.indexing_metrics import (
+        IndexingMetrics,
+        create_metrics_for_index,
+    )
+
+    METRICS_AVAILABLE = True
+except ImportError:
+    METRICS_AVAILABLE = False
+    IndexingMetrics = None
+    create_metrics_for_index = None
+
 
 class HybridVectorStore:
     """Sistema híbrido de indexación vectorial ChromaDB + Faiss"""
@@ -84,7 +97,7 @@ class HybridVectorStore:
         self.bm25_index = None
         self.bm25_texts = []
 
-        # Métricas de rendimiento
+        # Métricas de rendimiento (legacy)
         self.metrics = {
             "queries_processed": 0,
             "avg_query_time": 0,
@@ -92,13 +105,30 @@ class HybridVectorStore:
             "hybrid_search_ratio": 0.7,
         }
 
-        # Inicializar componentes
-        self._initialize_components()
+        # Métricas Prometheus
+        if METRICS_AVAILABLE:
+            self.prometheus_metrics = create_metrics_for_index(collection_name)
+        else:
+            self.prometheus_metrics = None
 
-    def _initialize_components(self):
-        """Inicializar todos los componentes del sistema"""
+        # Initialization state
+        self.initialized = False
+
+    async def initialize(self):
+        """Inicializar todos los componentes del sistema de manera asíncrona"""
+        if self.initialized:
+            return
+
         print("🚀 Inicializando sistema híbrido de indexación vectorial...")
+        loop = asyncio.get_running_loop()
 
+        # Run heavy initialization in executor
+        await loop.run_in_executor(None, self._initialize_components_sync)
+        self.initialized = True
+        print("✅ Sistema híbrido inicializado")
+
+    def _initialize_components_sync(self):
+        """Inicialización síncrona de componentes (para correr en thread)"""
         # Modelo de embeddings
         if SENTENCE_TRANSFORMERS_AVAILABLE:
             try:
@@ -148,10 +178,11 @@ class HybridVectorStore:
         else:
             print("❌ Faiss no disponible")
 
-        print("✅ Sistema híbrido inicializado")
-
     async def add_documents(self, documents: List[Dict[str, Any]]) -> bool:
         """Agregar documentos al índice híbrido"""
+        if not self.initialized:
+            await self.initialize()
+
         if not documents:
             return False
 
@@ -173,55 +204,31 @@ class HybridVectorStore:
             if not texts:
                 return False
 
-            # Generar embeddings
+            # Generar embeddings (async)
             embeddings = await self._generate_embeddings(texts)
 
             if embeddings is None:
                 return False
 
-            # 1. Agregar a ChromaDB
-            if self.chroma_collection is not None:
-                try:
-                    self.chroma_collection.add(
-                        embeddings=embeddings,
-                        documents=texts,
-                        metadatas=metadatas,
-                        ids=ids,
+            # Registrar inicio de construcción de índice
+            if self.prometheus_metrics:
+                self.prometheus_metrics.start_index_build()
+
+            # Run DB operations in executor to avoid blocking
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                None, 
+                lambda: self._add_to_stores_sync(texts, metadatas, ids, embeddings)
+            )
+
+            # Registrar finalización de construcción de índice
+            if self.prometheus_metrics:
+                self.prometheus_metrics.record_index_build("hybrid", success=True)
+                # Actualizar número de vectores
+                if self.faiss_index is not None:
+                    self.prometheus_metrics.set_n_vectors(
+                        self.faiss_index.ntotal, "faiss"
                     )
-                    print(f"✅ Documentos agregados a ChromaDB: {len(texts)}")
-                except Exception as e:
-                    print(f"⚠️ Error agregando a ChromaDB: {e}")
-
-            # 2. Agregar a Faiss
-            if self.faiss_index is not None:
-                try:
-                    # Agregar embeddings a Faiss
-                    self.faiss_index.add(embeddings.astype(np.float32))
-
-                    # Mantener mapping y textos para Faiss
-                    for i, (text, metadata, doc_id) in enumerate(
-                        zip(texts, metadatas, ids)
-                    ):
-                        self.faiss_id_mapping[len(self.faiss_texts)] = doc_id
-                        self.faiss_texts.append(text)
-                        self.faiss_metadata.append(metadata)
-
-                    print(f"✅ Documentos agregados a Faiss: {len(texts)}")
-                except Exception as e:
-                    print(f"⚠️ Error agregando a Faiss: {e}")
-
-            # 3. Actualizar BM25 index
-            if BM25_AVAILABLE and self.bm25_texts is not None:
-                try:
-                    self.bm25_texts.extend(texts)
-                    # Tokenizar para BM25
-                    tokenized_texts = [text.lower().split() for text in self.bm25_texts]
-                    self.bm25_index = BM25Okapi(tokenized_texts)
-                    print(
-                        f"✅ BM25 index actualizado: {len(self.bm25_texts)} documentos"
-                    )
-                except Exception as e:
-                    print(f"⚠️ Error actualizando BM25: {e}")
 
             return True
 
@@ -229,10 +236,59 @@ class HybridVectorStore:
             print(f"❌ Error procesando documentos: {e}")
             return False
 
+    def _add_to_stores_sync(self, texts, metadatas, ids, embeddings):
+        """Operaciones síncronas de base de datos"""
+        # 1. Agregar a ChromaDB
+        if self.chroma_collection is not None:
+            try:
+                self.chroma_collection.add(
+                    embeddings=embeddings,
+                    documents=texts,
+                    metadatas=metadatas,
+                    ids=ids,
+                )
+                print(f"✅ Documentos agregados a ChromaDB: {len(texts)}")
+            except Exception as e:
+                print(f"⚠️ Error agregando a ChromaDB: {e}")
+
+        # 2. Agregar a Faiss
+        if self.faiss_index is not None:
+            try:
+                # Agregar embeddings a Faiss
+                self.faiss_index.add(embeddings.astype(np.float32))
+
+                # Mantener mapping y textos para Faiss
+                for i, (text, metadata, doc_id) in enumerate(
+                    zip(texts, metadatas, ids)
+                ):
+                    self.faiss_id_mapping[len(self.faiss_texts)] = doc_id
+                    self.faiss_texts.append(text)
+                    self.faiss_metadata.append(metadata)
+
+                print(f"✅ Documentos agregados a Faiss: {len(texts)}")
+            except Exception as e:
+                print(f"⚠️ Error agregando a Faiss: {e}")
+
+        # 3. Actualizar BM25 index
+        if BM25_AVAILABLE:
+            try:
+                self.bm25_texts.extend(texts)
+                # Tokenizar para BM25
+                tokenized_texts = [text.lower().split() for text in self.bm25_texts]
+                self.bm25_index = BM25Okapi(tokenized_texts)
+                print(
+                    f"✅ BM25 index actualizado: {len(self.bm25_texts)} documentos"
+                )
+            except Exception as e:
+                print(f"⚠️ Error actualizando BM25: {e}")
+
     async def hybrid_search(
         self, query: str, limit: int = 10, score_threshold: float = 0.0
     ) -> List[Dict[str, Any]]:
         """Búsqueda híbrida combinando vector search + BM25"""
+        if not self.initialized:
+            await self.initialize()
+
         start_time = datetime.now()
 
         print(f"🔍 Ejecutando búsqueda híbrida para: '{query[:50]}...'")
@@ -245,79 +301,21 @@ class HybridVectorStore:
 
             query_embedding = query_embedding[0]
 
-            # Resultados de diferentes estrategias
-            vector_results = []
-            bm25_results = []
-
-            # 1. Vector search con Faiss
-            if (
-                FAISS_AVAILABLE
-                and self.faiss_index is not None
-                and len(self.faiss_texts) > 0
-            ):
-                try:
-                    # Búsqueda en Faiss
-                    distances, indices = self.faiss_index.search(
-                        query_embedding.reshape(1, -1).astype(np.float32),
-                        min(
-                            limit * 2, len(self.faiss_texts)
-                        ),  # Buscar más para luego filtrar
-                    )
-
-                    for i, idx in enumerate(indices[0]):
-                        if idx != -1 and idx < len(self.faiss_texts):
-                            similarity = (
-                                1 - distances[0][i]
-                            )  # Convertir distancia a similitud
-                            if similarity >= score_threshold:
-                                vector_results.append(
-                                    {
-                                        "text": self.faiss_texts[idx],
-                                        "metadata": (
-                                            self.faiss_metadata[idx]
-                                            if idx < len(self.faiss_metadata)
-                                            else {}
-                                        ),
-                                        "similarity": float(similarity),
-                                        "source": "faiss",
-                                        "doc_id": self.faiss_id_mapping.get(
-                                            idx, f"faiss_{idx}"
-                                        ),
-                                    }
-                                )
-                except Exception as e:
-                    print(f"⚠️ Error en búsqueda Faiss: {e}")
-
-            # 2. BM25 search
-            if BM25_AVAILABLE and self.bm25_index is not None:
-                try:
-                    query_tokens = query.lower().split()
-                    bm25_scores = self.bm25_index.get_scores(query_tokens)
-
-                    # Obtener top resultados BM25
-                    top_bm25_indices = np.argsort(bm25_scores)[::-1][: limit * 2]
-
-                    for idx in top_bm25_indices:
-                        score = bm25_scores[idx]
-                        if score > 0.1:  # Umbral mínimo
-                            bm25_results.append(
-                                {
-                                    "text": self.bm25_texts[idx],
-                                    "bm25_score": float(score),
-                                    "source": "bm25",
-                                    "doc_id": f"bm25_{idx}",
-                                }
-                            )
-                except Exception as e:
-                    print(f"⚠️ Error en búsqueda BM25: {e}")
-
-            # 3. Combinar resultados de manera inteligente
-            combined_results = await self._combine_results(
-                vector_results, bm25_results, query, limit
+            # Run search in executor
+            loop = asyncio.get_running_loop()
+            combined_results = await loop.run_in_executor(
+                None,
+                lambda: self._search_sync(query, query_embedding, limit, score_threshold)
             )
 
             # Actualizar métricas
-            self._update_metrics(datetime.now() - start_time, len(combined_results))
+            query_time_delta = datetime.now() - start_time
+            query_time_ms = query_time_delta.total_seconds() * 1000
+            self._update_metrics(query_time_delta, len(combined_results))
+            
+            # Registrar en Prometheus
+            if self.prometheus_metrics:
+                self.prometheus_metrics.record_query(query_time_ms, "hybrid")
 
             print(
                 f"✅ Búsqueda híbrida completada - Resultados: {len(combined_results)}"
@@ -328,7 +326,77 @@ class HybridVectorStore:
             print(f"❌ Error en búsqueda híbrida: {e}")
             return []
 
-    async def _combine_results(
+    def _search_sync(self, query, query_embedding, limit, score_threshold):
+        """Búsqueda síncrona"""
+        vector_results = []
+        bm25_results = []
+
+        # 1. Vector search con Faiss
+        if (
+            FAISS_AVAILABLE
+            and self.faiss_index is not None
+            and len(self.faiss_texts) > 0
+        ):
+            try:
+                # Búsqueda en Faiss
+                distances, indices = self.faiss_index.search(
+                    query_embedding.reshape(1, -1).astype(np.float32),
+                    min(
+                        limit * 2, len(self.faiss_texts)
+                    ),  # Buscar más para luego filtrar
+                )
+
+                for i, idx in enumerate(indices[0]):
+                    if idx != -1 and idx < len(self.faiss_texts):
+                        similarity = (
+                            1 - distances[0][i]
+                        )  # Convertir distancia a similitud
+                        if similarity >= score_threshold:
+                            vector_results.append(
+                                {
+                                    "text": self.faiss_texts[idx],
+                                    "metadata": (
+                                        self.faiss_metadata[idx]
+                                        if idx < len(self.faiss_metadata)
+                                        else {}
+                                    ),
+                                    "similarity": float(similarity),
+                                    "source": "faiss",
+                                    "doc_id": self.faiss_id_mapping.get(
+                                        idx, f"faiss_{idx}"
+                                    ),
+                                }
+                            )
+            except Exception as e:
+                print(f"⚠️ Error en búsqueda Faiss: {e}")
+
+        # 2. BM25 search
+        if BM25_AVAILABLE and self.bm25_index is not None:
+            try:
+                query_tokens = query.lower().split()
+                bm25_scores = self.bm25_index.get_scores(query_tokens)
+
+                # Obtener top resultados BM25
+                top_bm25_indices = np.argsort(bm25_scores)[::-1][: limit * 2]
+
+                for idx in top_bm25_indices:
+                    score = bm25_scores[idx]
+                    if score > 0.1:  # Umbral mínimo
+                        bm25_results.append(
+                            {
+                                "text": self.bm25_texts[idx],
+                                "bm25_score": float(score),
+                                "source": "bm25",
+                                "doc_id": f"bm25_{idx}",
+                            }
+                        )
+            except Exception as e:
+                print(f"⚠️ Error en búsqueda BM25: {e}")
+
+        # 3. Combinar resultados
+        return self._combine_results_sync(vector_results, bm25_results, query, limit)
+
+    def _combine_results_sync(
         self,
         vector_results: List[Dict],
         bm25_results: List[Dict],
@@ -336,6 +404,7 @@ class HybridVectorStore:
         limit: int,
     ) -> List[Dict]:
         """Combinar resultados de vector search y BM25 de manera inteligente"""
+        # (This logic was previously async but didn't await anything, so it can be sync)
         combined_scores = {}
 
         # Peso para cada tipo de resultado
@@ -394,9 +463,13 @@ class HybridVectorStore:
 
         return final_results
 
+    # Kept for compatibility but redirects to sync version
+    async def _combine_results(self, *args, **kwargs):
+        return self._combine_results_sync(*args, **kwargs)
+
     async def _generate_embeddings(self, texts: List[str]) -> Optional[np.ndarray]:
-        """Generar embeddings para textos dados"""
-        if not SENTENCE_TRANSFORMERS_AVAILABLE or self.embedding_model is None:
+        """Generar embeddings para textos dados (async)"""
+        if not SENTENCE_TRANSFORMERS_AVAILABLE:
             print("❌ Modelo de embeddings no disponible")
             return None
 
@@ -404,7 +477,12 @@ class HybridVectorStore:
             return None
 
         try:
-            embeddings = self.embedding_model.encode(texts, convert_to_numpy=True)
+            # Run inference in executor
+            loop = asyncio.get_running_loop()
+            embeddings = await loop.run_in_executor(
+                None, 
+                lambda: self.embedding_model.encode(texts, convert_to_numpy=True)
+            )
             return embeddings
         except Exception as e:
             print(f"❌ Error generando embeddings: {e}")
@@ -445,7 +523,11 @@ class HybridVectorStore:
 
         # Estadísticas de Faiss
         if self.faiss_index is not None:
-            stats["collections"]["faiss"] = self.faiss_index.ntotal
+            faiss_count = self.faiss_index.ntotal
+            stats["collections"]["faiss"] = faiss_count
+            # Actualizar métricas Prometheus
+            if self.prometheus_metrics:
+                self.prometheus_metrics.set_n_vectors(faiss_count, "faiss")
         else:
             stats["collections"]["faiss"] = 0
 
@@ -528,8 +610,11 @@ class VectorIndexingAPI:
 
     async def initialize(self, collection_name: str = "sheily_rag"):
         """Inicializar el sistema de indexación"""
-        self.vector_store = HybridVectorStore(collection_name)
-        print("🎯 API de Vector Indexing inicializada")
+        if self.vector_store is None:
+            self.vector_store = HybridVectorStore(collection_name)
+            await self.vector_store.initialize()
+            self.indexes[collection_name] = self.vector_store
+            print("🎯 API de Vector Indexing inicializada")
         return True
 
     async def create_index(self, index_name: str, config: Dict[str, Any] = None):

@@ -389,14 +389,14 @@ async def create_extensions():
         # Audit trigger functionality
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "audit-trigger";'))
 
-        print("✅ PostgreSQL extensions created successfully")
+        print("[OK] PostgreSQL extensions created successfully")
 
 
 async def create_tables():
     """Create all database tables"""
     async with async_engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
-        print("✅ All database tables created successfully")
+        print("[OK] All database tables created successfully")
 
 
 async def create_indexes():
@@ -437,10 +437,10 @@ async def create_indexes():
             try:
                 await conn.execute(text(query))
             except Exception as e:
-                print(f"⚠️ Index creation warning: {e}")
+                print(f"[WARN] Index creation warning: {e}")
                 continue
 
-        print("✅ Database indexes created successfully")
+        print("[OK] Database indexes created successfully")
 
 
 async def create_row_level_security():
@@ -532,10 +532,10 @@ async def create_row_level_security():
             try:
                 await conn.execute(text(query.strip()))
             except Exception as e:
-                print(f"⚠️ RLS policy warning: {e}")
+                print(f"[WARN] RLS policy warning: {e}")
                 continue
 
-        print("✅ Row-Level Security policies configured successfully")
+        print("[OK] Row-Level Security policies configured successfully")
 
 
 async def create_default_roles():
@@ -601,7 +601,7 @@ async def create_default_roles():
                 },
             )
 
-        print("✅ Default roles created successfully")
+        print("[OK] Default roles created successfully")
 
 
 async def create_default_admin():
@@ -641,7 +641,7 @@ async def create_default_admin():
 
     # Validate password strength
     if len(admin_password) < 12:
-        logger.error("❌ Admin password too weak - minimum 12 characters required")
+        logger.error("[ERROR] Admin password too weak - minimum 12 characters required")
         raise ValueError("Admin password must be at least 12 characters long")
 
     # Create admin password hash (secure the password immediately)
@@ -676,15 +676,15 @@ async def create_default_admin():
             },
         )
 
-        logger.info("✅ Default admin user 'admin' created successfully")
+        logger.info("[OK] Default admin user 'admin' created successfully")
         logger.warning(
-            "⚠️  SECURITY: Change default admin password immediately in production!"
+            "[WARN]  SECURITY: Change default admin password immediately in production!"
         )
         logger.warning(
             "🔐 Use environment variable SHEILY_ADMIN_PASSWORD to set custom password"
         )
         logger.info("📧 Admin email: admin@sheily.ai")
-        logger.info("🚀 Default admin account ready (requires password change)")
+        logger.info("[START] Default admin account ready (requires password change)")
 
 
 async def create_triggers_and_functions():
@@ -766,15 +766,15 @@ async def create_triggers_and_functions():
             try:
                 await conn.execute(text(query.strip()))
             except Exception as e:
-                print(f"⚠️ Trigger/function creation warning: {e}")
+                print(f"[WARN] Trigger/function creation warning: {e}")
                 continue
 
-        print("✅ Database triggers and functions created successfully")
+        print("[OK] Database triggers and functions created successfully")
 
 
 async def run_migrations():
     """Run all database migrations"""
-    print("🚀 Starting database migrations...")
+    print("[START] Starting database migrations...")
 
     try:
         # Create database extensions
@@ -798,11 +798,11 @@ async def run_migrations():
         # Create triggers and functions
         await create_triggers_and_functions()
 
-        print("🎉 Database migrations completed successfully!")
-        print("📊 Database ready for Sheily MCP Enterprise production deployment")
+        print("[CELEBRATION] Database migrations completed successfully!")
+        print("[CHART] Database ready for Sheily MCP Enterprise production deployment")
 
     except Exception as e:
-        print(f"❌ Database migration failed: {e}")
+        print(f"[ERROR] Database migration failed: {e}")
         raise
 
 
@@ -812,7 +812,7 @@ async def health_check():
         async with async_engine.begin() as conn:
             result = await conn.execute(text("SELECT version()"))
             version = result.fetchone()[0]
-            print(f"✅ Database connection successful: {version[:50]}...")
+            print(f"[OK] Database connection successful: {version[:50]}...")
 
             # Check table existence
             tables = ["users", "conversations", "agent_tasks", "security_audit_logs"]
@@ -824,13 +824,13 @@ async def health_check():
                     {"table": table},
                 )
                 exists = result.fetchone()[0]
-                status = "✅" if exists else "❌"
+                status = "[OK]" if exists else "[ERROR]"
                 print(f"{status} Table '{table}' exists: {exists}")
 
             return True
 
     except Exception as e:
-        print(f"❌ Database health check failed: {e}")
+        print(f"[ERROR] Database health check failed: {e}")
         return False
 
 

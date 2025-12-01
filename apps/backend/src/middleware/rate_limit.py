@@ -11,7 +11,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from redis import Redis
 
-from ..config.settings import settings
+from apps.backend.src.core.config.settings import settings
 
 logger = logging.getLogger(__name__)
 

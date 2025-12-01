@@ -34,7 +34,7 @@ async def validate_mcp_assignments():
     print("=" * 80)
     print(f"📊 TOTAL FUNCTIONS: {total_functions}")
     print(f"🤖 ASSIGNED FUNCTIONS: {assigned_functions}")
-    print(".1f"
+    print(f"📈 COVERAGE: {coverage:.1f}%")
     # Análisis detallado de calidad
     assignment_analysis = await analyze_assignment_quality(orchestrator.agent_assignments)
     agent_distribution = await get_agent_distribution(orchestrator.agent_assignments)
@@ -47,8 +47,13 @@ async def validate_mcp_assignments():
     print(f"\n🤖 AGENT SPECIALIZATION TOP 10:")
     for i, (agent, count) in enumerate(agent_distribution[:10], 1):
         pct = (count / assigned_functions) * 100 if assigned_functions > 0 else 0
-        print("2d"    # Validación lógica de asignaciones críticas
+        print(f"   {i:2d}. {agent}: {count} ({pct:.1f}%)")
     quality_validation = await validate_logic_assignment_quality(orchestrator.agent_assignments)
+
+    # Calcular puntuación general de calidad
+    overall_quality_score = calculate_overall_quality_score(
+        quality_validation, assignment_analysis, coverage
+    )
 
     print(f"\n✅ QUALITY VALIDATION RESULTS:")
     print(f"   ℹ️ Validation checks performed: {quality_validation['checks_performed']}")
@@ -72,18 +77,9 @@ async def validate_mcp_assignments():
         agent = assignment['primary_agent']
         capabilities = assignment.get('capabilities', [])
         cap_list = ', '.join(capabilities[:2]) + ('...' if len(capabilities) > 2 else '')
-        print("2d"
+        print(f"   {i:2d}. {func_path} -> {agent} [{cap_list}]")
 
-    # Estadísticas finales de evaluación
-    print("
-🏆 FINAL QUALITY ASSESSMENT:"
-    print(f"   💎 Military-grade quality: {'✅ ACHIEVED' if quality_validation['issues_found'] == 0 else '⚠️ NEEDS OPTIMIZATION'}")
-    print(f"   🤖 Agent specialization: {'✅ DIVERSE & APPROPRIATE' if assignment_analysis['unique_agents'] >= 10 else '⚠️ LIMITED'}")
-    print(f"   🎯 Assignment logic: {'✅ HIGH FIDELITY' if assignment_analysis['avg_capabilities'] >= 1.5 else '⚠️ BASIC'}")
-    print(f"   📈 System confidence: {'✅ ENTERPRISE READY' if coverage >= 99.9 else '⚠️ NEEDS WORK'}")
-
-    overall_quality_score = calculate_overall_quality_score(quality_validation, assignment_analysis, coverage)
-    print(".0f"
+    print(f"   🌟 OVERALL QUALITY SCORE: {overall_quality_score:.0f}/100")
     return {
         'total_functions': total_functions,
         'assigned_functions': assigned_functions,

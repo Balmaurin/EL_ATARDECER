@@ -334,7 +334,7 @@ class QueryClassifier:
             weight_decay=0.01,
             logging_dir=f"{self.model_path}/logs",
             logging_steps=100,
-            evaluation_strategy="steps",
+            eval_strategy="steps",
             eval_steps=eval_steps,
             save_steps=save_steps,
             save_total_limit=2,

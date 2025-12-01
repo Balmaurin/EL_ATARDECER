@@ -36,13 +36,8 @@ import logging
 # ==============================================================================
 
 __all__ = [
-    # "ChatEngine",
     "UnifiedChatSystem",
     "FastChatV3",
-    # "SheilyChatMemoryAdapter",
-    # "ChatContext",
-    # "ChatMessage",
-    # "ChatResponse",
 ]
 
 # ==============================================================================
@@ -54,25 +49,54 @@ __author__ = "Sheily AI Team"
 __description__ = "Sistema completo de conversación inteligente con detección automática de ramas académicas"
 
 # ==============================================================================
-# IMPORTS CONDICIONALES PARA MEJOR COMPATIBILIDAD
+# IMPORTS REALES - Sin comentarios, solo lo que está disponible
 # ==============================================================================
 
-# from .chat_engine import ChatContext, ChatEngine, ChatMessage, ChatResponse
-# from .sheily_chat_memory_adapter import SheilyChatMemoryAdapter
-from .sheily_fast_chat_v3 import FastChatV3
-from .unified_chat_system import UnifiedChatSystem
-
 logger = logging.getLogger(__name__)
+
+# Imports reales - fail if not available
+try:
+    from .sheily_fast_chat_v3 import FastChatV3
+    from .unified_chat_system import UnifiedChatSystem
+    logger.info("✅ Chat system components loaded successfully")
+except ImportError as e:
+    logger.error(f"❌ CRITICAL: Chat system components not available: {e}")
+    raise ImportError(
+        f"Chat system components not available. Required modules:\n"
+        f"  - sheily_fast_chat_v3 (FastChatV3)\n"
+        f"  - unified_chat_system (UnifiedChatSystem)\n"
+        f"Original error: {e}"
+    ) from e
+
+# Optional components - try to import but don't fail if not available
+try:
+    from .chat_engine import ChatContext, ChatEngine, ChatMessage, ChatResponse
+    __all__.extend(["ChatEngine", "ChatContext", "ChatMessage", "ChatResponse"])
+    logger.info("✅ ChatEngine components available")
+except ImportError:
+    logger.debug("ChatEngine components not available (optional)")
+
+try:
+    from .sheily_chat_memory_adapter import SheilyChatMemoryAdapter
+    __all__.append("SheilyChatMemoryAdapter")
+    logger.info("✅ Chat memory adapter available")
+except ImportError:
+    logger.debug("Chat memory adapter not available (optional)")
 
 
 # ==============================================================================
 # FUNCIONES DE UTILIDAD DEL MÓDULO
 # ==============================================================================
 
-
-# def create_chat_engine(config_path: str = None):
-#     """Crear motor de chat con configuración opcional"""
-#     return ChatEngine()
+def create_chat_engine(config_path: str = None):
+    """Crear motor de chat con configuración opcional - REAL implementation"""
+    try:
+        from .chat_engine import ChatEngine
+        return ChatEngine() if config_path is None else ChatEngine(config_path)
+    except NameError:
+        raise RuntimeError(
+            "ChatEngine not available. Install chat_engine module or use UnifiedChatSystem instead."
+        )
 
 
 def create_unified_chat():

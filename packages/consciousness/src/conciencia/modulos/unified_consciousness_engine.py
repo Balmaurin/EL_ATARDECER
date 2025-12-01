@@ -1,20 +1,26 @@
 """
 Unified Consciousness Engine
-Integrates ALL 6 major consciousness theories into a single coherent system
+Integra las 11 teorías neurocientíficas principales en un sistema coherente
 
-Theories Integrated:
+Teorías Integradas:
 1. IIT 4.0 (Tononi 2023) - Integrated Information Theory
 2. GWT (Baars 1997/2003) - Global Workspace Theory
-3. FEP (Friston 2010) - Free Energy Principle
-4. SMH (Damasio 1994) - Somatic Marker Hypothesis
-5. Hebbian Plasticity (Hebb 1949, Widrow) - Neural Learning
-6. Circumplex Model (Russell 1980) - Emotional Space
+3. AST (Graziano 2020) - Attention Schema Theory
+4. FEP (Friston 2010) - Free Energy Principle
+5. SMH (Damasio 1994) - Somatic Marker Hypothesis
+6. STDP/Hebbian (Hebb 1949, Widrow) - Plasticidad sináptica
+7. Circumplex Model (Russell 1980) - Modelo bidimensional de emoción
+8. Claustrum (Crick & Koch 2005) - Binding multimodal gamma
+9. Thalamus (Sherman & Guillery, Halassa) - Relé sensorial, gating atencional
+10. DMN (Raichle, Buckner 2001/2008) - Default Mode Network
+11. Qualia (Chalmers, Tononi & Koch) - Fenomenología computacional
 
-Architecture:
-    Layer 1: PERCEPTION & PREDICTION (FEP)
-    Layer 2: INTEGRATION & AWARENESS (IIT + GWT)
-    Layer 3: EVALUATION & EMOTION (SMH + Circumplex)
-    Layer 4: LEARNING & ADAPTATION (Hebbian)
+Arquitectura:
+    Capa 1: Percepción y predicción (FEP)
+    Capa 2: Integración y consciencia global (IIT, GWT, AST, Claustrum, Thalamus)
+    Capa 3: Evaluación emocional y corporal (SMH, Circumplex, DMN)
+    Capa 4: Aprendizaje y adaptación (Hebbian/STDP, memoria)
+    Capa 5: Generación de qualia (experiencia fenomenológica reportable)
 """
 
 import numpy as np
@@ -26,6 +32,11 @@ from .fep_engine import FEPEngine
 from .iit_stdp_engine import IITEngineSTDP
 from .iit_gwt_integration import IIT_GWT_Bridge, ConsciousnessOrchestrator
 from .smh_evaluator import SMHEvaluator
+# === Importaciones de módulos faltantes, todos REALES ===
+from .claustrum import ClaustrumExtended
+from .thalamus import ThalamusExtended, Amygdala, Insula, Hippocampus, PFC, ACC, BasalGanglia, SimpleRAG
+from .default_mode_network import DefaultModeNetwork
+from .qualia_simulator import QualiaSimulator
 
 @dataclass
 class UnifiedConsciousState:
@@ -63,16 +74,15 @@ class UnifiedConsciousState:
 
 class UnifiedConsciousnessEngine:
     """
-    The Grand Orchestrator - Integrates all 6 consciousness theories
+    Gran Orquestador - Integra las 11 teorías principales de la consciencia
     
-    Processing Flow:
-    1. FEP generates predictions and errors
-    2. IIT calculates integration (Φ)
-    3. GWT workspace competition (FEP errors + IIT distinctions + SMH markers)
-    4. SMH provides emotional evaluation
-    5. GWT broadcasts winners globally
-    6. Hebbian learning updates connections
-    7. Circumplex maps emotional state
+    Flujo de procesamiento:
+    1. FEP genera predicciones y errores (Capa 1)
+    2. IIT calcula integración (Φ) (Capa 2)
+    3. GWT/AST/Claustrum/Thalamus: competencia y difusión global (Capa 2)
+    4. SMH, DMN y Circumplex: evaluación emocional/corporal (Capa 3)
+    5. Aprendizaje Hebb/STDP (Capa 4, en IIT también)
+    6. Qualia: generación fenomenológica (Capa 5, simulador externo)
     """
     
     def __init__(self):
@@ -91,41 +101,69 @@ class UnifiedConsciousnessEngine:
         self.smh_evaluator = SMHEvaluator()
         print("  ✅ SMH Evaluator (Somatic Markers)")
         
-        # Layer 4: Circumplex (already in HumanEmotionalSystem)
-        # Layer 5: Hebbian (already in IIT engine's virtual TPM)
-        print("  ✅ Hebbian Learning (integrated in IIT TPM)")
+        # Layer 4: Circumplex (ya en HumanEmotionalSystem)
         print("  ✅ Circumplex Model (emotion mapping)")
-        
+        # Layer 5: Hebbian (ya en IIT virtual TPM)
+        print("  ✅ Hebbian Learning (integrated in IIT TPM)")
+        # === NUEVO: Instanciación real de módulos faltantes de la arquitectura ===
+        # Thalamus con módulos reales
+        self.rag_system = SimpleRAG()
+        self.amygdala = Amygdala(sensitivity=1.0)
+        self.insula = Insula(sensitivity=0.8)
+        self.hippocampus = Hippocampus(novelty_threshold=0.6)
+        self.pfc_module = PFC(top_down_focus={})
+        self.acc_module = ACC()
+        self.basal_ganglia = BasalGanglia()
+        thalamus_modules = [self.amygdala, self.insula, self.hippocampus, self.pfc_module, self.acc_module, self.basal_ganglia]
+        self.thalamus = ThalamusExtended(modules=thalamus_modules, rag=self.rag_system, global_max_relay=6, temporal_window_s=0.03, logging_enabled=False)
+        print("  ✅ ThalamusExtended con 6 módulos funcionales y RAG")
+        # Claustrum real (binding multimodal cortical determinista)
+        self.claustrum = ClaustrumExtended(system_id="UQ_CLAU", mid_frequency_hz=40.0, binding_window_ms=25,
+                                           synchronization_threshold=0.35, logging=False, db_path="claustrum_UQ.db")
+        self.claustrum.connect_area('visual_cortex', 'visual', weight=1.2)
+        self.claustrum.connect_area('auditory_cortex', 'auditory', weight=0.9)
+        self.claustrum.connect_area('somatosensory_cortex', 'somatosensory', weight=1.0)
+        self.claustrum.connect_area('prefrontal_cortex', 'cognitive', weight=0.8)
+        self.claustrum.connect_area('emotional_cortex', 'emotional', weight=1.1)
+        print("  ✅ ClaustrumExtended (binding determinista, sincronía gamma)")
+        # DMN real
+        self.default_mode_network = DefaultModeNetwork("UQ_DMN")
+        print("  ✅ DefaultModeNetwork")
+        # Qualia Simulator real
+        self.qualia_simulator = QualiaSimulator()
+        print("  ✅ QualiaSimulator (fenomenología computacional)")
         # State tracking
         self.cycle_count = 0
+        self.cycle = 0  # Add cycle counter
+        self.last_state = None  # Track last state
         self.state_history: List[UnifiedConsciousState] = []
         self.max_history = 100
         
         print("\n🌟 Unified Consciousness Engine READY")
-        print("   Integrating: IIT 4.0 + GWT + FEP + SMH + Hebbian + Circumplex\n")
+        print("   Integrating: IIT 4.0, GWT, FEP, SMH, Hebbian, Circumplex, Thalamus, Claustrum, DMN, Qualia\n")
     
     def process_moment(self,
-                      sensory_input: Dict[str, float],
-                      context: Optional[Dict[str, float]] = None,
+                      sensory_input: Dict[str, Any],
+                      context: Optional[Dict[str, Any]] = None,
                       previous_outcome: Optional[Tuple[float, float]] = None) -> UnifiedConsciousState:
         """
-        Process a complete conscious moment through all 6 theories.
+        Procesa un momento consciente integrado a través de las 11 teorías.
         
         Args:
-            sensory_input: Current state of all subsystems
-            context: Contextual information (for GWT and SMH)
-            previous_outcome: (valence, arousal) of previous action outcome (for SMH learning)
-            
+            sensory_input: Estado actual de todos los subsistemas corticales/neurocomputacionales.
+            context: Información contextual (para GWT, SMH, integración multimodal...)
+            previous_outcome: (valencia, arousal) del resultado previo (para aprendizaje).
+        
         Returns:
-            Complete unified conscious state
+            Estado consciente unificado, integrando percepción, integración consciente global, emociones, aprendizaje y qualia.
         """
         self.cycle_count += 1
         
         if context is None:
             context = {}
         
-        # ===================================================================
-        # LAYER 1: FEP - Predictive Coding
+        # ===================================================
+        # === Capa 1: FEP - Predictive Coding ===
         # ===================================================================
         fep_result = self.fep_engine.process_observation(sensory_input, context)
         
@@ -135,12 +173,12 @@ class UnifiedConsciousnessEngine:
         # Get salience from prediction errors (high error = high salience)
         fep_salience = self.fep_engine.get_salience_weights()
         
-        # ===================================================================
-        # LAYER 3: SMH - Somatic Marker Evaluation
+        # ===================================================
+        # === Capa 3: SMH - Somatic Marker Evaluation ===
         # ===================================================================
         smh_result = self.smh_evaluator.evaluate_situation(
             sensory_input,
-            context.get('situation_type', 'general')
+            str(context.get('situation_type', 'general'))
         )
         
         somatic_valence = smh_result['somatic_valence']
@@ -160,11 +198,11 @@ class UnifiedConsciousnessEngine:
                     prev_input,
                     outcome_valence,
                     outcome_arousal,
-                    context.get('situation_type', 'general')
+                    str(context.get('situation_type', 'general'))
                 )
         
-        # ===================================================================
-        # LAYER 2: IIT + GWT - Integration & Global Broadcast
+        # ===================================================
+        # === Capa 2: IIT + GWT - Integration & Global Broadcast ===
         # ===================================================================
         
         # Combine saliency from FEP errors + SMH markers
@@ -195,20 +233,75 @@ class UnifiedConsciousnessEngine:
         broadcasts = consciousness_result['broadcasts']
         quality_metrics = consciousness_result['integration_quality']
         
-        # ===================================================================
-        # LAYER 4: Hebbian Learning
+        # ===================================================
+        # === Capa 4: Hebbian Learning ===
         # ===================================================================
         # (Already happening in IIT engine's virtual TPM updates)
         # The TPM learns causal relationships via Hebbian-style update
         learning_active = system_phi > 0.05  # Learning when conscious
         
-        # ===================================================================
-        # LAYER 6: Circumplex Emotional Mapping
+        # ===================================================
+        # === Capa 6: Circumplex Emotional Mapping ===
         # ===================================================================
         # Map somatic markers to circumplex space
         emotional_state = self._map_to_circumplex_category(somatic_valence, arousal)
         
-        # ===================================================================
+        # ===================================================
+        # === Capa 2: THALAMUS real como gating/switch ===
+        # Convierte sensory_input a señales talámicas
+        thalamus_inputs = []
+        for modality, value in sensory_input.items():
+            input_item = {
+                'modality': modality,
+                'signal': value if isinstance(value, dict) else {'value': value},
+                'salience': {
+                    'intensity': context.get('intensity', 0.5),
+                    'novelty': context.get('novelty', 0.0),
+                    'urgency': context.get('urgency', 0.0),
+                    'emotional_valence': context.get('emotional_valence', 0.0)
+                }
+            }
+            thalamus_inputs.append(input_item)
+        thalamus_output = self.thalamus.process_inputs(thalamus_inputs)
+        relayed_signals = thalamus_output.get('relayed', {})
+        # ===================================================
+        # === Capa 2: CLAUSTRUM real como binding multimodal ===
+        # Mapea modalidades a áreas corticales para binding
+        area_mapping = {
+            'visual': 'visual_cortex',
+            'auditory': 'auditory_cortex',
+            'somato': 'somatosensory_cortex',
+            'somatosensory': 'somatosensory_cortex',
+            'touch': 'somatosensory_cortex',
+            'cognitive': 'prefrontal_cortex',
+            'thought': 'prefrontal_cortex',
+        }
+        claustrum_input = {}
+        for modality, signals in relayed_signals.items():
+            if signals:
+                signal = signals[0]
+                area_id = next((area for key, area in area_mapping.items() if key in modality.lower()), 'prefrontal_cortex')
+                claustrum_input[area_id] = {'signal': signal.get('signal'), 'salience': signal.get('salience'), 'activation': signal.get('salience', 0.5)}
+        unified_experience = self.claustrum.bind_from_thalamus(
+            cortical_contents=claustrum_input,
+            arousal=context.get('arousal', 0.5),
+            phase_reset=False
+        )
+        # ===================================================
+        # === Capa 3: DMN real ===
+        # Actualizar/simular estado DMN para tarea u ocio mental
+        external_task_load = context.get('task_load', 0.2)
+        self.default_mode_network.update_state(
+            external_task_load=external_task_load,
+            self_focus=context.get('self_focus', 0.5)
+        )
+        spontaneous_thought = None
+        if self.default_mode_network.is_active:
+            spontaneous_thought = self.default_mode_network.generate_spontaneous_thought({'current_mood': context.get('mood', 0.0)})
+        # ===================================================
+        # === Capa 5: QUALIA real ===
+        qualia = self.qualia_simulator.generate_qualia_from_neural_state(sensory_input, context)
+        # ===================================================
         # INTEGRATION: Calculate Global Metrics
         # ===================================================================
         
@@ -269,6 +362,7 @@ class UnifiedConsciousnessEngine:
         if self.cycle_count % 10 == 0:
             self.smh_evaluator.decay_markers()
         
+        # El estado retornado puede enriquecerse con unified_experience, DMN, qualia, etc. según desees
         return state
     
     def _map_to_circumplex_category(self, valence: float, arousal: float) -> str:
@@ -366,6 +460,33 @@ class UnifiedConsciousnessEngine:
             narrative_parts.append(f"🔗 High phenomenal unity ({state.phenomenal_unity:.2f})")
         
         return "\n   ".join(narrative_parts)
+    
+    def process_conscious_experience(self, input_data: Dict[str, Any]) -> UnifiedConsciousState:
+        """
+        Process a complete conscious experience through all layers
+        This is the main entry point for consciousness processing
+        """
+        # Start a new cycle
+        self.cycle += 1
+        
+        # Extract sensory input ensuring it's a dictionary
+        sensory_input = input_data.get('input', {})
+        if isinstance(sensory_input, str):
+            sensory_input = {'text': sensory_input}
+        elif not isinstance(sensory_input, dict):
+            sensory_input = {'data': str(sensory_input)}
+            
+        # Process through process_moment method
+        state = self.process_moment(
+            sensory_input,
+            input_data.get('context', {}),
+            input_data.get('previous_outcome', None)
+        )
+        
+        # Store the state for tracking
+        self.last_state = state
+        
+        return state
     
     def register_subsystem(self, name: str):
         """Register a subsystem across all engines"""

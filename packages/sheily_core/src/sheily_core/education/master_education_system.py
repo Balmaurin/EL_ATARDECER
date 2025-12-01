@@ -862,6 +862,17 @@ class MasterEducationSystem:
 # Instancia global del Master Education System
 master_education_system = MasterEducationSystem()
 
+
+def get_master_education_system() -> MasterEducationSystem:
+    """
+    Función getter para obtener la instancia singleton del sistema educativo maestro
+
+    Returns:
+        MasterEducationSystem: Instancia global del sistema educativo
+    """
+    return master_education_system
+
+
 print("\n🎓 MASTER EDUCATION SYSTEM WEB3 COMPLETAMENTE OPERATIVO")
 print("💰 Learn-to-Earn: ACTIVO con SHEILYS tokens")
 print("⛓️  Blockchain certificates: FUNCIONALES")

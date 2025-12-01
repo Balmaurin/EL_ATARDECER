@@ -654,13 +654,80 @@ class InfrastructureManager:
             return {"status": "error", "details": str(e)}
 
     async def _check_database_health(self) -> Dict[str, Any]:
-        """Comprobar salud de la base de datos"""
+        """Comprobar salud de la base de datos - Real implementation"""
         try:
-            # Check if we can connect to PostgreSQL
-            # This is a placeholder - would need actual database connection logic
+            # Buscar bases de datos SQLite en el proyecto
+            db_files = []
+            db_dir = self.root_dir / "data" / "db"
+            if db_dir.exists():
+                db_files = list(db_dir.glob("*.db"))
+            
+            # También buscar en raíz de data
+            data_dir = self.root_dir / "data"
+            if data_dir.exists():
+                db_files.extend(data_dir.glob("*.db"))
+            
+            if db_files:
+                # Verificar que los archivos sean accesibles
+                accessible = 0
+                total_size = 0
+                for db_file in db_files:
+                    try:
+                        if db_file.exists() and db_file.stat().st_size > 0:
+                            accessible += 1
+                            total_size += db_file.stat().st_size
+                    except Exception:
+                        pass
+                
+                if accessible > 0:
+                    return {
+                        "status": "healthy",
+                        "details": f"{accessible} SQLite database(s) accessible ({total_size / 1024 / 1024:.2f} MB total)",
+                        "databases_found": accessible,
+                        "total_size_mb": round(total_size / 1024 / 1024, 2)
+                    }
+                else:
+                    return {
+                        "status": "warning",
+                        "details": "Database files found but not accessible"
+                    }
+            
+            # Intentar conectar a PostgreSQL si está configurado
+            try:
+                import psycopg2
+                # Intentar leer configuración de base de datos
+                config_file = self.root_dir / "config" / "database" / "config.json"
+                if config_file.exists():
+                    with open(config_file, "r") as f:
+                        db_config = json.load(f)
+                    
+                    # Intentar conexión
+                    conn = psycopg2.connect(
+                        host=db_config.get("host", "localhost"),
+                        port=db_config.get("port", 5432),
+                        database=db_config.get("database", "postgres"),
+                        user=db_config.get("user", "postgres"),
+                        password=db_config.get("password", "")
+                    )
+                    conn.close()
+                    
+                    return {
+                        "status": "healthy",
+                        "details": "PostgreSQL connection successful",
+                        "type": "postgresql"
+                    }
+            except ImportError:
+                pass  # psycopg2 no disponible
+            except Exception as e:
+                return {
+                    "status": "warning",
+                    "details": f"PostgreSQL configured but connection failed: {str(e)[:50]}"
+                }
+            
+            # Si no hay bases de datos encontradas
             return {
-                "status": "unknown",
-                "details": "Database health check not implemented",
+                "status": "inactive",
+                "details": "No databases found or configured"
             }
         except Exception as e:
             return {"status": "error", "details": str(e)}

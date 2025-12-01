@@ -341,19 +341,19 @@ if __name__ == "__main__":
 
     # Estado inicial
     initial_state = homeostasis.get_homeostatic_feedback()
-    print(".3f"    print(f"   Parámetros críticos: {initial_state['overall_status']['critical_parameters']}")
+    print(f"   Parámetros críticos: {initial_state['overall_status']['critical_parameters']}")
 
     # Aplicar estrés
     homeostasis.apply_external_effect('stress_event', 0.8)
     stressed_state = homeostasis.update_states()
     print(f"\nDespués de evento estresante:")
-    print(".3f"    print(f"   Nivel de crisis: {stressed_state['overall_status']['crisis_level']:.2f}")
+    print(f"   Nivel de crisis: {stressed_state['overall_status']['crisis_level']:.2f}")
 
     # Recuperación
     homeostasis.apply_external_effect('relaxation', 1.0)
     recovered_state = homeostasis.update_states()
     print(f"\nDespués de relajación:")
-    print(".3f"
+    print(f"   Nivel de crisis: {recovered_state['overall_status']['crisis_level']:.2f}")
     print(f"\n🏥 Homeostasis proporciona feedback emocional y corporal constante")
     print(f"   ✓ {len(homeostasis.parameters)} parámetros fisiológicos monitoreados")
     print(f"   ✓ Señales emocionales integradas con consciencia")

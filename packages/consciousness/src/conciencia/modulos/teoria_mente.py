@@ -214,7 +214,7 @@ try:
         SocialStrategy
     )
     ADVANCED_TOM_AVAILABLE = True
-    print("✅ Advanced Theory of Mind (Levels 8-10) LOADED successfully")
+    print("[OK] Advanced Theory of Mind (Levels 8-10) LOADED successfully")
 except ImportError as e:
     ADVANCED_TOM_AVAILABLE = False
     print(f"⚠️  Advanced Theory of Mind not available: {e}")

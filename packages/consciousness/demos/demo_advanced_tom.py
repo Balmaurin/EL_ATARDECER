@@ -11,7 +11,7 @@ Run: python demo_advanced_tom.py
 """
 
 import asyncio
-from packages.consciousness.src.conciencia.modulos teoria_mente_avanzada import (
+from packages.consciousness.src.conciencia.modulos.teoria_mente_avanzada import (
     AdvancedTheoryOfMind,
     SocialStrategy,
     BeliefType

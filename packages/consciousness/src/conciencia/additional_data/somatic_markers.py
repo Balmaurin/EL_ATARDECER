@@ -440,7 +440,9 @@ class SomaticMarkersSystem:
         }
 
 
+
 # ==================== EJEMPLO DE USO ====================
+
 
 if __name__ == "__main__":
     print("🧠 SISTEMA DE MARCADORES SOMÁTICOS - DEMO DAMASIO")
@@ -488,25 +490,26 @@ if __name__ == "__main__":
 
     feedback = somatic_system.get_somatic_feedback(situation, options)
 
-    print("
-Situación:"    print(f"   '{situation}'")
+    print("\nSituación:")
+    print(f"   '{situation}'")
 
-    print("
-Opciones disponibles con bias emocional:"    for option in options:
+    print("\nOpciones disponibles con bias emocional:")
+    for option in options:
         opt_emotion = feedback['option_emotions'].get(option, {'emotion': 'unknown'})
         emotion_label = opt_emotion.get('emotion', 'unknown') if isinstance(opt_emotion, dict) else 'unknown'
         print(f"   • {option}: {emotion_label.upper()}")
 
-    print("
-Estado somático actual:"    print(".3f"    print(f"   Emoción dominante: {feedback['dominant_emotion']['emotion'].upper()}")
-    print(".3f"
-    print("
-Señales corporales activadas:"    for signal, value in feedback.get('somatic_signals', {}).items():
+    print("\nEstado somático actual:")
+    print(f"   Emoción dominante: {feedback['dominant_emotion']['emotion'].upper()}")
+    print(f"   Intensidad: {feedback['dominant_emotion']['intensity']:.3f}")
+    print(f"   Confianza: {feedback['dominant_emotion']['confidence']:.3f}")
+    print("\nSeñales corporales activadas:")
+    for signal, value in feedback.get('somatic_signals', {}).items():
         if value > 0.2:  # solo mostrar señales significativas
-            print(".3f"
+            print(f"   • {signal}: {value:.3f}")
     # Aprender de experiencia simulada
-    print("
-📚 Aprendiendo de experiencia..."    # Simular resultado de elegir opción arriesgada
+    print("\n📚 Aprendiendo de experiencia...")
+    # Simular resultado de elegir opción arriesgada
     actual_result = {
         'emotion': 'positive',
         'valence': 0.8,
@@ -519,8 +522,8 @@ Señales corporales activadas:"    for signal, value in feedback.get('somatic_si
         actual_outcome=actual_result
     )
 
-    print("
-🎉 APRENDIZAJE COMPLETADO"    print("   ✓ Sistema Damasio operativo")
+    print("\n🎉 APRENDIZAJE COMPLETADO")
+    print("   ✓ Sistema Damasio operativo")
     print(f"   ✓ {somatic_system.get_system_status()['total_markers']} marcadores activos")
     print(f"   ✓ {somatic_system.get_system_status()['total_learned_experiences']} experiencias aprendidas")
     print("   ✓ Bias emocional funcionado como guía de decisión")

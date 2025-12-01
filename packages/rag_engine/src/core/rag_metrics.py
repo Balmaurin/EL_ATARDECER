@@ -3,13 +3,27 @@
 Enhanced RAG Metrics - BM25 + Hybrid Search System
 ==================================================
 
+⚠️ DEPRECATED: Este módulo está siendo deprecado.
+Migrar a `indexing_metrics.py` para métricas Prometheus integradas.
+
 Sistema avanzado de métricas para RAG (Retrieval Augmented Generation):
 - Métricas de precisión, recall y F1-score para evaluaciones RAG
 - Sistema híbrido BM25 + Vector Search con re-ranking
 - Evaluación de calidad de respuesta y relevancia
 - Métricas de diversidad y cobertura de contexto
 - Análisis de latencia y rendimiento
+
+NOTA: Las clases HybridSearchEngine y RAGEvaluator se mantienen temporalmente
+para compatibilidad, pero se recomienda migrar a los nuevos módulos.
 """
+
+import warnings
+
+warnings.warn(
+    "rag_metrics.py está deprecated. Migrar a indexing_metrics.py",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 import asyncio
 import json
@@ -22,6 +36,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 try:
     from rank_bm25 import BM25Okapi
@@ -284,6 +300,17 @@ class RAGMetrics:
         # Métricas de rendimiento
         throughput = 1000 / latency_ms if latency_ms > 0 else 0
 
+        # Calcular thresholds antes de crear el diccionario
+        metrics_dict = {
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1_score,
+            "context_relevance": context_relevance,
+            "latency_ms": latency_ms,
+            "throughput": throughput,
+        }
+        meets_thresholds = self._check_performance_thresholds(metrics_dict)
+        
         evaluation = {
             "timestamp": datetime.now().isoformat(),
             "query": query,
@@ -307,7 +334,7 @@ class RAGMetrics:
             "context_length": len(context.split()),
             "answer_length": len(generated_answer.split()),
             # Performance flags
-            "meets_thresholds": self._check_performance_thresholds(evaluation),
+            "meets_thresholds": meets_thresholds,
         }
 
         # Agregar a historial
@@ -739,7 +766,7 @@ class RAGEvaluator:
                 context = " ".join(
                     retrieved_docs[:3]
                 )  # Usar top 3 documentos como contexto
-                generated_answer = self._generate_mock_answer(
+                generated_answer = self._generate_real_answer(
                     test_case["query"], context
                 )
 
@@ -802,27 +829,68 @@ class RAGEvaluator:
 
         return report
 
-    def _generate_mock_answer(self, query: str, context: str) -> str:
-        """Generar respuesta simulada basada en query y contexto (versión simplificada)"""
+    def _generate_real_answer(self, query: str, context: str) -> str:
+        """Generar respuesta real usando LLM con el contexto recuperado"""
         if not context:
             return "No se pudo encontrar información relevante para responder esta pregunta."
 
-        # Versión muy básica: extraer frases relevantes del contexto
-        sentences = context.split(".")
-        relevant_sentences = []
+        try:
+            # Intentar usar el LLM real
+            import sys
+            from pathlib import Path
+            
+            # Agregar path para importar RealLLMInference
+            root = Path(__file__).resolve().parents[5]
+            sys.path.insert(0, str(root / "packages" / "sheily_core" / "src"))
+            
+            if get_real_llm_inference is None:
+                raise ImportError("RealLLMInference no disponible")
+            
+            llm = get_real_llm_inference()
+            
+            # Crear prompt con contexto
+            prompt = f"""Basándote en el siguiente contexto, responde la pregunta de manera clara y precisa.
 
-        query_keywords = set(query.lower().split())
+Contexto:
+{context[:2000]}  # Limitar contexto a 2000 caracteres
 
-        for sentence in sentences:
-            sentence_lower = sentence.lower()
-            if any(keyword in sentence_lower for keyword in query_keywords):
-                relevant_sentences.append(sentence.strip())
+Pregunta: {query}
 
-        if relevant_sentences:
-            answer = ". ".join(relevant_sentences[:3])
-            return answer + "." if not answer.endswith(".") else answer
-        else:
-            return "Basado en la información disponible, esta pregunta requiere más contexto específico."
+Respuesta:"""
+            
+            results = llm.generate(
+                prompt,
+                max_new_tokens=200,
+                temperature=0.7,
+                top_p=0.9
+            )
+            
+            if results and len(results) > 0:
+                answer = results[0].strip()
+                # Limpiar respuesta si contiene el prompt
+                if "Respuesta:" in answer:
+                    answer = answer.split("Respuesta:")[-1].strip()
+                return answer if answer else "No pude generar una respuesta clara."
+            
+            return "No pude generar una respuesta clara."
+            
+        except Exception as e:
+            logger.warning(f"Error usando LLM real, usando método básico: {e}")
+            # Fallback básico solo si el LLM falla completamente
+            sentences = context.split(".")
+            relevant_sentences = []
+            query_keywords = set(query.lower().split())
+            
+            for sentence in sentences:
+                sentence_lower = sentence.lower()
+                if any(keyword in sentence_lower for keyword in query_keywords):
+                    relevant_sentences.append(sentence.strip())
+            
+            if relevant_sentences:
+                answer = ". ".join(relevant_sentences[:3])
+                return answer + "." if not answer.endswith(".") else answer
+            else:
+                return "Basado en la información disponible, esta pregunta requiere más contexto específico."
 
 
 # ================================

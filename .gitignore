@@ -1,38 +1,101 @@
-# LARGE FILES - NEVER COMMIT
+# ARCHIVOS GRANDES - NUNCA COMMIT
 *.gguf
+*.ggml
 *.bin
 *.safetensors
 *.h5
 *.pkl
 *.model
+models/*.gguf
+models/*.bin
+tools/llama_cpp/
 models/
-data/
-datasets/
-checkpoints/
+modelsLLM/
+trained_models/
+
+# Archivos y datos pesados generados
+*.db
+*.sqlite3
+*.faiss
+*.npy
+*.tsbuildinfo
 
 # PYTHON
 __pycache__/
+*.py[cod]
 *.pyc
+*.pyo
+*.pyd
+.Python
 .pytest_cache/
+.coverage
+htmlcov/
+
+# ENTORNO
+.env
 .venv/
 venv/
+env/
 
-# ENTERPRISE GENERATED
+# IDE
+.vscode/settings.json
+.idea/
+.agent/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# GENERADOS ENTERPRISE
 test_backups/
 audit_results/
 tests/results/
 
-# IDE & OS
-.vscode/
-.DS_Store
-Thumbs.db
-
-# LOGS & TEMP
+# LOGS Y TEMPORALES
 *.log
 *.tmp
 *.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
 
-# LARGE JSON FILES
-**/normalization_spec.json
-**/endpoints.json
-**/bm25_trained.json
+# NODE (si existe)
+node_modules/
+package-lock.json
+.turbo/
+.vercel/
+.next/
+**/.next/
+dist/
+build/
+out/
+
+# MLflow y experimentos
+mlruns/
+.mlflow/
+
+# Cache y datos generados
+.cache/
+*.cache
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Archivos de deployment
+*.dockerfile.local
+docker-compose.override.yml

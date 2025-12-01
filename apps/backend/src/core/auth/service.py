@@ -32,7 +32,7 @@ class AuthService:
         self.secret_key = settings.jwt_secret_key
         self.algorithm = settings.jwt_algorithm
         self.access_token_expire_minutes = settings.jwt_expiration_hours * 60
-        self.refresh_token_expire_days = 7  # Default value as it's missing in settings
+        self.refresh_token_expire_days = settings.refresh_token_expire_days
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verificar contraseña con manejo de errores seguro"""

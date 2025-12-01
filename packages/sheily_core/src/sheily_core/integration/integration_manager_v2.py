@@ -354,7 +354,9 @@ class SheilyIntegrationManager:
             # Security check
             if self.security_monitor:
                 # Simplified security check
-                pass
+                security_result = await self.security_monitor.check_query(query, user_id)
+                if not security_result.get("safe", True):
+                    raise ValueError(f"Security violation: {security_result.get('reason', 'Unknown')}")
 
             # Memory lookup with integrated human memory
             memory_context = ""
@@ -603,11 +605,16 @@ class SheilyIntegrationManager:
             # Update metrics
             self.metrics["component_usage"]["continuous_learning"] += 1
 
+            # Calculate dynamic learning score based on content length and complexity
+            base_score = 0.5
+            complexity_bonus = min(0.4, len(content.split()) / 1000.0)
+            learning_score = min(1.0, base_score + complexity_bonus)
+
             return {
                 "success": True,
                 "learning_applied": True,
                 "content_processed": content,
-                "learning_score": learning_result.get("learning_score", 0.5),
+                "learning_score": learning_result.get("learning_score", learning_score),
                 "categories_identified": learning_result.get("categories", []),
             }
         except Exception as e:

@@ -70,6 +70,9 @@ class RealLLMEngine:
         """Buscar modelo GGUF disponible (priorizando Gemma2)"""
         # Priorizar Gemma2
         model_locations = [
+            # User's specific model location
+            "modelsLLM/gemma-2-2b-it-Q4_K_M.gguf",
+            str(Path(os.getcwd()) / "modelsLLM" / "gemma-2-2b-it-Q4_K_M.gguf"),
             # Docker paths
             "/app/models/gemma-2-9b-it-Q4_K_M.gguf",
             "/app/models/gemma-2-9b-it.gguf",
@@ -89,6 +92,21 @@ class RealLLMEngine:
             # Buscar cualquier .gguf en models/
             os.path.expanduser("~/models/gemma-2-9b-it-Q4_K_M.gguf"),
         ]
+
+        # Buscar dinámicamente en modelsLLM/ primero (usuario específico)
+        modelsllm_dir = Path("modelsLLM")
+        if modelsllm_dir.exists():
+            for pattern in ["gemma-2-2b*", "gemma-2*", "*.gguf"]:
+                for gguf_file in modelsllm_dir.glob(pattern):
+                    if gguf_file.is_file():
+                        model_path = str(gguf_file.absolute())
+                        # Priorizar el modelo específico del usuario
+                        if "gemma-2-2b-it-Q4_K_M" in model_path:
+                            model_locations.insert(0, model_path)
+                        elif "gemma" in model_path.lower():
+                            model_locations.insert(1, model_path)
+                        else:
+                            model_locations.insert(2, model_path)
 
         # Buscar dinámicamente en models/ si existe
         models_dir = Path("models")

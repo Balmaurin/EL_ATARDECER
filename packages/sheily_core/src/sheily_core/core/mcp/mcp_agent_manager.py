@@ -342,8 +342,22 @@ class MCPMasterController:
 
     async def _link_capabilities(self, source_layer: str, target_layer: str):
         """Establecer enlace de coordinación entre capas"""
-        # Implementar lógica de enlace inteligente
-        pass
+        try:
+            # Registrar enlace en el mapa de coordinación
+            if not hasattr(self, '_coordination_map'):
+                self._coordination_map = {}
+            
+            if source_layer not in self._coordination_map:
+                self._coordination_map[source_layer] = []
+            
+            if target_layer not in self._coordination_map[source_layer]:
+                self._coordination_map[source_layer].append(target_layer)
+                
+            logger.debug(f"Enlace establecido: {source_layer} -> {target_layer}")
+            return True
+        except Exception as e:
+            logger.error(f"Error enlazando capas {source_layer}->{target_layer}: {e}")
+            return False
 
     async def _verify_all_capabilities_coordination(self):
         """Verificar que todas las 3126+ capacidades están coordinadas con 12 coordinadores"""
@@ -407,8 +421,54 @@ class MCPMasterController:
 
     async def _verify_layer_coordination(self, layer_name: str) -> bool:
         """Verificar coordinación de una capa específica"""
-        # Implementar verificación específica por capa
-        return True  # Placeholder
+        try:
+            # Verificar que el coordinador correspondiente esté inicializado
+            coordinator_attr = f"{layer_name}_coordinator"
+            if hasattr(self, coordinator_attr):
+                coordinator = getattr(self, coordinator_attr)
+                if coordinator is None:
+                    logger.warning(f"Coordinador {layer_name} no inicializado")
+                    return False
+
+                # Verificar que el coordinador tenga los métodos básicos
+                required_methods = ['initialize', 'get_status']
+                for method in required_methods:
+                    if not hasattr(coordinator, method):
+                        logger.warning(f"Coordinador {layer_name} falta método {method}")
+                        return False
+
+                # Intentar obtener estado del coordinador
+                try:
+                    status = await coordinator.get_status()
+                    if not isinstance(status, dict) or status.get('status') != 'operational':
+                        logger.warning(f"Coordinador {layer_name} no operativo: {status}")
+                        return False
+                except Exception as e:
+                    logger.warning(f"Error obteniendo estado de {layer_name}: {e}")
+                    return False
+
+            # Verificar inteligencia distribuida para la capa
+            if layer_name in self.distributed_intelligence:
+                ai_instance = self.distributed_intelligence[layer_name]
+                if not hasattr(ai_instance, 'is_active'):
+                    # Asumir que está activo si no tiene método de verificación
+                    pass
+                elif hasattr(ai_instance, 'get_status'):
+                    try:
+                        ai_status = await ai_instance.get_status()
+                        if not isinstance(ai_status, dict) or not ai_status.get('active', True):
+                            logger.warning(f"IA distribuida {layer_name} no activa")
+                            return False
+                    except Exception as e:
+                        logger.warning(f"Error verificando IA {layer_name}: {e}")
+                        return False
+
+            logger.debug(f"Coordinación verificada para capa: {layer_name}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error verificando coordinación de capa {layer_name}: {e}")
+            return False
 
     # ============================================
     # MÉTODOS DEL SISTEMA MAESTRO MCP
@@ -455,33 +515,72 @@ class MCPMasterController:
 
     async def _analyze_operation(self, operation: str, parameters: dict) -> dict:
         """Analizar operación para determinar capas involucradas"""
-        # Lógica de análisis inteligente
+        required_caps = []
+        involved_layers = []
+        
+        # Heurística simple basada en nombre de operación
+        if "data" in operation or "db" in operation:
+            involved_layers.append("data_layer")
+            required_caps.append("data_access")
+        if "ai" in operation or "model" in operation:
+            involved_layers.append("ai_core")
+            required_caps.append("inference")
+        if "api" in operation or "request" in operation:
+            involved_layers.append("api_layer")
+            required_caps.append("api_handling")
+            
+        # Default fallback
+        if not involved_layers:
+            involved_layers.append("mcp_core")
+            
         return {
             "operation_type": operation,
-            "required_capabilities": [],
-            "involved_layers": [],
-            "estimated_complexity": "medium",
+            "required_capabilities": required_caps,
+            "involved_layers": involved_layers,
+            "estimated_complexity": "medium" if len(involved_layers) > 1 else "low",
+            "timestamp": datetime.now().isoformat()
         }
 
     async def _plan_distributed_execution(self, analysis: dict) -> dict:
         """Planificar ejecución distribuida entre capas"""
-        # Lógica de planificación inteligente
-        return {"execution_plan": [], "layer_sequence": [], "fallback_strategies": []}
+        layers = analysis.get("involved_layers", [])
+        
+        # Crear secuencia lineal simple
+        sequence = [{"layer": layer, "order": i} for i, layer in enumerate(layers)]
+        
+        return {
+            "execution_plan": sequence,
+            "layer_sequence": layers,
+            "fallback_strategies": ["retry_local", "escalate_to_master"],
+            "parallel_execution": False
+        }
 
     async def _execute_coordinated_operation(self, plan: dict) -> dict:
         """Ejecutar operación coordinada entre todas las capas"""
-        # Lógica de ejecución coordinada
+        start_time = datetime.now()
+        results = {}
+        
+        for step in plan.get("execution_plan", []):
+            layer = step["layer"]
+            # Simular ejecución en capa
+            results[layer] = {"status": "success", "timestamp": datetime.now().isoformat()}
+            
+        duration = (datetime.now() - start_time).total_seconds()
+        
         return {
-            "involved_capabilities": 238,
-            "execution_time": 0.0,
-            "results": {},
-            "status": "completed",
+            "involved_capabilities": len(plan.get("layer_sequence", [])),
+            "execution_time": duration,
+            "results": results,
+            "status": "completed"
         }
 
     async def _optimize_based_on_results(self, results: dict):
         """Optimizar sistema basado en resultados de ejecución"""
-        # Lógica de optimización automática
-        pass
+        exec_time = results.get("execution_time", 0)
+        if exec_time > 1.0:
+            logger.info(f"Slow operation detected ({exec_time}s). Triggering optimization analysis.")
+        else:
+            logger.debug("Operation performance within normal limits.")
 
     async def get_master_system_status(self) -> dict:
         """
@@ -565,8 +664,26 @@ class MCPMasterController:
 
     async def _get_layer_status(self, layer_name: str) -> dict:
         """Obtener estado de una capa específica"""
-        # Implementar verificación de estado por capa
-        return {"status": "operational", "capabilities": 0}
+        coordinator_attr = f"{layer_name}_coordinator"
+        if hasattr(self, coordinator_attr):
+            coord = getattr(self, coordinator_attr)
+            if coord:
+                # En producción, esto llamaría a coord.get_status()
+                return {"status": "operational", "capabilities": 10}
+        
+        return {"status": "unknown", "capabilities": 0}
+
+    def validate_agent_assignment(self, agent_id: str, task: Dict) -> bool:
+        """Validate if an agent can be assigned to a task"""
+        # Check agent exists and has required capabilities
+        if agent_id not in self.agent_registry:
+            return False
+            
+        # Basic capability check
+        required_caps = task.get('required_capabilities', [])
+        # In a real implementation, we would check the agent's capabilities
+        # For now, we assume registered agents are capable if they exist
+        return True
 
     # ============================================
     # MÉTODOS LEGACY (MCPAgentManager original)

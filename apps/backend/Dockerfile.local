@@ -1,0 +1,9 @@
+# Dockerfile simplificado para desarrollo local
+FROM scratch
+COPY . /app
+WORKDIR /app
+
+# Usar Python del sistema en lugar de imagen Docker
+# Este Dockerfile se usa solo para estructura, no para build real
+EXPOSE 8000
+CMD ["echo", "Use deploy_local.py instead"]

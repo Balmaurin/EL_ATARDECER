@@ -5,11 +5,17 @@ Implementa almacenamiento y recuperación de experiencias significativas
 con valoración emocional y construcción de narrativa personal.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Any, Optional, Tuple
 import time
 import numpy as np
 from datetime import datetime
+import json
+import os
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -50,10 +56,18 @@ class AutobiographicalMemory:
     - Construcción narrativa de identidad
     """
 
-    def __init__(self, max_capacity: int = 10000):
+    def __init__(self, max_capacity: int = 10000, persistence_dir: Optional[str] = None):
         self.max_capacity = max_capacity
         self.memories: List[AutobiographicalMoment] = []
         self.narrative_threads: Dict[str, NarrativeThread] = {}
+
+        # Persistencia
+        if persistence_dir is None:
+            persistence_dir = os.path.join("data", "consciousness", "autobiographical_memory")
+        self.persistence_dir = Path(persistence_dir)
+        self.persistence_dir.mkdir(parents=True, exist_ok=True)
+        self.persistence_file = self.persistence_dir / "memories.json"
+        self.narrative_file = self.persistence_dir / "narratives.json"
 
         # Índices para búsqueda eficiente
         self.significance_index: Dict[str, float] = {}
@@ -72,18 +86,21 @@ class AutobiographicalMemory:
         self.emotional_recency = 0.5
         self.narrative_completeness = 0.4
 
-        print("🧠 Autobiographical Memory inicializada con capacidad:", max_capacity)
+        # Cargar desde persistencia si existe
+        self._load_from_persistence()
 
-    def store_experience(self, conscious_moment: Any, context: Dict[str, Any]) -> str:
+        logger.info(f"Autobiographical Memory inicializada con capacidad: {max_capacity}")
+
+    def store_experience(self, conscious_moment: Any, context: Dict[str, Any]) -> Optional[str]:
         """
         Almacena una experiencia consciente en memoria autobiográfica
 
         Args:
             conscious_moment: Momento consciente a almacenar
-            context: Contexto adicional de la experiencia
+            context: Contexto adicional de la experiencia (puede incluir 'metacognitive_insights')
 
         Returns:
-            ID único del momento almacenado
+            ID único del momento almacenado o None si no se almacenó
         """
         # Generar ID único
         moment_id = f"mem_{int(time.time()*1000)}_{len(self.memories)}"
@@ -102,6 +119,9 @@ class AutobiographicalMemory:
         if significance < storage_threshold:
             return None  # No almacenar experiencias no significativas
 
+        # Extraer insights metacognitivos del contexto o del momento consciente
+        metacognitive_insight = self._extract_metacognitive_insights(conscious_moment, context)
+
         # Crear momento autobiográfico
         memory_moment = AutobiographicalMoment(
             id=moment_id,
@@ -112,7 +132,7 @@ class AutobiographicalMemory:
             significance=significance,
             self_reference=self_reference,
             context=context,
-            metacognitive_insight={},  # Placeholder para insights metacognitivos futuros
+            metacognitive_insight=metacognitive_insight,
         )
 
         # Almacenar en memoria principal
@@ -127,7 +147,45 @@ class AutobiographicalMemory:
         # Intentar integrar en narrativa
         self._integrate_into_narrative(memory_moment)
 
+        # Guardar en persistencia
+        self._save_to_persistence()
+
         return moment_id
+
+    def _extract_metacognitive_insights(self, conscious_moment: Any, context: Dict[str, Any]) -> Dict[str, float]:
+        """
+        Extrae insights metacognitivos del momento consciente o contexto
+        
+        Returns:
+            Dict con métricas metacognitivas
+        """
+        insights = {}
+        
+        # Intentar obtener del contexto primero (viene de conscious_system)
+        if 'metacognitive_insights' in context:
+            meta_insights = context['metacognitive_insights']
+            insights = {
+                'reasoning_quality': meta_insights.get('reasoning_quality', 0.5),
+                'confidence_accuracy': meta_insights.get('confidence_accuracy', 0.5),
+                'bias_detection': meta_insights.get('bias_detection', 0.0),
+                'clarity': meta_insights.get('clarity', 0.5),
+                'certainty': meta_insights.get('certainty', 0.5)
+            }
+        else:
+            # Extraer del momento consciente si tiene atributos relevantes
+            attention_weight = getattr(conscious_moment, 'attention_weight', 0.5)
+            significance = getattr(conscious_moment, 'significance', 0.5)
+            
+            # Inferir insights básicos desde propiedades del momento
+            insights = {
+                'reasoning_quality': min(1.0, significance * 1.2),
+                'confidence_accuracy': attention_weight,
+                'bias_detection': 0.0,  # Sin detección de sesgos disponible
+                'clarity': attention_weight,
+                'certainty': significance
+            }
+        
+        return insights
 
     def retrieve_relevant_memories(self, current_context: Dict[str, Any],
                                  max_results: int = 5,
@@ -754,6 +812,92 @@ class AutobiographicalMemory:
         sorted_themes = sorted(theme_counts.items(), key=lambda x: x[1], reverse=True)
         return sorted_themes[:5]
 
+    def _save_to_persistence(self):
+        """Guarda memorias y narrativas en disco"""
+        try:
+            # Guardar memorias
+            memories_data = []
+            for mem in self.memories:
+                mem_dict = {
+                    'id': mem.id,
+                    'timestamp': mem.timestamp,
+                    'content_hash': mem.content_hash,
+                    'sensory_experience': mem.sensory_experience,
+                    'emotional_valence': mem.emotional_valence,
+                    'significance': mem.significance,
+                    'self_reference': mem.self_reference,
+                    'context': mem.context,
+                    'metacognitive_insight': mem.metacognitive_insight,
+                    'retrieval_count': mem.retrieval_count,
+                    'last_retrieved': mem.last_retrieved,
+                    'consolidation_level': mem.consolidation_level
+                }
+                memories_data.append(mem_dict)
+            
+            with open(self.persistence_file, 'w', encoding='utf-8') as f:
+                json.dump(memories_data, f, indent=2, ensure_ascii=False)
+            
+            # Guardar narrativas
+            narratives_data = {}
+            for theme, thread in self.narrative_threads.items():
+                narratives_data[theme] = {
+                    'theme': thread.theme,
+                    'moments': thread.moments,
+                    'emotional_trajectory': thread.emotional_trajectory,
+                    'significance_score': thread.significance_score,
+                    'last_updated': thread.last_updated
+                }
+            
+            with open(self.narrative_file, 'w', encoding='utf-8') as f:
+                json.dump(narratives_data, f, indent=2, ensure_ascii=False)
+                
+        except Exception as e:
+            logger.error(f"Error guardando persistencia: {e}", exc_info=True)
+
+    def _load_from_persistence(self):
+        """Carga memorias y narrativas desde disco"""
+        try:
+            # Cargar memorias
+            if self.persistence_file.exists():
+                with open(self.persistence_file, 'r', encoding='utf-8') as f:
+                    memories_data = json.load(f)
+                
+                for mem_dict in memories_data:
+                    memory = AutobiographicalMoment(
+                        id=mem_dict['id'],
+                        timestamp=mem_dict['timestamp'],
+                        content_hash=mem_dict['content_hash'],
+                        sensory_experience=mem_dict['sensory_experience'],
+                        emotional_valence=mem_dict['emotional_valence'],
+                        significance=mem_dict['significance'],
+                        self_reference=mem_dict['self_reference'],
+                        context=mem_dict['context'],
+                        metacognitive_insight=mem_dict.get('metacognitive_insight', {}),
+                        retrieval_count=mem_dict.get('retrieval_count', 0),
+                        last_retrieved=mem_dict.get('last_retrieved'),
+                        consolidation_level=mem_dict.get('consolidation_level', 1.0)
+                    )
+                    self.memories.append(memory)
+                    self._update_indices(memory)
+            
+            # Cargar narrativas
+            if self.narrative_file.exists():
+                with open(self.narrative_file, 'r', encoding='utf-8') as f:
+                    narratives_data = json.load(f)
+                
+                for theme, thread_data in narratives_data.items():
+                    thread = NarrativeThread(
+                        theme=thread_data['theme'],
+                        moments=thread_data['moments'],
+                        emotional_trajectory=thread_data['emotional_trajectory'],
+                        significance_score=thread_data['significance_score'],
+                        last_updated=thread_data.get('last_updated', time.time())
+                    )
+                    self.narrative_threads[theme] = thread
+                    
+        except Exception as e:
+            logger.warning(f"Error cargando persistencia: {e}", exc_info=True)
+
 
 # Función helper para narrativa emocional
 def extract_emotional_narrative(memory_system: AutobiographicalMemory,
@@ -785,7 +929,7 @@ def extract_emotional_narrative(memory_system: AutobiographicalMemory,
         tone = "balanceado emocionalmente"
 
     # Crear resumen narrativo
-    narrative = ".3f"f"""
+    narrative = f"""
 Análisis emocional del período {focus_period_days} días:
 
 Durante este período, el sistema consciente experimentó {len(recent_moments)} momentos significativos

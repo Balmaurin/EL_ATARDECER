@@ -5,8 +5,11 @@ Wrapper simplificado del UltraRAGSystem que funciona sin dependencias complejas
 """
 
 import time
+import logging
 import numpy as np
 from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 class SimpleRAGSystem:
     """
@@ -18,7 +21,7 @@ class SimpleRAGSystem:
         self.documents = {}
         self.document_embeddings = {}
         self.is_initialized = False
-        print("📚 Simple RAG System initialized")
+        logger.info("📚 Simple RAG System initialized")
     
     def initialize_system(self) -> bool:
         """Inicializar sistema"""
@@ -37,10 +40,10 @@ class SimpleRAGSystem:
                 # Embedding simple (hash-based)
                 self.document_embeddings[doc_id] = self._simple_embedding(doc)
             
-            print(f"✅ {len(documents)} documents added to RAG")
+            logger.info(f"✅ {len(documents)} documents added to RAG")
             return True
         except Exception as e:
-            print(f"❌ Error adding documents: {e}")
+            logger.error(f"❌ Error adding documents: {e}")
             return False
     
     def _simple_embedding(self, text: str) -> np.ndarray:

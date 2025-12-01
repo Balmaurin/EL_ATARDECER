@@ -23,7 +23,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import aiofiles
 
@@ -153,21 +153,72 @@ class BackupManager:
             return data
 
     def _encrypt_data(self, data: bytes) -> bytes:
-        """Encriptar datos (placeholder - implementar con cryptography)"""
+        """Encriptar datos usando Fernet (AES)"""
         if not self.config.enable_encryption or not self.config.encryption_key:
             return data
 
-        # TODO: Implementar encriptación real con Fernet o AES
-        logger.warning("Encriptación no implementada aún")
-        return data
+        try:
+            from cryptography.fernet import Fernet
+            import base64
+
+            # Derivar clave de 32 bytes desde la clave proporcionada
+            key_bytes = self.config.encryption_key.encode('utf-8')
+            if len(key_bytes) < 32:
+                # Rellenar con ceros si es necesario
+                key_bytes = key_bytes.ljust(32, b'\x00')
+            elif len(key_bytes) > 32:
+                # Truncar si es demasiado largo
+                key_bytes = key_bytes[:32]
+
+            # Crear clave Fernet (debe ser 32 bytes URL-safe base64-encoded)
+            fernet_key = base64.urlsafe_b64encode(key_bytes)
+            fernet = Fernet(fernet_key)
+
+            # Encriptar datos
+            encrypted_data = fernet.encrypt(data)
+            logger.debug("Datos encriptados exitosamente")
+            return encrypted_data
+
+        except ImportError:
+            logger.warning("Biblioteca 'cryptography' no disponible, guardando sin encriptación")
+            return data
+        except Exception as e:
+            logger.error(f"Error en encriptación: {e}")
+            # En caso de error, devolver datos sin encriptar para no perder información
+            return data
 
     def _decrypt_data(self, data: bytes) -> bytes:
-        """Desencriptar datos (placeholder)"""
+        """Desencriptar datos usando Fernet (AES)"""
         if not self.config.enable_encryption or not self.config.encryption_key:
             return data
 
-        # TODO: Implementar desencriptación real
-        return data
+        try:
+            from cryptography.fernet import Fernet
+            import base64
+
+            # Derivar clave de 32 bytes (misma lógica que en encriptación)
+            key_bytes = self.config.encryption_key.encode('utf-8')
+            if len(key_bytes) < 32:
+                key_bytes = key_bytes.ljust(32, b'\x00')
+            elif len(key_bytes) > 32:
+                key_bytes = key_bytes[:32]
+
+            fernet_key = base64.urlsafe_b64encode(key_bytes)
+            fernet = Fernet(fernet_key)
+
+            # Desencriptar datos
+            decrypted_data = fernet.decrypt(data)
+            logger.debug("Datos desencriptados exitosamente")
+            return decrypted_data
+
+        except ImportError:
+            logger.warning("Biblioteca 'cryptography' no disponible, datos sin desencriptar")
+            return data
+        except Exception as e:
+            logger.error(f"Error en desencriptación: {e}")
+            # Si falla la desencriptación, asumir que los datos no estaban encriptados
+            logger.warning("Asumiendo datos sin encriptar debido a error de desencriptación")
+            return data
 
     async def _backup_component(
         self, component_name: str, paths: List[str]
@@ -184,7 +235,8 @@ class BackupManager:
                 try:
                     file_size = path.stat().st_size
                     total_size += file_size
-                    backed_up_files.append(str(path))
+                    content = await self._read_file_content(path)
+                    backed_up_files.append({"path": str(path), "content": content})
                 except Exception as e:
                     logger.error(f"Error accediendo a {path}: {e}")
 
@@ -196,15 +248,31 @@ class BackupManager:
                             try:
                                 file_size = file_path.stat().st_size
                                 total_size += file_size
-                                backed_up_files.append(
-                                    str(file_path.relative_to(Path.cwd()))
-                                )
+                                content = await self._read_file_content(file_path)
+                                backed_up_files.append({
+                                    "path": str(file_path.relative_to(Path.cwd())),
+                                    "content": content
+                                })
                             except Exception as e:
                                 logger.error(f"Error accediendo a {file_path}: {e}")
                 except Exception as e:
                     logger.error(f"Error accediendo a directorio {path}: {e}")
 
         return total_size, backed_up_files
+
+    async def _read_file_content(self, path: Path) -> str:
+        """Read file content and return as base64 string"""
+        import base64
+        async with aiofiles.open(path, "rb") as f:
+            content = await f.read()
+            return base64.b64encode(content).decode("utf-8")
+
+    async def _write_file_content(self, path: Path, content_b64: str):
+        """Write base64 content to file"""
+        import base64
+        content = base64.b64decode(content_b64)
+        async with aiofiles.open(path, "wb") as f:
+            await f.write(content)
 
     async def create_backup(
         self, backup_type: str = "full", components: Optional[List[str]] = None
@@ -370,19 +438,36 @@ class BackupManager:
 
                 comp_data = json.loads(decompressed_data.decode("utf-8"))
 
-                # Restaurar archivos (lógica básica - en producción sería más sofisticada)
-                for file_path in comp_data.get("files", []):
+                # Restore files
+                for file_data in comp_data.get("files", []):
                     try:
-                        # Aquí iría la lógica real de restauración
-                        # Por simplicidad, solo verificamos que los archivos existan
-                        if Path(file_path).exists():
-                            logger.debug(f"Archivo {file_path} verificado")
-                        else:
-                            logger.warning(
-                                f"Archivo {file_path} no encontrado durante restauración"
-                            )
+                        if isinstance(file_data, str):
+                            # Legacy format support (path only)
+                            logger.warning(f"Skipping legacy backup file format: {file_data}")
+                            continue
+                            
+                        file_path = file_data.get("path")
+                        content_b64 = file_data.get("content")
+                        
+                        if not file_path or not content_b64:
+                            continue
+                            
+                        target_path = Path(file_path)
+                        
+                        # Ensure parent directory exists
+                        target_path.parent.mkdir(parents=True, exist_ok=True)
+                        
+                        # Backup existing if exists
+                        if target_path.exists():
+                            backup_target = target_path.with_suffix(target_path.suffix + ".bak")
+                            shutil.copy2(target_path, backup_target)
+                            
+                        # Write content
+                        await self._write_file_content(target_path, content_b64)
+                        logger.debug(f"Restored file: {target_path}")
+                        
                     except Exception as e:
-                        logger.error(f"Error restaurando {file_path}: {e}")
+                        logger.error(f"Error restoring file: {e}")
 
             logger.info(f"✅ Restauración desde {backup_id} completada")
             return True

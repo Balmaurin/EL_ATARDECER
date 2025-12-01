@@ -684,4 +684,4 @@ def main():
 
 if __name__ == "__main__":
     # Si se ejecuta como script principal, ejecutar demo
-    demo_mcp_memory_system()</parameter>
+    demo_mcp_memory_system()

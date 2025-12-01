@@ -8,14 +8,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Flags de disponibilidad de dependencias opcionales
-AVAILABLE_DEPS = {
-    "transformers": True,
-    "torch": True,
-    "faiss": True,
-    "chromadb": True,
-    "sentence_transformers": True,
-}
+# REAL dependency availability - checked at runtime
+def _check_all_dependencies():
+    """REAL check of all optional dependencies"""
+    deps = {}
+    for dep_name in ["transformers", "torch", "faiss", "chromadb", "sentence_transformers"]:
+        deps[dep_name] = check_dependency(dep_name)
+    return deps
+
+# Initialize with REAL checks
+AVAILABLE_DEPS = _check_all_dependencies()
 
 def check_dependency(dep_name: str) -> bool:
     """Verificar si una dependencia está disponible"""

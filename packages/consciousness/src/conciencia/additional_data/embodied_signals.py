@@ -572,8 +572,7 @@ if __name__ == "__main__":
     print(f"   Señales activas: {initial_state['overall_embodied_state']['signal_count']['active']}")
 
     # Simulaciones de escenarios corporales
-    print("
-⚡ Simulando escenarios corporales..."    # Ejercicio intenso
+    print("\n⚡ Simulando escenarios corporales...")    # Ejercicio intenso
     print("   • Después de ejercicio pesado:")
     exercise_result = embodied_system.simulate_body_state_change('heavy_exercise', 0.8)
     print(f"     Estado: {exercise_result['general_state'].upper()}")
@@ -597,5 +596,5 @@ if __name__ == "__main__":
     print(f"     Estado: {injury_result['general_state'].upper()}")
     print(f"     Urgencia total: {injury_result['total_urgency']:.2f}")
 
-    print("
-🌡️ Feedback emocional corporal:"    final_feedback = embodied_system.get_embodied_feedback()
+    print("\n🌡️ Feedback emocional corporal:")
+    final_feedback = embodied_system.get_embodied_feedback()

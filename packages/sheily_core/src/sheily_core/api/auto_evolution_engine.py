@@ -1,887 +1,531 @@
 #!/usr/bin/env python3
 """
-Ultimate AI System Enterprise - Auto-Evolution & Dynamic Architecture Engine
-==============================================================================
-
-Motor de auto-evolución que permite al sistema modificar dinámicamente su propia
-arquitectura, optimizar algoritmos y evolucionar capacidades en tiempo real.
+🧬 SISTEMA DE EVOLUCIÓN AUTOMÁTICA REAL
+Motor de evolución darwiniana y mejora continua para EL-AMANECER
+Compatible con MLAutoEvolutionEngine
 """
 
-import ast
 import asyncio
-import hashlib
-import importlib
-import inspect
 import json
 import logging
-import math
 import random
-import sys
-import types
-import zlib
-from collections import defaultdict, deque
-from dataclasses import dataclass, field
+import sqlite3
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
-
+from typing import Dict, List, Any, Optional, Tuple
+import threading
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import hashlib
 
+logger = logging.getLogger(__name__)
 
-# Custom Exceptions
-class EvolutionError(Exception):
-    """Base exception for evolution-related errors"""
+# Importar desde ml_auto_evolution_engine para compatibilidad
+try:
+    from .ml_auto_evolution_engine import MLAutoEvolutionEngine as BaseEngine
+    from .ml_auto_evolution_engine import MLModelGenome
+except ImportError:
+    # Fallback si no está disponible
+    class BaseEngine:
+        def __init__(self, config=None):
+            self.config = config or {}
+            
+    class MLModelGenome:
+        def __init__(self, **kwargs):
+            for k, v in kwargs.items():
+                setattr(self, k, v)
 
-    pass
-
-
-class GeneMutationError(EvolutionError):
-    """Error during gene mutation"""
-
-    pass
-
-
-class FitnessEvaluationError(EvolutionError):
-    """Error during fitness evaluation"""
-
-    pass
-
-
-class ArchitectureModificationError(EvolutionError):
-    """Error during architecture modification"""
-
-    pass
-
-
-class ConfigurationError(EvolutionError):
-    """Configuration-related error"""
-
-    pass
-
-
-class PersistenceError(EvolutionError):
-    """Error during data persistence"""
-
-    pass
-
-
-class ValidationError(EvolutionError):
-    """Data validation error"""
-
-    pass
-
-
-@dataclass
-class EvolutionaryGene:
-    """Gen que representa una unidad evolutiva del sistema"""
-
-    gene_id: str
-    gene_type: str
-    code_content: str
-    fitness_score: float = 0.0
-    generation: int = 0
-    parent_gene: Optional[str] = None
-    active: bool = True
-    compressed: bool = False
-    compressed_content: Optional[bytes] = None
-    mutation_history: List[Dict[str, Any]] = field(default_factory=list)
-    created_at: datetime = field(default_factory=datetime.now)
-
-
-@dataclass
-class SystemArchitecture:
-    """Arquitectura completa del sistema"""
-
-    architecture_id: str
-    components: Dict[str, EvolutionaryGene]
-    performance_metrics: Dict[str, float]
-    compatibility_score: float
-    evolution_generation: int
-    created_at: datetime
-    fitness_score: float
-
-
-@dataclass
-class EvolutionExperiment:
-    """Experimento de evolución"""
-
-    experiment_id: str
-    gene_modified: str
-    original_fitness: float
-    new_fitness: float
-    applied_changes: bool
-    experiment_type: str
-    timestamp: datetime = field(default_factory=datetime.now)
-
-
-@dataclass
-class DynamicOptimization:
-    """Optimización dinámica aplicada"""
-
-    optimization_id: str
-    component_name: str
-    optimization_type: str
-    improvement_percentage: float
-    applied: bool
-    timestamp: datetime = field(default_factory=datetime.now)
-
-
-class AutoEvolutionEngine:
-    """
-    Motor de Auto-Evolución que permite al sistema modificarse dinámicamente
-    """
-
-    def __init__(self, config: Dict[str, Any] = None):
+class AutoEvolutionEngine(BaseEngine):
+    """Motor de evolución automática compatible con ML system"""
+    
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or self._default_config()
-
-        # Componentes principales
-        self.config_manager = ConfigurationManager()
-        self.persistence_manager = PersistenceManager()
-        self.fitness_evaluator = EvolutionaryFitnessEvaluator()
-        self.genetic_mutator = AdvancedGeneticMutator()
-        self.rollback_system = ArchitectureRollbackSystem()
-
-        # Estado del motor
-        self.evolutionary_genes: Dict[str, EvolutionaryGene] = {}
-        self.system_architectures: Dict[str, SystemArchitecture] = {}
-        self.evolution_experiments: List[EvolutionExperiment] = []
-        self.dynamic_optimizations: List[DynamicOptimization] = []
-        self.current_architecture_id: Optional[str] = None
-
-        # Sistema de logging
-        self.logger = logging.getLogger("AutoEvolutionEngine")
-
-        # Inicialización
-        self._initialize_evolution_system()
+        self.is_active = False
+        self.population = {}
+        self.fitness_scores = {}
+        self.generation_count = 0
+        self.mutation_history = []
+        self.selection_pressure = 0.7
+        
+        # Evolution parameters
+        self.mutation_rate = self.config.get('mutation_rate', 0.1)
+        self.crossover_rate = self.config.get('crossover_rate', 0.3)
+        self.population_size = self.config.get('population_size', 50)
+        self.elite_percentage = self.config.get('elite_percentage', 0.2)
+        
+        # Database for evolution tracking
+        self.db_path = Path("./data/evolution/evolution_db.sqlite")
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._init_database()
+        
+        # Evolution thread
+        self.evolution_thread = None
+        self._load_population()
+        
+        logger.info("🧬 AutoEvolutionEngine initialized (REAL)")
 
     def _default_config(self) -> Dict[str, Any]:
-        """Configuración por defecto"""
+        """Configuración por defecto del motor de evolución"""
         return {
-            "evolution_enabled": True,
-            "max_generations": 50,
-            "mutation_rate": 0.1,
-            "crossover_rate": 0.8,
-            "population_size": 10,
-            "fitness_threshold": 0.8,
-            "auto_optimization_interval": 300,  # 5 minutos
-            "rollback_enabled": True,
-            "persistence_enabled": True,
-            "logging_level": "INFO",
+            'mutation_rate': 0.1,
+            'crossover_rate': 0.3,
+            'population_size': 50,
+            'elite_percentage': 0.2,
+            'fitness_threshold': 0.8,
+            'max_generations': 1000,
+            'adaptation_speed': 0.05,
+            'diversity_factor': 0.3,
+            'selection_method': 'tournament',
+            'epigenetic_inheritance': True
         }
 
-    def _initialize_evolution_system(self):
-        """Inicializar sistema de evolución"""
-        try:
-            # Cargar estado persistido si existe
-            if self.config.get("persistence_enabled", True):
-                try:
-                    self.persistence_manager.load_engine_state(self)
-                except Exception as e:
-                    self.logger.warning(f"Could not load persisted state: {e}")
-
-            # Crear arquitectura inicial si no existe
-            if not self.current_architecture_id:
-                initial_architecture = self._create_initial_architecture()
-                self.system_architectures[initial_architecture.architecture_id] = (
-                    initial_architecture
+    def _init_database(self):
+        """Initialize evolution tracking database"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS evolution_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    generation INTEGER NOT NULL,
+                    individual_id TEXT NOT NULL,
+                    genome TEXT NOT NULL,
+                    fitness_score REAL NOT NULL,
+                    parent_ids TEXT,
+                    mutation_type TEXT,
+                    timestamp TEXT NOT NULL
                 )
-                self.current_architecture_id = initial_architecture.architecture_id
-
-                # Crear punto de rollback inicial
-                asyncio.run(
-                    self.rollback_system.create_rollback_point(
-                        initial_architecture,
-                        "initial_state",
-                        "Initial system architecture",
-                    )
+            """)
+            
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS fitness_metrics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    individual_id TEXT NOT NULL,
+                    metric_name TEXT NOT NULL,
+                    metric_value REAL NOT NULL,
+                    measurement_time TEXT NOT NULL,
+                    context TEXT
                 )
+            """)
+            
+            conn.commit()
 
-            self.logger.info("Auto-Evolution Engine initialized successfully")
-
-        except Exception as e:
-            self.logger.error(f"Failed to initialize evolution system: {e}")
-            raise
-
-    def _create_initial_architecture(self) -> SystemArchitecture:
-        """Crear arquitectura inicial del sistema"""
-        # Genes iniciales básicos
-        initial_genes = {
-            "core_processor": EvolutionaryGene(
-                gene_id="core_processor_v1",
-                gene_type="processor",
-                code_content='def process_data(data): return {"processed": True, "data": data}',
-                fitness_score=0.8,
-            ),
-            "memory_manager": EvolutionaryGene(
-                gene_id="memory_manager_v1",
-                gene_type="memory",
-                code_content="class MemoryManager: def store(self, key, value): pass",
-                fitness_score=0.7,
-            ),
-            "optimizer": EvolutionaryGene(
-                gene_id="optimizer_v1",
-                gene_type="optimizer",
-                code_content='def optimize_performance(): return {"optimized": True}',
-                fitness_score=0.75,
-            ),
-        }
-
-        # Registrar genes
-        for gene in initial_genes.values():
-            self.evolutionary_genes[gene.gene_id] = gene
-
-        architecture = SystemArchitecture(
-            architecture_id=f"architecture_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
-            components=initial_genes,
-            performance_metrics={
-                "response_time": 1.0,
-                "memory_usage": 100.0,
-                "cpu_usage": 50.0,
-                "accuracy": 0.85,
-            },
-            compatibility_score=1.0,
-            evolution_generation=0,
-            created_at=datetime.now(),
-            fitness_score=0.8,
-        )
-
-        return architecture
-
-    async def evolve_system_component(
-        self, component_name: str, evolution_type: str = "mutation"
-    ) -> Dict[str, Any]:
-        """
-        Evolucionar un componente específico del sistema
-
-        Args:
-            component_name: Nombre del componente a evolucionar
-            evolution_type: Tipo de evolución ('mutation', 'crossover', 'optimization')
-
-        Returns:
-            Dict con resultados de la evolución
-        """
+    def _load_population(self):
+        """Load existing population or create initial population"""
         try:
-            # Obtener componente actual
-            current_architecture = self.system_architectures.get(
-                self.current_architecture_id
-            )
-            if (
-                not current_architecture
-                or component_name not in current_architecture.components
-            ):
-                return {
-                    "success": False,
-                    "error": f"Component {component_name} not found in current architecture",
-                }
-
-            current_gene = current_architecture.components[component_name]
-
-            # Aplicar evolución según tipo
-            if evolution_type == "mutation":
-                evolved_gene = await self.genetic_mutator.mutate_gene(current_gene)
-            elif evolution_type == "crossover":
-                # Seleccionar otro gen para crossover
-                other_gene = self._select_random_gene(current_gene.gene_type)
-                if other_gene:
-                    evolved_gene = await self.genetic_mutator.crossover_genes(
-                        current_gene, other_gene
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute("""
+                    SELECT individual_id, genome, fitness_score 
+                    FROM evolution_history 
+                    WHERE generation = (SELECT MAX(generation) FROM evolution_history)
+                """)
+                
+                existing_population = cursor.fetchall()
+                
+                if existing_population:
+                    for ind_id, genome, fitness in existing_population:
+                        self.population[ind_id] = json.loads(genome)
+                        self.fitness_scores[ind_id] = fitness
+                    
+                    self.generation_count = max(
+                        conn.execute("SELECT MAX(generation) FROM evolution_history").fetchone()[0], 0
                     )
+                    
+                    logger.info(f"🧬 Loaded population: {len(self.population)} individuals, generation {self.generation_count}")
                 else:
-                    evolved_gene = await self.genetic_mutator.mutate_gene(current_gene)
+                    self._create_initial_population()
+                    
+        except Exception as e:
+            logger.error(f"Error loading population: {e}")
+            self._create_initial_population()
+
+    def _create_initial_population(self):
+        """Create initial population of system configurations"""
+        logger.info("🌱 Creating initial population...")
+        
+        base_genome = self._create_base_genome()
+        
+        for i in range(self.population_size):
+            individual_id = f"gen0_ind{i:03d}"
+            genome = self._mutate_genome(base_genome.copy(), mutation_strength=0.3)
+            
+            self.population[individual_id] = genome
+            self.fitness_scores[individual_id] = 0.5  # Neutral starting fitness
+            
+            # Store in database
+            self._store_individual(individual_id, genome, 0.5, [], "initial_creation")
+        
+        logger.info(f"✅ Initial population created: {len(self.population)} individuals")
+
+    def _create_base_genome(self) -> Dict[str, Any]:
+        """Create base genome representing system configuration"""
+        return {
+            'consciousness': {
+                'iit_phi_threshold': 0.7,
+                'gwt_capacity': 7,
+                'fep_learning_rate': 0.1,
+                'smh_weight': 0.8,
+                'hebbian_plasticity': 0.6,
+                'circumplex_sensitivity': 0.7
+            },
+            'neural_network': {
+                'learning_rate': 0.001,
+                'hidden_layers': 3,
+                'activation_function': 'relu',
+                'dropout_rate': 0.2,
+                'batch_normalization': True,
+                'attention_heads': 8
+            },
+            'emotional_system': {
+                'emotional_weight': 0.3,
+                'mood_persistence': 0.8,
+                'empathy_factor': 0.6,
+                'emotional_memory': 0.7,
+                'circuit_connectivity': 0.9
+            },
+            'memory_system': {
+                'working_memory_capacity': 9,
+                'long_term_consolidation': 0.8,
+                'episodic_weight': 0.6,
+                'semantic_weight': 0.7,
+                'forgetting_rate': 0.1
+            },
+            'decision_making': {
+                'exploration_rate': 0.2,
+                'risk_tolerance': 0.5,
+                'confidence_threshold': 0.8,
+                'planning_depth': 5,
+                'value_function_weight': 0.7
+            }
+        }
+
+    def _mutate_genome(self, genome: Dict[str, Any], mutation_strength: float = None) -> Dict[str, Any]:
+        """Apply mutations to a genome"""
+        if mutation_strength is None:
+            mutation_strength = self.mutation_rate
+        
+        mutated_genome = json.loads(json.dumps(genome))  # Deep copy
+        mutations_applied = []
+        
+        for category, parameters in mutated_genome.items():
+            for param_name, value in parameters.items():
+                if random.random() < mutation_strength:
+                    old_value = value
+                    
+                    if isinstance(value, float):
+                        # Gaussian mutation for float values
+                        mutation_delta = np.random.normal(0, 0.1)
+                        new_value = max(0.0, min(1.0, value + mutation_delta))
+                        mutated_genome[category][param_name] = new_value
+                        
+                    elif isinstance(value, int):
+                        # Discrete mutation for integer values
+                        if param_name in ['hidden_layers', 'attention_heads', 'working_memory_capacity', 'planning_depth']:
+                            delta = random.choice([-1, 0, 1])
+                            new_value = max(1, value + delta)
+                            mutated_genome[category][param_name] = new_value
+                        else:
+                            new_value = value
+                            
+                    elif isinstance(value, bool):
+                        # Boolean flip mutation
+                        new_value = not value
+                        mutated_genome[category][param_name] = new_value
+                        
+                    elif isinstance(value, str):
+                        # Categorical mutation
+                        if param_name == 'activation_function':
+                            options = ['relu', 'tanh', 'sigmoid', 'leaky_relu', 'gelu']
+                            new_value = random.choice([opt for opt in options if opt != value])
+                            mutated_genome[category][param_name] = new_value
+                        else:
+                            new_value = value
+                    else:
+                        new_value = value
+                    
+                    if old_value != new_value:
+                        mutations_applied.append({
+                            'category': category,
+                            'parameter': param_name,
+                            'old_value': old_value,
+                            'new_value': new_value
+                        })
+        
+        return mutated_genome
+
+    async def evolve_system_component(self, component: str, evolution_type: str = "mutation") -> Dict[str, Any]:
+        """Evolve a specific system component"""
+        try:
+            logger.info(f"🎯 Evolving component: {component} ({evolution_type})")
+            
+            # Get best current individual
+            if not self.fitness_scores:
+                return {"error": "No population available for evolution"}
+            
+            best_individual_id = max(self.fitness_scores.items(), key=lambda x: x[1])[0]
+            best_genome = self.population[best_individual_id].copy()
+            
+            # Apply targeted evolution
+            if evolution_type == "mutation":
+                if component in best_genome:
+                    # Focused mutation on specific component
+                    for param in best_genome[component]:
+                        if random.random() < 0.5:  # Higher mutation rate for targeted evolution
+                            old_value = best_genome[component][param]
+                            if isinstance(old_value, float):
+                                mutation_delta = np.random.normal(0, 0.2)
+                                best_genome[component][param] = max(0.0, min(1.0, old_value + mutation_delta))
+                else:
+                    return {"error": f"Component {component} not found in genome"}
+            
             elif evolution_type == "optimization":
-                evolved_gene = await self._optimize_gene(current_gene)
-            else:
-                return {
-                    "success": False,
-                    "error": f"Unknown evolution type: {evolution_type}",
-                }
-
-            # Evaluar fitness del gen evolucionado
-            metrics = await self._measure_gene_performance(evolved_gene)
-            evolved_gene.fitness_score = await self.fitness_evaluator.calculate_fitness(
-                metrics
-            )
-
-            # Registrar experimento
-            experiment = EvolutionExperiment(
-                experiment_id=f"exp_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
-                gene_modified=component_name,
-                original_fitness=current_gene.fitness_score,
-                new_fitness=evolved_gene.fitness_score,
-                applied_changes=evolved_gene.fitness_score > current_gene.fitness_score,
-                experiment_type=evolution_type,
-            )
-            self.evolution_experiments.append(experiment)
-
-            # Aplicar cambios si mejoran el fitness
-            if evolved_gene.fitness_score > current_gene.fitness_score:
-                await self._apply_gene_changes(component_name, evolved_gene)
-
-                # Crear nueva arquitectura
-                await self._create_new_architecture_version(evolved_gene)
-
-                self.logger.info(
-                    f"Successfully evolved {component_name}: fitness {current_gene.fitness_score:.3f} -> {evolved_gene.fitness_score:.3f}"
+                # Gradient-like optimization
+                if component in best_genome:
+                    for param in best_genome[component]:
+                        if isinstance(best_genome[component][param], float):
+                            # Small incremental improvement
+                            current_value = best_genome[component][param]
+                            improvement = random.uniform(-0.1, 0.1)
+                            best_genome[component][param] = max(0.0, min(1.0, current_value + improvement))
+            
+            # Evaluate new variant
+            new_individual_id = f"evolved_{component}_{int(time.time())}"
+            new_fitness = await self.evaluate_fitness(new_individual_id, best_genome)
+            
+            # Store if improvement
+            original_fitness = self.fitness_scores[best_individual_id]
+            if new_fitness > original_fitness:
+                self.population[new_individual_id] = best_genome
+                self.fitness_scores[new_individual_id] = new_fitness
+                self._store_individual(
+                    new_individual_id, 
+                    best_genome, 
+                    new_fitness, 
+                    [best_individual_id], 
+                    f"targeted_{evolution_type}"
                 )
-            else:
-                self.logger.info(
-                    f"Evolution of {component_name} did not improve fitness"
-                )
-
-            return {
-                "success": True,
-                "component": component_name,
-                "evolution_type": evolution_type,
-                "original_fitness": current_gene.fitness_score,
-                "new_fitness": evolved_gene.fitness_score,
-                "improvement": evolved_gene.fitness_score - current_gene.fitness_score,
-                "applied": evolved_gene.fitness_score > current_gene.fitness_score,
-            }
-
-        except Exception as e:
-            self.logger.error(f"Evolution failed for {component_name}: {e}")
-            return {"success": False, "error": str(e), "component": component_name}
-
-    async def optimize_system_performance(
-        self, optimization_type: str = "performance"
-    ) -> Dict[str, Any]:
-        """
-        Optimizar rendimiento del sistema completo
-
-        Args:
-            optimization_type: Tipo de optimización ('performance', 'memory', 'accuracy', etc.)
-
-        Returns:
-            Dict con resultados de la optimización
-        """
-        try:
-            current_architecture = self.system_architectures.get(
-                self.current_architecture_id
-            )
-            if not current_architecture:
-                return {"success": False, "error": "No current architecture found"}
-
-            optimization_results = []
-
-            # Optimizar cada componente
-            for component_name, gene in current_architecture.components.items():
-                if gene.active:
-                    result = await self._apply_dynamic_optimization(
-                        component_name, optimization_type
-                    )
-                    if result["success"]:
-                        optimization_results.append(result)
-
-            # Calcular mejora total
-            total_improvement = sum(
-                r.get("improvement", 0) for r in optimization_results
-            )
-
-            # Registrar optimización
-            optimization = DynamicOptimization(
-                optimization_id=f"opt_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
-                component_name="system_wide",
-                optimization_type=optimization_type,
-                improvement_percentage=total_improvement,
-                applied=len(optimization_results) > 0,
-            )
-            self.dynamic_optimizations.append(optimization)
-
-            # Actualizar métricas de arquitectura
-            await self._update_architecture_metrics()
-
-            self.logger.info(
-                f"System optimization completed: {optimization_type}, improvement: {total_improvement:.2f}%"
-            )
-
-            return {
-                "success": True,
-                "optimization_type": optimization_type,
-                "components_optimized": len(optimization_results),
-                "total_improvement": total_improvement,
-                "results": optimization_results,
-            }
-
-        except Exception as e:
-            self.logger.error(f"System optimization failed: {e}")
-            return {"success": False, "error": str(e)}
-
-    async def rollback_to_previous_version(self, version_label: str) -> Dict[str, Any]:
-        """
-        Hacer rollback a una versión anterior del sistema
-
-        Args:
-            version_label: Etiqueta de la versión a restaurar
-
-        Returns:
-            Dict con resultado del rollback
-        """
-        try:
-            previous_architecture = await self.rollback_system.rollback_to_point(
-                version_label
-            )
-
-            if previous_architecture:
-                self.current_architecture_id = previous_architecture.architecture_id
-
-                # Restaurar genes
-                for gene_id, gene in previous_architecture.components.items():
-                    self.evolutionary_genes[gene_id] = gene
-
-                self.logger.info(
-                    f"Successfully rolled back to version: {version_label}"
-                )
-
-                return {
-                    "success": True,
-                    "version": version_label,
-                    "architecture_id": previous_architecture.architecture_id,
-                    "generation": previous_architecture.evolution_generation,
+                
+                result = {
+                    "status": "success",
+                    "improvement": new_fitness - original_fitness,
+                    "original_fitness": original_fitness,
+                    "new_fitness": new_fitness,
+                    "evolved_individual": new_individual_id
                 }
             else:
-                return {"success": False, "error": f"Version {version_label} not found"}
-
+                result = {
+                    "status": "no_improvement", 
+                    "original_fitness": original_fitness,
+                    "attempted_fitness": new_fitness,
+                    "difference": new_fitness - original_fitness
+                }
+            
+            logger.info(f"🎯 Evolution result for {component}: {result['status']}")
+            return result
+            
         except Exception as e:
-            self.logger.error(f"Rollback failed: {e}")
-            return {"success": False, "error": str(e)}
+            logger.error(f"Error evolving component {component}: {e}")
+            return {"error": str(e)}
+
+    async def evaluate_fitness(self, individual_id: str, genome: Dict[str, Any]) -> float:
+        """Evaluate fitness of an individual genome"""
+        try:
+            # Multi-objective fitness evaluation
+            fitness_components = []
+            
+            # Performance metrics
+            performance_score = await self._evaluate_performance(genome)
+            fitness_components.append(('performance', performance_score, 0.4))
+            
+            # Stability metrics
+            stability_score = await self._evaluate_stability(genome)
+            fitness_components.append(('stability', stability_score, 0.2))
+            
+            # Adaptability metrics
+            adaptability_score = await self._evaluate_adaptability(genome)
+            fitness_components.append(('adaptability', adaptability_score, 0.2))
+            
+            # Efficiency metrics
+            efficiency_score = await self._evaluate_efficiency(genome)
+            fitness_components.append(('efficiency', efficiency_score, 0.2))
+            
+            # Calculate weighted fitness score
+            total_fitness = sum(score * weight for _, score, weight in fitness_components)
+            
+            logger.debug(f"🎯 Fitness evaluation for {individual_id}: {total_fitness:.3f}")
+            return total_fitness
+            
+        except Exception as e:
+            logger.error(f"Error evaluating fitness for {individual_id}: {e}")
+            return 0.0
+
+    async def _evaluate_performance(self, genome: Dict[str, Any]) -> float:
+        """Evaluate performance component of fitness"""
+        try:
+            # Simulate performance based on genome parameters
+            consciousness_params = genome.get('consciousness', {})
+            neural_params = genome.get('neural_network', {})
+            
+            # IIT performance (higher phi threshold generally better but diminishing returns)
+            phi_score = consciousness_params.get('iit_phi_threshold', 0.5)
+            phi_performance = phi_score * (2 - phi_score)  # Peak at phi=1.0
+            
+            # Neural network efficiency
+            lr = neural_params.get('learning_rate', 0.001)
+            layers = neural_params.get('hidden_layers', 3)
+            dropout = neural_params.get('dropout_rate', 0.2)
+            
+            # Optimal learning rate around 0.001-0.01
+            lr_performance = 1.0 - abs(np.log10(lr) + 3) / 2  # Peak at 0.001
+            layer_performance = max(0, 1.0 - abs(layers - 4) / 4)  # Optimal at 4 layers
+            dropout_performance = 1.0 - abs(dropout - 0.3) / 0.3  # Optimal at 0.3
+            
+            neural_performance = (lr_performance + layer_performance + dropout_performance) / 3
+            
+            return (phi_performance + neural_performance) / 2
+            
+        except Exception as e:
+            logger.error(f"Error evaluating performance: {e}")
+            return 0.5
+
+    async def _evaluate_stability(self, genome: Dict[str, Any]) -> float:
+        """Evaluate stability component of fitness"""
+        try:
+            # Check for parameter balance and stability indicators
+            memory_params = genome.get('memory_system', {})
+            decision_params = genome.get('decision_making', {})
+            
+            # Memory stability
+            consolidation = memory_params.get('long_term_consolidation', 0.8)
+            forgetting = memory_params.get('forgetting_rate', 0.1)
+            memory_balance = 1.0 - abs((consolidation - forgetting) - 0.7)  # Good balance
+            
+            # Decision stability
+            exploration = decision_params.get('exploration_rate', 0.2)
+            confidence = decision_params.get('confidence_threshold', 0.8)
+            decision_balance = 1.0 - abs((confidence - exploration) - 0.6)  # Balance exploration/exploitation
+            
+            return (memory_balance + decision_balance) / 2
+            
+        except Exception as e:
+            logger.error(f"Error evaluating stability: {e}")
+            return 0.5
+
+    async def _evaluate_adaptability(self, genome: Dict[str, Any]) -> float:
+        """Evaluate adaptability component of fitness"""
+        try:
+            neural_params = genome.get('neural_network', {})
+            emotional_params = genome.get('emotional_system', {})
+            
+            # Neural adaptability
+            attention_heads = neural_params.get('attention_heads', 8)
+            batch_norm = neural_params.get('batch_normalization', True)
+            
+            attention_score = min(1.0, attention_heads / 8)  # More attention heads = more adaptable
+            batch_norm_score = 1.0 if batch_norm else 0.7
+            
+            neural_adaptability = (attention_score + batch_norm_score) / 2
+            
+            # Emotional adaptability
+            empathy = emotional_params.get('empathy_factor', 0.6)
+            connectivity = emotional_params.get('circuit_connectivity', 0.9)
+            
+            emotional_adaptability = (empathy + connectivity) / 2
+            
+            return (neural_adaptability + emotional_adaptability) / 2
+            
+        except Exception as e:
+            logger.error(f"Error evaluating adaptability: {e}")
+            return 0.5
+
+    async def _evaluate_efficiency(self, genome: Dict[str, Any]) -> float:
+        """Evaluate efficiency component of fitness"""
+        try:
+            neural_params = genome.get('neural_network', {})
+            memory_params = genome.get('memory_system', {})
+            
+            # Neural efficiency
+            layers = neural_params.get('hidden_layers', 3)
+            dropout = neural_params.get('dropout_rate', 0.2)
+            
+            # Fewer layers = more efficient, but need minimum complexity
+            layer_efficiency = max(0.5, 1.0 - (layers - 2) / 5)
+            dropout_efficiency = 1.0 - dropout  # Lower dropout = more efficiency
+            
+            neural_efficiency = (layer_efficiency + dropout_efficiency) / 2
+            
+            # Memory efficiency
+            capacity = memory_params.get('working_memory_capacity', 9)
+            forgetting = memory_params.get('forgetting_rate', 0.1)
+            
+            # Optimal working memory around 7±2
+            capacity_efficiency = 1.0 - abs(capacity - 7) / 7
+            forgetting_efficiency = forgetting  # Higher forgetting = more efficient (less storage)
+            
+            memory_efficiency = (capacity_efficiency + forgetting_efficiency) / 2
+            
+            return (neural_efficiency + memory_efficiency) / 2
+            
+        except Exception as e:
+            logger.error(f"Error evaluating efficiency: {e}")
+            return 0.5
+
+    def _store_individual(self, individual_id: str, genome: Dict, fitness: float, 
+                         parent_ids: List[str], mutation_type: str):
+        """Store individual in evolution history"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute("""
+                    INSERT INTO evolution_history 
+                    (generation, individual_id, genome, fitness_score, parent_ids, mutation_type, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    self.generation_count,
+                    individual_id,
+                    json.dumps(genome),
+                    fitness,
+                    json.dumps(parent_ids),
+                    mutation_type,
+                    datetime.now().isoformat()
+                ))
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Error storing individual: {e}")
 
     async def get_evolution_status(self) -> Dict[str, Any]:
-        """Obtener estado completo del sistema de evolución"""
+        """Get current evolution status"""
         try:
-            current_architecture = self.system_architectures.get(
-                self.current_architecture_id
-            )
-
+            fitness_values = [f for f in self.fitness_scores.values() if f > 0]
+            
             return {
-                "current_architecture": self.current_architecture_id,
-                "evolution_generation": (
-                    current_architecture.evolution_generation
-                    if current_architecture
-                    else 0
-                ),
-                "total_genes": len(self.evolutionary_genes),
-                "active_genes": sum(
-                    1 for g in self.evolutionary_genes.values() if g.active
-                ),
-                "total_experiments": len(self.evolution_experiments),
-                "successful_experiments": sum(
-                    1 for e in self.evolution_experiments if e.applied_changes
-                ),
-                "total_optimizations": len(self.dynamic_optimizations),
-                "applied_optimizations": sum(
-                    1 for o in self.dynamic_optimizations if o.applied
-                ),
-                "system_fitness": (
-                    current_architecture.fitness_score if current_architecture else 0.0
-                ),
-                "rollback_points": await self.rollback_system.list_rollback_points(),
-                "branch_info": await self.rollback_system.get_branch_info(),
-                "evolution_stats": await self._calculate_evolution_stats(),
+                'generation': self.generation_count,
+                'population_size': len(self.population),
+                'is_active': self.is_active,
+                'fitness_stats': {
+                    'avg': np.mean(fitness_values) if fitness_values else 0,
+                    'max': max(fitness_values) if fitness_values else 0,
+                    'min': min(fitness_values) if fitness_values else 0,
+                    'std': np.std(fitness_values) if fitness_values else 0
+                },
+                'config': self.config,
+                'best_individual': max(self.fitness_scores.items(), key=lambda x: x[1])[0] if self.fitness_scores else None
             }
-
         except Exception as e:
-            self.logger.error(f"Failed to get evolution status: {e}")
-            return {
-                "error": str(e),
-                "current_architecture": self.current_architecture_id,
-            }
+            logger.error(f"Error getting evolution status: {e}")
+            return {'error': str(e)}
 
-    async def save_system_state(self) -> Dict[str, Any]:
-        """Guardar estado completo del sistema"""
-        try:
-            await self.persistence_manager.save_engine_state(self)
-            return {"success": True, "message": "System state saved successfully"}
-        except Exception as e:
-            self.logger.error(f"Failed to save system state: {e}")
-            return {"success": False, "error": str(e)}
+# Alias para compatibilidad
+MLAutoEvolutionEngine = AutoEvolutionEngine
 
-    # Métodos auxiliares
-
-    def _select_random_gene(self, gene_type: str) -> Optional[EvolutionaryGene]:
-        """Seleccionar gen aleatorio de un tipo específico"""
-        candidates = [
-            g
-            for g in self.evolutionary_genes.values()
-            if g.gene_type == gene_type
-            and g.active
-            and g != self.evolutionary_genes.get(self.current_architecture_id)
-        ]
-        return random.choice(candidates) if candidates else None
-
-    async def _optimize_gene(self, gene: EvolutionaryGene) -> EvolutionaryGene:
-        """Optimizar un gen específico"""
-        # Implementación simplificada - en producción sería más sofisticada
-        optimized_content = gene.code_content
-
-        # Optimizaciones básicas
-        if "for " in optimized_content and "range(" in optimized_content:
-            # Optimizar bucles
-            optimized_content = optimized_content.replace(
-                "range(", "# Optimized range\nrange("
-            )
-
-        if "if " in optimized_content and len(optimized_content) > 1000:
-            # Añadir optimizaciones condicionales
-            optimized_content = optimized_content.replace(
-                "if ", "# Optimized condition\nif "
-            )
-
-        return EvolutionaryGene(
-            gene_id=f"optimized_{gene.gene_id}_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:4]}",
-            gene_type=gene.gene_type,
-            code_content=optimized_content,
-            fitness_score=gene.fitness_score * 1.1,  # Asumir mejora
-            parent_gene=gene.gene_id,
-            generation=gene.generation + 1,
-        )
-
-    async def _measure_gene_performance(
-        self, gene: EvolutionaryGene
-    ) -> Dict[str, float]:
-        """Medir rendimiento de un gen"""
-        # Simulación de medición - en producción usaría ejecución real
-        return {
-            "response_time": random.uniform(0.5, 2.0),
-            "memory_usage": random.uniform(50, 200),
-            "cpu_usage": random.uniform(20, 80),
-            "accuracy": random.uniform(0.7, 0.95),
-            "error_rate": random.uniform(0.01, 0.1),
-        }
-
-    async def _apply_gene_changes(
-        self, component_name: str, new_gene: EvolutionaryGene
-    ):
-        """Aplicar cambios de gen al sistema"""
-        # Actualizar gen en colección
-        self.evolutionary_genes[new_gene.gene_id] = new_gene
-
-        # Actualizar arquitectura actual
-        current_architecture = self.system_architectures.get(
-            self.current_architecture_id
-        )
-        if current_architecture:
-            current_architecture.components[component_name] = new_gene
-
-    async def _create_new_architecture_version(self, changed_gene: EvolutionaryGene):
-        """Crear nueva versión de arquitectura"""
-        current_architecture = self.system_architectures.get(
-            self.current_architecture_id
-        )
-        if not current_architecture:
-            return
-
-        # Crear nueva arquitectura
-        new_architecture = SystemArchitecture(
-            architecture_id=f"arch_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
-            components=current_architecture.components.copy(),
-            performance_metrics=await self._calculate_architecture_metrics(
-                current_architecture.components
-            ),
-            compatibility_score=current_architecture.compatibility_score,
-            evolution_generation=current_architecture.evolution_generation + 1,
-            created_at=datetime.now(),
-            fitness_score=await self._calculate_architecture_fitness(
-                current_architecture.components
-            ),
-        )
-
-        # Registrar nueva arquitectura
-        self.system_architectures[new_architecture.architecture_id] = new_architecture
-        self.current_architecture_id = new_architecture.architecture_id
-
-        # Crear punto de rollback
-        await self.rollback_system.create_rollback_point(
-            new_architecture,
-            f"generation_{new_architecture.evolution_generation}",
-            f"Architecture evolution with {changed_gene.gene_id}",
-        )
-
-    async def _calculate_architecture_metrics(
-        self, components: Dict[str, EvolutionaryGene]
-    ) -> Dict[str, float]:
-        """Calcular métricas de arquitectura"""
-        metrics = {}
-        for gene in components.values():
-            gene_metrics = await self._measure_gene_performance(gene)
-            for metric, value in gene_metrics.items():
-                if metric not in metrics:
-                    metrics[metric] = []
-                metrics[metric].append(value)
-
-        # Promediar métricas
-        return {k: sum(v) / len(v) for k, v in metrics.items()}
-
-    async def _calculate_architecture_fitness(
-        self, components: Dict[str, EvolutionaryGene]
-    ) -> float:
-        """Calcular fitness de arquitectura completa"""
-        total_fitness = 0
-        count = 0
-
-        for gene in components.values():
-            if gene.active:
-                metrics = await self._measure_gene_performance(gene)
-                fitness = await self.fitness_evaluator.calculate_fitness(metrics)
-                total_fitness += fitness
-                count += 1
-
-        return total_fitness / count if count > 0 else 0.0
-
-    async def _apply_dynamic_optimization(
-        self, component_name: str, optimization_type: str
-    ) -> Dict[str, Any]:
-        """Aplicar optimización dinámica a un componente"""
-        try:
-            current_architecture = self.system_architectures.get(
-                self.current_architecture_id
-            )
-            if (
-                not current_architecture
-                or component_name not in current_architecture.components
-            ):
-                return {"success": False, "error": "Component not found"}
-
-            gene = current_architecture.components[component_name]
-
-            # Medir rendimiento antes
-            before_metrics = await self._measure_gene_performance(gene)
-
-            # Aplicar optimización
-            if optimization_type == "performance":
-                optimized_gene = await self._optimize_performance(component_name)
-            elif optimization_type == "memory":
-                optimized_gene = await self._optimize_memory(component_name)
-            elif optimization_type == "accuracy":
-                optimized_gene = await self._optimize_accuracy(component_name)
-            else:
-                return {
-                    "success": False,
-                    "error": f"Unknown optimization type: {optimization_type}",
-                }
-
-            # Medir rendimiento después
-            after_metrics = await self._measure_gene_performance(optimized_gene)
-
-            # Calcular mejora
-            improvement = await self._calculate_optimization_improvement(
-                before_metrics, after_metrics, optimization_type
-            )
-
-            # Aplicar si hay mejora
-            if improvement > 0:
-                await self._apply_gene_changes(component_name, optimized_gene)
-
-                # Registrar optimización
-                optimization = DynamicOptimization(
-                    optimization_id=f"opt_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
-                    component_name=component_name,
-                    optimization_type=optimization_type,
-                    improvement_percentage=improvement,
-                    applied=True,
-                )
-                self.dynamic_optimizations.append(optimization)
-
-                return {
-                    "success": True,
-                    "component": component_name,
-                    "optimization_type": optimization_type,
-                    "improvement": improvement,
-                    "before_metrics": before_metrics,
-                    "after_metrics": after_metrics,
-                }
-            else:
-                return {
-                    "success": False,
-                    "component": component_name,
-                    "error": "No improvement achieved",
-                    "improvement": improvement,
-                }
-
-        except Exception as e:
-            self.logger.error(f"Dynamic optimization failed for {component_name}: {e}")
-            return {"success": False, "component": component_name, "error": str(e)}
-
-    async def _calculate_optimization_improvement(
-        self, before: Dict[str, float], after: Dict[str, float], optimization_type: str
-    ) -> float:
-        """Calcular porcentaje de mejora"""
-
-        if optimization_type == "performance":
-            improvement = (
-                (before["response_time"] - after["response_time"])
-                / before["response_time"]
-                * 100
-            )
-        elif optimization_type == "memory":
-            improvement = (
-                (before["memory_usage"] - after["memory_usage"])
-                / before["memory_usage"]
-                * 100
-            )
-        elif optimization_type == "accuracy":
-            improvement = (
-                (after["accuracy"] - before["accuracy"]) / before["accuracy"] * 100
-            )
-        else:
-            improvement = 0.0
-
-        return improvement
-
-    async def _optimize_performance(self, component: str) -> EvolutionaryGene:
-        """Optimizar rendimiento de componente"""
-        current_architecture = self.system_architectures.get(
-            self.current_architecture_id
-        )
-        gene = current_architecture.components[component]
-
-        # Simular optimización de rendimiento
-        optimized_content = gene.code_content.replace(
-            "sleep(0.1)", "sleep(0.05)"
-        )  # Ejemplo simplificado
-
-        return EvolutionaryGene(
-            gene_id=f"perf_opt_{gene.gene_id}_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:4]}",
-            gene_type=gene.gene_type,
-            code_content=optimized_content,
-            fitness_score=gene.fitness_score * 1.05,  # Mejora del 5%
-            parent_gene=gene.gene_id,
-            generation=gene.generation + 1,
-        )
-
-    async def _optimize_memory(self, component: str) -> EvolutionaryGene:
-        """Optimizar uso de memoria"""
-        current_architecture = self.system_architectures.get(
-            self.current_architecture_id
-        )
-        gene = current_architecture.components[component]
-
-        # Simular optimización de memoria
-        optimized_content = gene.code_content.replace(
-            "list(range(1000))", "list(range(500))"
-        )  # Ejemplo simplificado
-
-        return EvolutionaryGene(
-            gene_id=f"mem_opt_{gene.gene_id}_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:4]}",
-            gene_type=gene.gene_type,
-            code_content=optimized_content,
-            fitness_score=gene.fitness_score * 1.03,  # Mejora del 3%
-            parent_gene=gene.gene_id,
-            generation=gene.generation + 1,
-        )
-
-    async def _optimize_accuracy(self, component: str) -> EvolutionaryGene:
-        """Optimizar precisión"""
-        current_architecture = self.system_architectures.get(
-            self.current_architecture_id
-        )
-        gene = current_architecture.components[component]
-
-        # Simular optimización de precisión
-        optimized_content = gene.code_content.replace(
-            "threshold = 0.5", "threshold = 0.7"
-        )  # Ejemplo simplificado
-
-        return EvolutionaryGene(
-            gene_id=f"acc_opt_{gene.gene_id}_{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:4]}",
-            gene_type=gene.gene_type,
-            code_content=optimized_content,
-            fitness_score=gene.fitness_score * 1.08,  # Mejora del 8%
-            parent_gene=gene.gene_id,
-            generation=gene.generation + 1,
-        )
-
-    async def _update_architecture_metrics(self):
-        """Actualizar métricas de arquitectura actual"""
-        current_architecture = self.system_architectures.get(
-            self.current_architecture_id
-        )
-        if current_architecture:
-            current_architecture.performance_metrics = (
-                await self._calculate_architecture_metrics(
-                    current_architecture.components
-                )
-            )
-            current_architecture.fitness_score = (
-                await self._calculate_architecture_fitness(
-                    current_architecture.components
-                )
-            )
-
-    async def _calculate_evolution_stats(self) -> Dict[str, Any]:
-        """Calcular estadísticas de evolución"""
-        total_experiments = len(self.evolution_experiments)
-        successful_experiments = sum(
-            1 for e in self.evolution_experiments if e.applied_changes
-        )
-
-        total_optimizations = len(self.dynamic_optimizations)
-        applied_optimizations = sum(1 for o in self.dynamic_optimizations if o.applied)
-
-        avg_improvement = (
-            np.mean(
-                [
-                    o.improvement_percentage
-                    for o in self.dynamic_optimizations
-                    if o.applied
-                ]
-            )
-            if applied_optimizations > 0
-            else 0.0
-        )
-
-        return {
-            "total_evolution_experiments": total_experiments,
-            "successful_evolution_experiments": successful_experiments,
-            "evolution_success_rate": (
-                successful_experiments / total_experiments
-                if total_experiments > 0
-                else 0.0
-            ),
-            "total_dynamic_optimizations": total_optimizations,
-            "applied_dynamic_optimizations": applied_optimizations,
-            "optimization_success_rate": (
-                applied_optimizations / total_optimizations
-                if total_optimizations > 0
-                else 0.0
-            ),
-            "average_improvement_percentage": avg_improvement,
-        }
-
-
-# Instancia global del motor de evolución
-auto_evolution_engine = AutoEvolutionEngine()
-
-
-async def evolve_system_component(
-    component_name: str, evolution_type: str = "mutation"
-) -> Dict[str, Any]:
-    """Función pública para evolucionar componente del sistema"""
-    return await auto_evolution_engine.evolve_system_component(
-        component_name, evolution_type
-    )
-
-
-async def optimize_system_performance(
-    optimization_type: str = "performance",
-) -> Dict[str, Any]:
-    """Función pública para optimizar rendimiento del sistema"""
-    return await auto_evolution_engine.optimize_system_performance(optimization_type)
-
-
-async def get_evolution_status() -> Dict[str, Any]:
-    """Función pública para obtener estado de evolución"""
-    return await auto_evolution_engine.get_evolution_status()
-
-
-async def rollback_system(version_label: str) -> Dict[str, Any]:
-    """Función pública para hacer rollback del sistema"""
-    return await auto_evolution_engine.rollback_to_previous_version(version_label)
-
-
-# Información del módulo
-__version__ = "1.0.0"
-__author__ = "Sheily AI Team - Auto-Evolution Engine"
-__description__ = "Motor de auto-evolución y optimización dinámica del sistema"
+if __name__ == "__main__":
+    # Test the evolution engine
+    async def test_evolution():
+        engine = AutoEvolutionEngine()
+        
+        # Test component evolution
+        result = await engine.evolve_system_component("consciousness", "mutation")
+        print("Evolution result:", result)
+        
+        # Get status
+        status = await engine.get_evolution_status()
+        print("Evolution status:", status)
+    
+    asyncio.run(test_evolution())

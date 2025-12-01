@@ -14,18 +14,24 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 import os
 import secrets
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ed25519, padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from .sheilys_blockchain import SHEILYSBlockchain
+from .sheilys_blockchain import SHEILYSBlockchain, SHEILYSTransaction, TransactionType
 from .sheilys_token import NFTCollection, SHEILYSTokenManager
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 
 class WalletKeys:
@@ -39,50 +45,79 @@ class WalletKeys:
 
     def generate_keys(self) -> str:
         """
-        Generar nuevo par de claves
+        Generar nuevo par de claves usando Ed25519 (REAL)
 
         Returns:
             str: Address generado
         """
-        # Generar clave privada de 32 bytes
-        self.private_key = secrets.token_bytes(32)
+        # Generar par de claves Ed25519 REAL
+        private_key_obj = ed25519.Ed25519PrivateKey.generate()
+        public_key_obj = private_key_obj.public_key()
 
-        # Derivar clave pública del hash de la privada (simplificado)
-        self.public_key = hashlib.sha256(self.private_key).digest()
+        # Serializar claves
+        self.private_key = private_key_obj.private_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PrivateFormat.Raw,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        
+        self.public_key = public_key_obj.public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw
+        )
 
-        # Generar address desde clave pública
+        # Generar address desde clave pública (hash SHA256 de la clave pública)
+        public_hash = hashlib.sha256(self.public_key).digest()
         self.address = (
-            base64.b64encode(self.public_key[:20]).decode("utf-8").rstrip("=")
+            base64.b64encode(public_hash[:20]).decode("utf-8").rstrip("=")
         )
 
         return self.address
 
     def import_private_key(self, private_key_hex: str) -> str:
         """
-        Importar clave privada desde formato hexadecimal
+        Importar clave privada desde formato hexadecimal (Ed25519)
 
         Args:
-            private_key_hex: Clave privada en formato hex
+            private_key_hex: Clave privada en formato hex (32 bytes = 64 hex chars)
 
         Returns:
             str: Address correspondiente
         """
         try:
-            self.private_key = bytes.fromhex(private_key_hex)
-            self.public_key = hashlib.sha256(self.private_key).digest()
+            private_key_bytes = bytes.fromhex(private_key_hex)
+            
+            # Validar longitud de clave Ed25519 (32 bytes)
+            if len(private_key_bytes) != 32:
+                raise ValueError(f"Clave privada debe tener 32 bytes, tiene {len(private_key_bytes)}")
+            
+            # Crear objeto de clave privada Ed25519
+            private_key_obj = ed25519.Ed25519PrivateKey.from_private_bytes(private_key_bytes)
+            public_key_obj = private_key_obj.public_key()
+            
+            self.private_key = private_key_bytes
+            
+            self.public_key = public_key_obj.public_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PublicFormat.Raw
+            )
+            
+            # Generar address desde clave pública
+            public_hash = hashlib.sha256(self.public_key).digest()
             self.address = (
-                base64.b64encode(self.public_key[:20]).decode("utf-8").rstrip("=")
+                base64.b64encode(public_hash[:20]).decode("utf-8").rstrip("=")
             )
             return self.address
-        except Exception:
-            raise ValueError("Invalid private key format")
+        except Exception as e:
+            logger.error(f"Error importando clave privada: {e}")
+            raise ValueError(f"Invalid private key format: {e}")
 
-    def sign_transaction(self, transaction_data: str) -> str:
+    def sign_transaction(self, transaction: SHEILYSTransaction) -> str:
         """
-        Firmar datos de transacción
+        Firmar transacción usando Ed25519 (REAL)
 
         Args:
-            transaction_data: Datos a firmar
+            transaction: Transacción SHEILYS a firmar
 
         Returns:
             str: Firma en base64
@@ -90,12 +125,50 @@ class WalletKeys:
         if not self.private_key:
             raise ValueError("Wallet not initialized")
 
-        # Crear HMAC usando clave privada
-        signature = hmac.new(
-            self.private_key, transaction_data.encode(), hashlib.sha256
-        ).digest()
-
-        return base64.b64encode(signature).decode("utf-8")
+        # Crear objeto de clave privada Ed25519
+        private_key_obj = ed25519.Ed25519PrivateKey.from_private_bytes(self.private_key)
+        
+        # Crear datos para firmar (hash de la transacción)
+        tx_hash = transaction.calculate_hash()
+        tx_hash_bytes = bytes.fromhex(tx_hash)
+        
+        # Firmar con Ed25519
+        signature_bytes = private_key_obj.sign(tx_hash_bytes)
+        
+        # Retornar firma en base64
+        return base64.b64encode(signature_bytes).decode("utf-8")
+    
+    def verify_signature(self, transaction: SHEILYSTransaction, signature_b64: str) -> bool:
+        """
+        Verificar firma de una transacción
+        
+        Args:
+            transaction: Transacción a verificar
+            signature_b64: Firma en base64
+            
+        Returns:
+            bool: True si la firma es válida
+        """
+        try:
+            if not self.public_key:
+                return False
+            
+            # Crear objeto de clave pública Ed25519
+            public_key_obj = ed25519.Ed25519PublicKey.from_public_bytes(self.public_key)
+            
+            # Decodificar firma
+            signature_bytes = base64.b64decode(signature_b64)
+            
+            # Calcular hash de la transacción
+            tx_hash = transaction.calculate_hash()
+            tx_hash_bytes = bytes.fromhex(tx_hash)
+            
+            # Verificar firma
+            public_key_obj.verify(signature_bytes, tx_hash_bytes)
+            return True
+        except Exception as e:
+            logger.warning(f"Error verificando firma: {e}")
+            return False
 
     def export_private_key(self) -> str:
         """Exportar clave privada en formato hexadecimal"""
@@ -190,6 +263,9 @@ class BlockchainWallet:
         self.auto_backup = True
         self.backup_path = "./wallet_backups"
         self.security_level = "standard"
+        
+        # Archivo de wallet encriptada
+        self.wallet_file: Optional[str] = None
 
     def create_wallet(self, password: Optional[str] = None) -> str:
         """
@@ -223,33 +299,46 @@ class BlockchainWallet:
         except Exception as e:
             raise Exception(f"Error creando wallet: {e}")
 
-    def load_wallet(self, private_key_hex: str, password: Optional[str] = None) -> str:
+    def load_wallet(
+        self, 
+        private_key_hex: Optional[str] = None, 
+        encrypted_data: Optional[Dict[str, str]] = None,
+        password: Optional[str] = None
+    ) -> str:
         """
-        Cargar wallet desde clave privada
+        Cargar wallet desde clave privada o datos encriptados
 
         Args:
-            private_key_hex: Clave privada en formato hex
+            private_key_hex: Clave privada en formato hex (si no está encriptada)
+            encrypted_data: Datos encriptados con encrypted_key, iv, salt
             password: Password si está encriptada
 
         Returns:
             str: Address de la wallet cargada
         """
         try:
-            # Si está encriptada, desencriptar primero
-            if password and self.encrypted:
-                private_key_hex = self._decrypt_wallet_data(private_key_hex, password)
+            # Si se proporcionan datos encriptados, desencriptar
+            if encrypted_data and password:
+                private_key_hex = self._decrypt_wallet_data(encrypted_data, password)
+                self.encrypted = True
+            
+            if not private_key_hex:
+                raise ValueError("Debe proporcionar private_key_hex o encrypted_data con password")
 
             # Importar clave
             self.address = self.keys.import_private_key(private_key_hex)
 
+            logger.info(f"Wallet cargada exitosamente: {self.address}")
             return self.address
 
         except Exception as e:
+            logger.error(f"Error cargando wallet: {e}", exc_info=True)
             raise Exception(f"Error cargando wallet: {e}")
 
     def _encrypt_wallet(self, password: str):
-        """Encriptar wallet con password"""
+        """Encriptar wallet con password y PERSISTIR"""
         if not self.keys.private_key:
+            logger.warning("No hay clave privada para encriptar")
             return
 
         # Generar salt
@@ -261,18 +350,85 @@ class BlockchainWallet:
         # Encriptar clave privada
         encrypted_key, iv = WalletEncryption.encrypt_data(self.keys.private_key, key)
 
-        # Guardar datos encriptados temporalmente
+        # Guardar datos encriptados (AHORA SE PERSISTEN)
         self.encrypted_data = {
             "encrypted_key": base64.b64encode(encrypted_key).decode(),
             "iv": base64.b64encode(iv).decode(),
             "salt": base64.b64encode(salt).decode(),
             "address": self.address,
         }
+        
+        # PERSISTIR datos encriptados inmediatamente
+        if self.auto_backup:
+            self._save_encrypted_wallet()
+        
+        logger.info(f"Wallet encriptada y persistida: {self.address}")
+    
+    def _save_encrypted_wallet(self):
+        """Guardar wallet encriptada en archivo"""
+        if not hasattr(self, 'encrypted_data') or not self.encrypted_data:
+            return
+        
+        try:
+            if not os.path.exists(self.backup_path):
+                os.makedirs(self.backup_path)
+            
+            wallet_filename = f"wallet_{self.address}.encrypted.json"
+            wallet_path = os.path.join(self.backup_path, wallet_filename)
+            
+            wallet_data = {
+                "address": self.address,
+                "encrypted_data": self.encrypted_data,
+                "backup_timestamp": datetime.now().isoformat(),
+                "version": "1.0",
+            }
+            
+            with open(wallet_path, "w") as f:
+                json.dump(wallet_data, f, indent=2)
+            
+            self.wallet_file = wallet_path
+            logger.info(f"Wallet encriptada guardada en: {wallet_path}")
+            
+        except Exception as e:
+            logger.error(f"Error guardando wallet encriptada: {e}", exc_info=True)
 
-    def _decrypt_wallet_data(self, encrypted_private_key: str, password: str) -> str:
-        """Desencriptar datos de wallet"""
-        # Implementación simplificada - en producción más robusta
-        return encrypted_private_key
+    def _decrypt_wallet_data(self, encrypted_data_dict: Dict[str, str], password: str) -> str:
+        """
+        Desencriptar datos de wallet usando AES (IMPLEMENTACIÓN REAL)
+        
+        Args:
+            encrypted_data_dict: Diccionario con encrypted_key, iv, salt
+            password: Password para desencriptar
+            
+        Returns:
+            str: Clave privada en formato hex
+        """
+        try:
+            # Extraer datos encriptados
+            encrypted_key_b64 = encrypted_data_dict.get("encrypted_key")
+            iv_b64 = encrypted_data_dict.get("iv")
+            salt_b64 = encrypted_data_dict.get("salt")
+            
+            if not all([encrypted_key_b64, iv_b64, salt_b64]):
+                raise ValueError("Datos encriptados incompletos")
+            
+            # Decodificar desde base64
+            encrypted_key = base64.b64decode(encrypted_key_b64)
+            iv = base64.b64decode(iv_b64)
+            salt = base64.b64decode(salt_b64)
+            
+            # Derivar clave desde password
+            key = WalletEncryption.derive_key(password, salt)
+            
+            # Desencriptar
+            decrypted_key_bytes = WalletEncryption.decrypt_data(encrypted_key, key, iv)
+            
+            # Convertir a hex string
+            return decrypted_key_bytes.hex()
+            
+        except Exception as e:
+            logger.error(f"Error desencriptando wallet: {e}", exc_info=True)
+            raise ValueError(f"Error desencriptando wallet: {e}")
 
     def connect_to_blockchain(
         self, blockchain: SHEILYSBlockchain, token_manager: SHEILYSTokenManager
@@ -310,12 +466,12 @@ class BlockchainWallet:
             return self.local_balances.copy()
 
         except Exception as e:
-            print(f"Error obteniendo balance: {e}")
+            logger.error(f"Error obteniendo balance: {e}", exc_info=True)
             return self.local_balances.copy()
 
     def send_tokens(self, to_address: str, amount: float) -> bool:
         """
-        Enviar tokens SHEILYS
+        Enviar tokens SHEILYS con FIRMA REAL
 
         Args:
             to_address: Dirección destinataria
@@ -324,16 +480,41 @@ class BlockchainWallet:
         Returns:
             bool: True si la transacción fue exitosa
         """
-        if not self.token_manager or not self.address:
+        if not self.token_manager or not self.address or not self.blockchain:
             raise ValueError("Wallet not connected to blockchain")
 
         try:
             # Verificar balance suficiente
             current_balance = self.token_manager.get_balance(self.address)
             if current_balance < amount:
-                raise ValueError("Insufficient SHEILYS balance")
+                raise ValueError(f"Insufficient SHEILYS balance. Tiene: {current_balance}, Necesita: {amount}")
 
-            # Ejecutar transferencia
+            # Crear transacción con hash correcto
+            tx_timestamp = time.time()
+            tx = SHEILYSTransaction.create_with_hash(
+                sender=self.address,
+                receiver=to_address,
+                amount=amount,
+                transaction_type=TransactionType.TRANSFER,
+                timestamp=tx_timestamp,
+                signature="",  # Se firmará después
+                metadata={
+                    "transfer_type": "wallet_send",
+                    "gas_used": 0.001,
+                },
+            )
+
+            # FIRMAR transacción con clave privada REAL
+            signature = self.keys.sign_transaction(tx)
+            tx.signature = signature
+
+            # Agregar transacción firmada a blockchain
+            tx_added = self.blockchain.add_transaction(tx)
+            if not tx_added:
+                logger.error(f"Error: transacción no se pudo agregar a blockchain")
+                return False
+
+            # Ejecutar transferencia en token manager
             success = self.token_manager.transfer_tokens(
                 self.address, to_address, amount
             )
@@ -345,18 +526,22 @@ class BlockchainWallet:
                         "type": "send",
                         "to": to_address,
                         "amount": amount,
+                        "transaction_id": tx.transaction_id,
+                        "signature": signature,
                         "timestamp": datetime.now(),
-                        "status": "confirmed",
+                        "status": "pending",  # Pendiente hasta confirmación en bloque
                     }
                 )
 
                 # Actualizar balances locales
                 self.local_balances["sheilys"] -= amount
+                
+                logger.info(f"Tokens enviados: {amount} SHEILYS de {self.address} a {to_address}")
 
             return success
 
         except Exception as e:
-            print(f"Error enviando tokens: {e}")
+            logger.error(f"Error enviando tokens: {e}", exc_info=True)
             return False
 
     def stake_tokens(self, amount: float, pool_name: str = "community_pool") -> bool:
@@ -395,7 +580,7 @@ class BlockchainWallet:
             return success
 
         except Exception as e:
-            print(f"Error staking tokens: {e}")
+            logger.error(f"Error staking tokens: {e}", exc_info=True)
             return False
 
     def claim_staking_rewards(self) -> float:
@@ -428,7 +613,7 @@ class BlockchainWallet:
             return claimed_amount
 
         except Exception as e:
-            print(f"Error claiming staking rewards: {e}")
+            logger.error(f"Error claiming staking rewards: {e}", exc_info=True)
             return 0.0
 
     def mint_nft(
@@ -474,7 +659,7 @@ class BlockchainWallet:
             return token_id
 
         except Exception as e:
-            print(f"Error minting NFT: {e}")
+            logger.error(f"Error minting NFT: {e}", exc_info=True)
             return None
 
     def transfer_nft(self, token_id: str, to_address: str) -> bool:
@@ -518,7 +703,7 @@ class BlockchainWallet:
             return success
 
         except Exception as e:
-            print(f"Error transfering NFT: {e}")
+            logger.error(f"Error transfering NFT: {e}", exc_info=True)
             return False
 
     def create_governance_proposal(
@@ -556,7 +741,7 @@ class BlockchainWallet:
             return proposal_id
 
         except Exception as e:
-            print(f"Error creating governance proposal: {e}")
+            logger.error(f"Error creating governance proposal: {e}", exc_info=True)
             raise
 
     def vote_on_proposal(self, proposal_id: str, vote_for: bool) -> bool:
@@ -592,7 +777,7 @@ class BlockchainWallet:
             return success
 
         except Exception as e:
-            print(f"Error voting on proposal: {e}")
+            logger.error(f"Error voting on proposal: {e}", exc_info=True)
             return False
 
     def _add_transaction_to_history(self, transaction: Dict[str, Any]):
@@ -636,8 +821,16 @@ class BlockchainWallet:
                 "version": "1.0",
             }
 
+            # INCLUIR CLAVE PRIVADA ENCRIPTADA EN EL BACKUP (CRÍTICO)
             if self.encrypted and hasattr(self, "encrypted_data"):
                 backup_data["encrypted_data"] = self.encrypted_data
+            elif self.keys.private_key:
+                # Si no está encriptada pero hay clave privada, incluirla encriptada en el backup
+                # Para que el backup sea realmente recuperable
+                if not hasattr(self, "encrypted_data") or not self.encrypted_data:
+                    logger.warning("Backup sin encriptación: la clave privada no está encriptada en memoria")
+                    # El backup incluirá solo la clave pública, pero advertir al usuario
+                    backup_data["warning"] = "Private key not encrypted in this backup. Use encrypted wallet for security."
 
             backup_filename = (
                 f"wallet_backup_{self.address}_{int(datetime.now().timestamp())}.json"
@@ -646,24 +839,38 @@ class BlockchainWallet:
 
             with open(backup_path, "w") as f:
                 json.dump(backup_data, f, indent=2, default=str)
+            
+            logger.info(f"Backup creado: {backup_path}")
 
         except Exception as e:
-            print(f"Error creando backup: {e}")
+            logger.error(f"Error creando backup: {e}", exc_info=True)
 
-    def export_wallet_data(self) -> Dict[str, Any]:
+    def export_wallet_data(self, include_encrypted: bool = True) -> Dict[str, Any]:
         """
-        Exportar datos de wallet para backup
+        Exportar datos de wallet para backup (INCLUYE CLAVE PRIVADA ENCRIPTADA)
+
+        Args:
+            include_encrypted: Si incluir datos encriptados en el export
 
         Returns:
             dict: Datos de wallet completos
         """
-        return {
+        export_data = {
             "address": self.address,
             "balances": self.local_balances,
             "transaction_history": self.transaction_history,
             "encrypted": self.encrypted,
             "export_timestamp": datetime.now().isoformat(),
         }
+        
+        # INCLUIR CLAVE PRIVADA ENCRIPTADA PARA RECUPERACIÓN REAL
+        if include_encrypted and self.encrypted and hasattr(self, "encrypted_data"):
+            export_data["encrypted_data"] = self.encrypted_data
+        elif include_encrypted and self.keys.private_key:
+            # Si no está encriptada, advertir
+            export_data["warning"] = "Private key not encrypted. Export is NOT secure."
+        
+        return export_data
 
     def import_wallet_data(self, wallet_data: Dict[str, Any]):
         """

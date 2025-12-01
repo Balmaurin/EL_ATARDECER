@@ -647,5 +647,5 @@ if __name__ == "__main__":
         if result.warnings:
             print(f"Warnings: {result.warnings[:2]}")  # Mostrar máximo 2
 
-    print("\n✅ Input Sanitization System Demo Complete!")
+    print("\n[OK] Input Sanitization System Demo Complete!")
     print("🛡️ Sistema listo para prevenir vulnerabilidades de seguridad")
