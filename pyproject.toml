@@ -107,15 +107,24 @@ dependencies = [
 # =====================================
 
 [tool.pytest.ini_options]
+minversion = "7.0"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short --disable-warnings"
+asyncio_mode = "auto"
 markers = [
-    "enterprise: Enterprise-grade tests",
-    "security: Security validation tests", 
-    "performance: Performance benchmark tests"
+    "enterprise: Enterprise-grade test validation",
+    "security: Security and compliance tests",
+    "performance: Performance and scalability tests",
+    "blockchain: Blockchain and smart contract tests",
+    "api: API functionality tests",
+    "rag: RAG system tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
 ]
 
 # =====================================

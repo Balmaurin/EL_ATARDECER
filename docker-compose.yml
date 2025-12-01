@@ -1,0 +1,195 @@
+services:
+  # 🎯 Event Backbone - NATS JetStream for consciousness events
+  nats:
+    image: nats:2.9-alpine
+    command: [ "-js", "--cluster_name", "consciousness" ]
+    ports:
+      - "4223:4222"
+      - "8223:8222"
+    volumes:
+      - nats-data:/data
+    environment:
+      - NATS_JETSTREAM_MAX_MEMORY=1GB
+      - NATS_JETSTREAM_MAX_FILE=10GB
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ⏰ Workflow Orchestration - Temporal for conscious processes
+  temporal:
+    image: temporalio/auto-setup:1.20.0
+    ports:
+      - "7233:7233"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - DB=postgresql
+      - POSTGRES_USER=temporal
+      - POSTGRES_PASSWORD=temporal
+      - POSTGRES_DB=temporal
+      - POSTGRES_HOST=postgresql-temporal
+      - POSTGRES_PORT=5432
+    depends_on:
+      - postgresql-temporal
+
+  # 🐘 Temporal Database - PostgreSQL for workflow persistence
+  postgresql-temporal:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    ports:
+      - "5433:5432"
+    volumes:
+      - temporal-postgres:/var/lib/postgresql/data
+
+  # 🛡️ Service Mesh - Dapr sidecar for distributed coordination
+  dapr:
+    image: daprio/daprd:1.14.0
+    command: [ "./daprd", "--app-id", "elamanecer-service-mesh" ]
+    ports:
+      - "3500:3500"
+    environment:
+      - APP_PORT=3000
+      - DAPR_HTTP_PORT=3500
+      - DAPR_GRPC_PORT=50001
+    volumes:
+      - ./dapr/components:/components
+    depends_on:
+      - nats
+
+  # 🧠 EL-AMANECER Backend - Modular Monolith (Consciousness, Emotion, Language, Memory)
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - NATS_URL=nats://nats:4222
+      - TEMPORAL_HOST=temporal:7233
+      - DAPR_HTTP_PORT=3500
+      - REDIS_URL=redis://redis:6379
+      - PYTHONPATH=/app
+      # Google ADK Integration Environment
+      - ADK_ENABLED=true
+      - HACK_MEMORI_AUTO_MODE=true
+      - ADK_TRAINING_THRESHOLD_SESSIONS=5
+      - ADK_TRAINING_THRESHOLD_QUESTIONS=500
+      - ADK_EVALUATION_QUALITY_MIN=95.0
+      # API Configuration
+      - API_VERSION=v1
+      - GRAPHQL_PLAYGROUND=true
+      - CORS_ENABLED=true
+    depends_on:
+      - nats
+      - temporal
+      - dapr
+      - redis
+    volumes:
+      - ./packages:/app/packages
+      - ./apps:/app/apps
+      - ./models:/app/models # Mount models directory for LLM access
+      - ./data:/app/data
+      - ./scripts:/app/scripts # Mount scripts for ADK management
+      - ./config:/app/config # Mount config directory
+
+  # 🧠 MEJORA 1: Consciousness Worker - Procesa consciencia de forma asíncrona
+  consciousness-worker:
+    build:
+      context: .
+      dockerfile: apps/consciousness_worker/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DAPR_HTTP_PORT=3500
+      - DAPR_GRPC_PORT=50001
+      - PYTHONPATH=/app
+      - PORT=8002
+    depends_on:
+      - nats
+      - dapr
+      - redis
+    volumes:
+      - ./packages:/app/packages
+      - ./data:/app/data
+      - ./dapr/components:/components
+
+  # 🚀 Frontend - Real-time consciousness interface (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - INTERNAL_API_URL=http://backend:8000
+    depends_on:
+      - backend
+
+  # 💾 Redis for distributed caching and state
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+
+  # 🚀 MEJORA 3: Servidor de Inferencia Dedicado - Carga el modelo una sola vez
+  llm-service:
+    build:
+      context: .
+      dockerfile: apps/llm_service/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+      - PYTHONPATH=/app
+    volumes:
+      - ./modelsLLM:/app/modelsLLM
+    deploy:
+      resources:
+        reservations:
+          memory: 6G  # Modelo necesita ~4GB + overhead
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  # 🧠 MEJORA 5: Consciousness API Server - Estructura real en lugar de generación dinámica
+  consciousness-api:
+    build:
+      context: .
+      dockerfile: apps/consciousness_server/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - CONSCIOUSNESS_API_PORT=8001
+      - CONSCIOUSNESS_API_HOST=0.0.0.0
+      - PYTHONPATH=/app
+    depends_on:
+      - redis
+    volumes:
+      - ./packages:/app/packages
+      - ./data:/app/data
+      - ./tools:/app/tools
+      - ./config:/app/config
+
+volumes:
+  nats-data:
+  temporal-postgres:
+  redis-data:
+
+
+networks:
+  default:
+    name: elamanecer-network

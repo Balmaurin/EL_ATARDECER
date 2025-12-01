@@ -1,0 +1,6 @@
+# GraphQL Config for IDE support and codegen
+schema: http://localhost:8000/graphql
+documents: 
+  - 'apps/**/*.{ts,tsx,graphql}'
+  - 'apps/lib/**/*.{ts,tsx,graphql}'
+

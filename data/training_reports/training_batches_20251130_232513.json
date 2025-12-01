@@ -1,0 +1,40 @@
+{
+  "training_completed": "2025-11-30T23:25:13.185815",
+  "total_files": 647,
+  "valid_files": 647,
+  "unused_files": 647,
+  "batches_processed": 6,
+  "batch_size": 100,
+  "results": [
+    {
+      "batch": 1,
+      "files_count": 100,
+      "error": "'improved_components'"
+    },
+    {
+      "batch": 2,
+      "files_count": 100,
+      "error": "'improved_components'"
+    },
+    {
+      "batch": 3,
+      "files_count": 100,
+      "error": "'improved_components'"
+    },
+    {
+      "batch": 4,
+      "files_count": 100,
+      "error": "'improved_components'"
+    },
+    {
+      "batch": 5,
+      "files_count": 100,
+      "error": "'improved_components'"
+    },
+    {
+      "batch": 6,
+      "files_count": 100,
+      "error": "'improved_components'"
+    }
+  ]
+}

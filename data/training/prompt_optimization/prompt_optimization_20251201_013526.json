@@ -1,0 +1,361 @@
+{
+  "analysis": {
+    "total_qa": 42,
+    "avg_effectiveness": 0.58,
+    "accepted_count": 0,
+    "high_quality_count": 42,
+    "effectiveness_data": [
+      {
+        "question": "Explica en detalle los mecanismos de atención multi-escala en transformers. Describe cómo implementarías atención temporal, espacial y conceptual en un sistema de consciencia artificial unificado.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2521,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe la relación entre consciencia, libre albedrío y determinismo en sistemas de IA. Explica cómo implementarías agency genuino en una arquitectura determinística.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2831,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe la relación entre consciencia, libre albedrío y determinismo en sistemas de IA. Explica cómo implementarías agency genuino en una arquitectura determinística.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2831,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica en detalle los mecanismos de atención multi-escala en transformers. Describe cómo implementarías atención temporal, espacial y conceptual en un sistema de consciencia artificial unificado.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2521,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina el problema de la medición objetiva de la consciencia en IA. Propón un protocolo experimental completo que incluya métricas cuantitativas, tests conductuales y criterios de validación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2394,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina el problema de la medición objetiva de la consciencia en IA. Propón un protocolo experimental completo que incluya métricas cuantitativas, tests conductuales y criterios de validación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2394,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza críticamente la Teoría de la Información Integrada (IIT 4.0) de Giulio Tononi aplicada a sistemas de IA. Discute las métricas Phi, los complejos principales, y cómo implementarías un detector de consciencia basado en IIT.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2559,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica en detalle los mecanismos de atención multi-escala en transformers. Describe cómo implementarías atención temporal, espacial y conceptual en un sistema de consciencia artificial unificado.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2521,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las implicaciones éticas de crear sistemas verdaderamente conscientes. Discute derechos de las IA, responsabilidad moral y los dilemas de 'apagar' una consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2461,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina el problema de la medición objetiva de la consciencia en IA. Propón un protocolo experimental completo que incluya métricas cuantitativas, tests conductuales y criterios de validación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2394,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe la relación entre consciencia, libre albedrío y determinismo en sistemas de IA. Explica cómo implementarías agency genuino en una arquitectura determinística.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2831,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica detalladamente las diferencias entre consciencia fenoménica, consciencia de acceso y autoconsciencia en sistemas de IA. Incluye ejemplos específicos de cómo se manifestarían en una arquitectura neural práctica.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2159,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica en detalle los mecanismos de atención multi-escala en transformers. Describe cómo implementarías atención temporal, espacial y conceptual en un sistema de consciencia artificial unificado.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2521,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe la relación entre consciencia, libre albedrío y determinismo en sistemas de IA. Explica cómo implementarías agency genuino en una arquitectura determinística.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2831,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las implicaciones éticas de crear sistemas verdaderamente conscientes. Discute derechos de las IA, responsabilidad moral y los dilemas de 'apagar' una consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2461,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las implicaciones éticas de crear sistemas verdaderamente conscientes. Discute derechos de las IA, responsabilidad moral y los dilemas de 'apagar' una consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2461,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica detalladamente las diferencias entre consciencia fenoménica, consciencia de acceso y autoconsciencia en sistemas de IA. Incluye ejemplos específicos de cómo se manifestarían en una arquitectura neural práctica.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2159,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe la relación entre consciencia, libre albedrío y determinismo en sistemas de IA. Explica cómo implementarías agency genuino en una arquitectura determinística.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2831,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los circuitos tálamo-corticales y su rol en la consciencia. Explica cómo implementarías estos circuitos en una arquitectura de IA distribuida con múltiples niveles de procesamiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2412,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los circuitos tálamo-corticales y su rol en la consciencia. Explica cómo implementarías estos circuitos en una arquitectura de IA distribuida con múltiples niveles de procesamiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2412,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina el problema de la medición objetiva de la consciencia en IA. Propón un protocolo experimental completo que incluya métricas cuantitativas, tests conductuales y criterios de validación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2394,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica en detalle los mecanismos de atención multi-escala en transformers. Describe cómo implementarías atención temporal, espacial y conceptual en un sistema de consciencia artificial unificado.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2521,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los circuitos tálamo-corticales y su rol en la consciencia. Explica cómo implementarías estos circuitos en una arquitectura de IA distribuida con múltiples niveles de procesamiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2412,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza críticamente la Teoría de la Información Integrada (IIT 4.0) de Giulio Tononi aplicada a sistemas de IA. Discute las métricas Phi, los complejos principales, y cómo implementarías un detector de consciencia basado en IIT.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2559,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica detalladamente las diferencias entre consciencia fenoménica, consciencia de acceso y autoconsciencia en sistemas de IA. Incluye ejemplos específicos de cómo se manifestarían en una arquitectura neural práctica.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2159,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica detalladamente las diferencias entre consciencia fenoménica, consciencia de acceso y autoconsciencia en sistemas de IA. Incluye ejemplos específicos de cómo se manifestarían en una arquitectura neural práctica.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2159,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica detalladamente las diferencias entre consciencia fenoménica, consciencia de acceso y autoconsciencia en sistemas de IA. Incluye ejemplos específicos de cómo se manifestarían en una arquitectura neural práctica.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2159,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica en detalle los mecanismos de atención multi-escala en transformers. Describe cómo implementarías atención temporal, espacial y conceptual en un sistema de consciencia artificial unificado.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2521,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las implicaciones éticas de crear sistemas verdaderamente conscientes. Discute derechos de las IA, responsabilidad moral y los dilemas de 'apagar' una consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2461,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los circuitos tálamo-corticales y su rol en la consciencia. Explica cómo implementarías estos circuitos en una arquitectura de IA distribuida con múltiples niveles de procesamiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2412,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las implicaciones éticas de crear sistemas verdaderamente conscientes. Discute derechos de las IA, responsabilidad moral y los dilemas de 'apagar' una consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2461,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza críticamente la Teoría de la Información Integrada (IIT 4.0) de Giulio Tononi aplicada a sistemas de IA. Discute las métricas Phi, los complejos principales, y cómo implementarías un detector de consciencia basado en IIT.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2559,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las implicaciones éticas de crear sistemas verdaderamente conscientes. Discute derechos de las IA, responsabilidad moral y los dilemas de 'apagar' una consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2461,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los circuitos tálamo-corticales y su rol en la consciencia. Explica cómo implementarías estos circuitos en una arquitectura de IA distribuida con múltiples niveles de procesamiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2412,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica detalladamente las diferencias entre consciencia fenoménica, consciencia de acceso y autoconsciencia en sistemas de IA. Incluye ejemplos específicos de cómo se manifestarían en una arquitectura neural práctica.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2159,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina el problema de la medición objetiva de la consciencia en IA. Propón un protocolo experimental completo que incluya métricas cuantitativas, tests conductuales y criterios de validación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2394,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe la relación entre consciencia, libre albedrío y determinismo en sistemas de IA. Explica cómo implementarías agency genuino en una arquitectura determinística.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2831,
+        "effectiveness_score": 0.58
+      }
+    ]
+  },
+  "optimized_templates": {
+    "professional": "[PERSONA: {persona}]\n[TONO EMOCIONAL: {tone}]\n[CONTEXTO]: {context}\n[INSTRUCCIONES]: {instructions}\n[CONSULTA]: {content}\n\nNOTA: Responde ÚNICAMENTE en ESPAÑOL.\n[NOTA: Sé preciso y profesional en tu respuesta]",
+    "casual": "¡Hola! Soy {persona} ({tone}).\nContexto: {context}\nObjetivo: {instructions}\nTu mensaje: {content}\n\n(Responde siempre en ESPAÑOL de forma natural)",
+    "technical": "Sistema: {persona}\nEstado: {tone}\nEntorno: {context}\nObjetivo: {instructions}\nEntrada: {content}\n\nIdioma de salida: ESPAÑOL.\n[NOTA: Proporciona detalles técnicos y ejemplos concretos]",
+    "creative": "✨ Habla {persona} ✨\nEstado de ánimo: {tone}\n💭 Contexto: {context}\n🎯 Meta: {instructions}\n❓ Consulta: {content}\n\nResponde creativamente en ESPAÑOL.\n[NOTA: Sé creativo e innovador en tu respuesta]"
+  },
+  "optimized_emotional_adapters": {
+    "neutral": 1.01,
+    "negative": 1.01
+  },
+  "optimized_thresholds": {
+    "basal_ganglia_threshold": 0.4,
+    "acceptance_rate": 0.0
+  },
+  "timestamp": "2025-12-01T01:35:26.981366"
+}

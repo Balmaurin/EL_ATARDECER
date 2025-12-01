@@ -1,0 +1,40 @@
+{
+  "training_completed": "2025-11-30T23:27:55.037969",
+  "total_files": 647,
+  "valid_files": 647,
+  "unused_files": 647,
+  "batches_processed": 6,
+  "batch_size": 100,
+  "results": [
+    {
+      "batch": 1,
+      "files_count": 100,
+      "error": "ComponentTrainer._train_single_component() missing 1 required positional argument: 'category'"
+    },
+    {
+      "batch": 2,
+      "files_count": 100,
+      "error": "ComponentTrainer._train_single_component() missing 1 required positional argument: 'category'"
+    },
+    {
+      "batch": 3,
+      "files_count": 100,
+      "error": "ComponentTrainer._train_single_component() missing 1 required positional argument: 'category'"
+    },
+    {
+      "batch": 4,
+      "files_count": 100,
+      "error": "ComponentTrainer._train_single_component() missing 1 required positional argument: 'category'"
+    },
+    {
+      "batch": 5,
+      "files_count": 100,
+      "error": "ComponentTrainer._train_single_component() missing 1 required positional argument: 'category'"
+    },
+    {
+      "batch": 6,
+      "files_count": 100,
+      "error": "ComponentTrainer._train_single_component() missing 1 required positional argument: 'category'"
+    }
+  ]
+}

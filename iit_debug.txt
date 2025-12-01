@@ -1,4 +1,0 @@
-n=4, raw=0.3097, boost=2.50, pen=1.00, phi=0.1703
-n=6, raw=0.7230, boost=1.67, pen=1.00, phi=0.2651
-n=20, raw=2.0273, boost=1.00, pen=1.00, phi=0.4460
-n=32, raw=0.5574, boost=1.00, pen=0.38, phi=0.0463

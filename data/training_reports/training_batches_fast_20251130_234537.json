@@ -1,0 +1,536 @@
+{
+  "training_completed": "2025-11-30T23:45:37.722898",
+  "mode": "fast",
+  "total_files": 647,
+  "valid_files": 647,
+  "unused_files": 647,
+  "batches_processed": 1,
+  "batch_size": 100,
+  "results": [
+    {
+      "batch": 1,
+      "files_count": 100,
+      "result": {
+        "training_completed": "2025-11-30T23:44:57.604980",
+        "qa_count": 647,
+        "total_components": 37,
+        "components_trained": 16,
+        "components_improved": 0,
+        "components_degraded": 0,
+        "successful_components": [
+          "unified_consciousness",
+          "meta_cognition",
+          "digital_nervous",
+          "continual_learning",
+          "meta_learning",
+          "rag_system",
+          "knowledge_management",
+          "ethical_engine",
+          "theory_of_mind",
+          "emotional_system"
+        ],
+        "failed_components": [
+          "qualia_simulator",
+          "attention_mechanisms",
+          "working_memory",
+          "auto_training",
+          "semantic_search",
+          "self_model"
+        ],
+        "overall_success": false,
+        "data_distribution": {
+          "consciousness": 251,
+          "neural": 481,
+          "learning": 348,
+          "knowledge": 506,
+          "meta_cognitive": 155,
+          "ethical": 157,
+          "theory_of_mind": 137,
+          "emotional": 57
+        },
+        "detailed_results": {
+          "unified_consciousness": {
+            "component": "unified_consciousness",
+            "category": "consciousness",
+            "qa_count": 251,
+            "pre_metrics": {
+              "accuracy": 0.8,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.85
+            },
+            "post_metrics": {
+              "accuracy": 0.8,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.85
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.8,
+                "after": 0.8,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.85,
+                "after": 0.85,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000229,
+            "status": "success",
+            "timestamp": "2025-11-30T23:41:48.516192"
+          },
+          "qualia_simulator": {
+            "component": "qualia_simulator",
+            "category": "consciousness",
+            "status": "failed",
+            "error": "Error entrenando qualia_simulator con TrainingSystemOrchestrator",
+            "timestamp": "2025-11-30T23:41:48.521660"
+          },
+          "meta_cognition": {
+            "component": "meta_cognition",
+            "category": "meta_cognitive",
+            "qa_count": 155,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.007995,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:57.505171"
+          },
+          "digital_nervous": {
+            "component": "digital_nervous",
+            "category": "neural",
+            "qa_count": 481,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000202,
+            "status": "success",
+            "timestamp": "2025-11-30T23:41:48.582319"
+          },
+          "attention_mechanisms": {
+            "component": "attention_mechanisms",
+            "category": "neural",
+            "status": "failed",
+            "error": "Error entrenando attention_mechanisms con TrainingSystemOrchestrator",
+            "timestamp": "2025-11-30T23:41:48.588367"
+          },
+          "working_memory": {
+            "component": "working_memory",
+            "category": "neural",
+            "status": "failed",
+            "error": "Error entrenando working_memory con TrainingSystemOrchestrator",
+            "timestamp": "2025-11-30T23:41:48.597793"
+          },
+          "continual_learning": {
+            "component": "continual_learning",
+            "category": "learning",
+            "qa_count": 348,
+            "pre_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "post_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.78,
+                "after": 0.78,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.8,
+                "after": 0.8,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 95.837608,
+            "status": "success",
+            "timestamp": "2025-11-30T23:43:24.440664"
+          },
+          "meta_learning": {
+            "component": "meta_learning",
+            "category": "learning",
+            "qa_count": 348,
+            "pre_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "post_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.78,
+                "after": 0.78,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.8,
+                "after": 0.8,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 85.971837,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:50.444311"
+          },
+          "auto_training": {
+            "component": "auto_training",
+            "category": "learning",
+            "status": "failed",
+            "error": "Error entrenando auto_training con TrainingSystemOrchestrator",
+            "timestamp": "2025-11-30T23:44:50.459770"
+          },
+          "rag_system": {
+            "component": "rag_system",
+            "category": "knowledge",
+            "qa_count": 506,
+            "pre_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.82,
+                "after": 0.82,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 200.0,
+                "after": 200.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 5.40829,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:55.875301"
+          },
+          "knowledge_management": {
+            "component": "knowledge_management",
+            "category": "knowledge",
+            "qa_count": 506,
+            "pre_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.82,
+                "after": 0.82,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 200.0,
+                "after": 200.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 1.599905,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:57.480344"
+          },
+          "semantic_search": {
+            "component": "semantic_search",
+            "category": "knowledge",
+            "status": "failed",
+            "error": "Error entrenando semantic_search con TrainingSystemOrchestrator",
+            "timestamp": "2025-11-30T23:44:57.492647"
+          },
+          "self_model": {
+            "component": "self_model",
+            "category": "meta_cognitive",
+            "status": "failed",
+            "error": "Error entrenando self_model con TrainingSystemOrchestrator",
+            "timestamp": "2025-11-30T23:44:57.511135"
+          },
+          "ethical_engine": {
+            "component": "ethical_engine",
+            "category": "ethical",
+            "qa_count": 157,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000715,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:57.517397"
+          },
+          "theory_of_mind": {
+            "component": "theory_of_mind",
+            "category": "theory_of_mind",
+            "qa_count": 137,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.00027,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:57.521645"
+          },
+          "emotional_system": {
+            "component": "emotional_system",
+            "category": "emotional",
+            "qa_count": 57,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000431,
+            "status": "success",
+            "timestamp": "2025-11-30T23:44:57.528409"
+          }
+        },
+        "validation": {
+          "overall_improvement": false,
+          "components_validated": 10,
+          "components_improved": 0,
+          "components_degraded": 10,
+          "validations": [
+            "ValidationResult(component_name='unified_consciousness', validation_passed=False, improvement_score=-1.0, before_metrics={'accuracy': 0.8, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.85}, after_metrics={'accuracy': 0.8, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.85}, test_results={'loads_successfully': False, 'responds_to_input': False, 'returns_valid_output': False, 'latency_acceptable': False, 'all_passed': False}, validation_time='2025-11-30T23:44:57.534634')",
+            "ValidationResult(component_name='meta_cognition', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.540319')",
+            "ValidationResult(component_name='digital_nervous', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.544739')",
+            "ValidationResult(component_name='continual_learning', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, after_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.549147')",
+            "ValidationResult(component_name='meta_learning', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, after_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.553869')",
+            "ValidationResult(component_name='rag_system', validation_passed=False, improvement_score=-1.0, before_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': False, 'returns_valid_output': False, 'latency_acceptable': True, 'all_passed': False}, validation_time='2025-11-30T23:44:57.558479')",
+            "ValidationResult(component_name='knowledge_management', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.563531')",
+            "ValidationResult(component_name='ethical_engine', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.568662')",
+            "ValidationResult(component_name='theory_of_mind', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.574521')",
+            "ValidationResult(component_name='emotional_system', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-11-30T23:44:57.579356')"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,750 @@
+{
+  "training_completed": "2025-12-01T03:02:04.557615",
+  "total_files": 100,
+  "valid_files": 100,
+  "unused_files": 100,
+  "batches_processed": 1,
+  "batch_size": 100,
+  "results": [
+    {
+      "batch": 1,
+      "files_count": 100,
+      "result": {
+        "training_completed": "2025-12-01T03:02:03.255393",
+        "qa_count": 100,
+        "total_components": 37,
+        "components_trained": 16,
+        "components_improved": 0,
+        "components_degraded": 0,
+        "successful_components": [
+          "unified_consciousness",
+          "qualia_simulator",
+          "meta_cognition",
+          "digital_nervous",
+          "attention_mechanisms",
+          "working_memory",
+          "continual_learning",
+          "meta_learning",
+          "auto_training",
+          "rag_system",
+          "knowledge_management",
+          "semantic_search",
+          "ethical_engine",
+          "self_model",
+          "theory_of_mind",
+          "emotional_system"
+        ],
+        "failed_components": [],
+        "overall_success": false,
+        "data_distribution": {
+          "consciousness": 35,
+          "neural": 76,
+          "learning": 57,
+          "knowledge": 80,
+          "ethical": 20,
+          "meta_cognitive": 27,
+          "theory_of_mind": 21,
+          "emotional": 8
+        },
+        "detailed_results": {
+          "unified_consciousness": {
+            "component": "unified_consciousness",
+            "category": "consciousness",
+            "qa_count": 35,
+            "pre_metrics": {
+              "accuracy": 0.8,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.85
+            },
+            "post_metrics": {
+              "accuracy": 0.8,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.85
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.8,
+                "after": 0.8,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.85,
+                "after": 0.85,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000306,
+            "status": "success",
+            "timestamp": "2025-12-01T01:46:09.857409"
+          },
+          "qualia_simulator": {
+            "component": "qualia_simulator",
+            "category": "consciousness",
+            "qa_count": 35,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 8.017742,
+            "status": "success",
+            "timestamp": "2025-12-01T01:46:17.879328"
+          },
+          "meta_cognition": {
+            "component": "meta_cognition",
+            "category": "meta_cognitive",
+            "qa_count": 27,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.006665,
+            "status": "success",
+            "timestamp": "2025-12-01T03:02:01.445893"
+          },
+          "digital_nervous": {
+            "component": "digital_nervous",
+            "category": "neural",
+            "qa_count": 76,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000194,
+            "status": "success",
+            "timestamp": "2025-12-01T01:46:17.923586"
+          },
+          "attention_mechanisms": {
+            "component": "attention_mechanisms",
+            "category": "neural",
+            "qa_count": 76,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.293434,
+            "status": "success",
+            "timestamp": "2025-12-01T01:46:18.220574"
+          },
+          "working_memory": {
+            "component": "working_memory",
+            "category": "neural",
+            "qa_count": 76,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.298657,
+            "status": "success",
+            "timestamp": "2025-12-01T01:46:18.523667"
+          },
+          "continual_learning": {
+            "component": "continual_learning",
+            "category": "learning",
+            "qa_count": 57,
+            "pre_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "post_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.78,
+                "after": 0.78,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.8,
+                "after": 0.8,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 65.916884,
+            "status": "success",
+            "timestamp": "2025-12-01T01:47:24.444677"
+          },
+          "meta_learning": {
+            "component": "meta_learning",
+            "category": "learning",
+            "qa_count": 57,
+            "pre_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "post_metrics": {
+              "accuracy": 0.78,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.8
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.78,
+                "after": 0.78,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.8,
+                "after": 0.8,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 56.621582,
+            "status": "success",
+            "timestamp": "2025-12-01T01:48:21.081617"
+          },
+          "auto_training": {
+            "component": "auto_training",
+            "category": "learning",
+            "qa_count": 57,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.316396,
+            "status": "success",
+            "timestamp": "2025-12-01T01:48:21.405445"
+          },
+          "rag_system": {
+            "component": "rag_system",
+            "category": "knowledge",
+            "qa_count": 80,
+            "pre_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.82,
+                "after": 0.82,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 200.0,
+                "after": 200.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 2251.092517,
+            "status": "success",
+            "timestamp": "2025-12-01T02:25:52.502482"
+          },
+          "knowledge_management": {
+            "component": "knowledge_management",
+            "category": "knowledge",
+            "qa_count": 80,
+            "pre_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.82,
+              "latency_ms": 200.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.82,
+                "after": 0.82,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 200.0,
+                "after": 200.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 2165.228889,
+            "status": "success",
+            "timestamp": "2025-12-01T03:01:57.759002"
+          },
+          "semantic_search": {
+            "component": "semantic_search",
+            "category": "knowledge",
+            "qa_count": 80,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 3.641339,
+            "status": "success",
+            "timestamp": "2025-12-01T03:02:01.429579"
+          },
+          "ethical_engine": {
+            "component": "ethical_engine",
+            "category": "ethical",
+            "qa_count": 20,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000422,
+            "status": "success",
+            "timestamp": "2025-12-01T03:02:01.435883"
+          },
+          "self_model": {
+            "component": "self_model",
+            "category": "meta_cognitive",
+            "qa_count": 27,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.337,
+            "status": "success",
+            "timestamp": "2025-12-01T03:02:01.786170"
+          },
+          "theory_of_mind": {
+            "component": "theory_of_mind",
+            "category": "theory_of_mind",
+            "qa_count": 21,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000177,
+            "status": "success",
+            "timestamp": "2025-12-01T03:02:01.790625"
+          },
+          "emotional_system": {
+            "component": "emotional_system",
+            "category": "emotional",
+            "qa_count": 8,
+            "pre_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "post_metrics": {
+              "accuracy": 0.75,
+              "latency_ms": 150.0,
+              "memory_mb": 300.0,
+              "coherence": 0.75
+            },
+            "improvement": {
+              "accuracy": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              },
+              "latency_ms": {
+                "before": 150.0,
+                "after": 150.0,
+                "improvement_pct": 0.0
+              },
+              "memory_mb": {
+                "before": 300.0,
+                "after": 300.0,
+                "improvement_pct": 0.0
+              },
+              "coherence": {
+                "before": 0.75,
+                "after": 0.75,
+                "improvement_pct": 0.0
+              }
+            },
+            "duration_seconds": 0.000175,
+            "status": "success",
+            "timestamp": "2025-12-01T03:02:01.794072"
+          }
+        },
+        "validation": {
+          "overall_improvement": false,
+          "components_validated": 16,
+          "components_improved": 0,
+          "components_degraded": 16,
+          "validations": [
+            "ValidationResult(component_name='unified_consciousness', validation_passed=False, improvement_score=-1.0, before_metrics={'accuracy': 0.8, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.85}, after_metrics={'accuracy': 0.8, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.85}, test_results={'loads_successfully': False, 'responds_to_input': False, 'returns_valid_output': False, 'latency_acceptable': False, 'all_passed': False}, validation_time='2025-12-01T03:02:01.797661')",
+            "ValidationResult(component_name='qualia_simulator', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.801182')",
+            "ValidationResult(component_name='meta_cognition', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.804345')",
+            "ValidationResult(component_name='digital_nervous', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.807348')",
+            "ValidationResult(component_name='attention_mechanisms', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.810881')",
+            "ValidationResult(component_name='working_memory', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.813966')",
+            "ValidationResult(component_name='continual_learning', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, after_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.816946')",
+            "ValidationResult(component_name='meta_learning', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, after_metrics={'accuracy': 0.78, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.8}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.820010')",
+            "ValidationResult(component_name='auto_training', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.824793')",
+            "ValidationResult(component_name='rag_system', validation_passed=False, improvement_score=-1.0, before_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': False, 'returns_valid_output': False, 'latency_acceptable': True, 'all_passed': False}, validation_time='2025-12-01T03:02:01.827690')",
+            "ValidationResult(component_name='knowledge_management', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.82, 'latency_ms': 200.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.830701')",
+            "ValidationResult(component_name='semantic_search', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.835358')",
+            "ValidationResult(component_name='ethical_engine', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.838697')",
+            "ValidationResult(component_name='self_model', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.841849')",
+            "ValidationResult(component_name='theory_of_mind', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.845117')",
+            "ValidationResult(component_name='emotional_system', validation_passed=False, improvement_score=0.0, before_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, after_metrics={'accuracy': 0.75, 'latency_ms': 150.0, 'memory_mb': 300.0, 'coherence': 0.75}, test_results={'loads_successfully': True, 'responds_to_input': True, 'returns_valid_output': True, 'latency_acceptable': True, 'all_passed': True}, validation_time='2025-12-01T03:02:01.848301')"
+          ]
+        }
+      }
+    }
+  ]
+}

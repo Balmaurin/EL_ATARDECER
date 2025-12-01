@@ -1,0 +1,14 @@
+{
+  "id": "1ecb8ef4-5b1f-4216-a423-86ee924dd11f",
+  "question_id": "da25cdc8-7558-4150-82f6-aabafdc4327e",
+  "session_id": "928f3bee-a594-458a-bce8-53f043069338",
+  "model_id": "gemma-2b",
+  "prompt": "Describe completamente el proceso de fine-tuning con LoRA, QLoRA y AdaLoRA. Explica cuándo usar cada técnica y cómo optimizar los hiperparámetros para diferentes tipos de tareas cognitivas.",
+  "response": "## Fine-Tuning con LoRA, QLoRA y AdaLoRA\n\nEl fine-tuning es un proceso fundamental en el aprendizaje automático para ajustar un modelo pre-entrenado a una tarea específica. LoRA, QLoRA y AdaLoRA son técnicas de fine-tuning que permiten a los usuarios ajustar solo las capas de un modelo pre-entrenado, lo que aumenta la eficiencia y la flexibilidad. \n\n**1. LoRA (LowRank Adaptation)**\n\nLoRA funciona mediante la inyección de **matrices de tamaño reducido** en las capas del modelo pre-entrenado, en lugar de modificar las capas completas. Esto permite a LoRA reducir la cantidad de parámetros que se entrenan durante el fine-tuning, lo que acelera el proceso y consume menos recursos.\n\n* **Cuándo usar:** LoRA es una buena opción para tareas donde la **memoria del modelo pre-entrenado es importante** y los datos son **limitados**. \n* **Optimización de hiperparámetros:** La tasa de aprendizaje, el tamaño de las matrices de rango reducido, y la cantidad de capas a fine-tune, son parámetros cruciales. Experimentar con diferentes configuraciones puede optimizar el rendimiento.\n\n**2. QLoRA (Quantized Low-Rank Adaptation)**\n\nQLoRA combina LoRA con **quantización** para reducir aún más el tamaño de los parámetros de entrada. Esto permite a QLoRA manejar **modelos más grandes** con menor memoria y recursos.\n\n* **Cuándo usar:** QLoRA es una buena opción para fine-tuning de **modelos grandes**, especialmente en dispositivos con **limitaciones de memoria**. \n* **Optimización de hiperparámetros:** La cantidad de bits de precisión utilizada en la quantización, el tamaño de los matrices de rango reducido, y el número de capas a fine-tune, son cruciales.\n\n**3. AdaLoRA (Adaptive Low-Rank Adaptation)**\n\nAdaLoRA introduce una **modificación dinámica** del tamaño de las matrices de rango reducido, en función del tamaño del lote de entrenamiento.  \n\n* **Cuándo usar:** AdaLoRA es una buena opción para **tareas con diferentes tamaños de lotes**, donde la eficiencia puede variar con la cantidad de datos.\n* **Optimización de hiperparámetros:** La tasa de aprendizaje, el tamaño de las matrices de rango reducido, y la cantidad de capas a fine-tune, son cruciales. Experimentar con diferentes configuraciones puede optimizar el rendimiento.",
+  "tokens_used": 555,
+  "llm_meta": {},
+  "pii_flag": false,
+  "accepted_for_training": true,
+  "human_annotation": "",
+  "created_at": "2025-11-30T17:14:50.437767"
+}

@@ -1,0 +1,211 @@
+# ============================================
+# .cursorignore - Optimización para Codebase Indexing
+# EL-AMANECER V3 - Excluye archivos que no necesitan indexado semántico
+# ============================================
+
+# ============================================
+# ARCHIVOS BINARIOS Y MODELOS GRANDES
+# ============================================
+# Modelos de ML/LLM - demasiado grandes para indexado semántico
+modelsLLM/**/*.gguf
+modelsLLM/**/*.bin
+modelsLLM/**/*.safetensors
+models/**/*.gguf
+models/**/*.bin
+models/**/*.safetensors
+models/**/*.pt
+models/**/*.pth
+models/**/*.h5
+models/**/*.pkl
+models/**/*.model
+*.gguf
+*.bin
+*.safetensors
+
+# Archivos compilados y binarios
+*.exe
+*.dll
+*.so
+*.dylib
+*.pyd
+*.pyc
+*.pyo
+*.py[cod]
+__pycache__/
+*.class
+*.jar
+*.war
+
+# ============================================
+# BASES DE DATOS Y ARCHIVOS DE DATOS GRANDES
+# ============================================
+# Bases de datos SQLite - estructura se puede ver en código
+data/**/*.db
+data/**/*.sqlite3
+data/**/*.db-shm
+data/**/*.db-wal
+*.db
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Datasets grandes en formato JSONL
+packages/rag_engine/**/*.jsonl
+data/datasets/*.json
+data/training_data.json
+
+# Archivos de embeddings y vectores
+models/embeddings/*.npy
+data/embeddings/*.npy
+*.npy
+*.npz
+
+# ============================================
+# LOGS Y ARCHIVOS TEMPORALES
+# ============================================
+# Logs - no necesitan indexado semántico
+*.log
+logs/
+**/*.log
+*.log.*
+evolution_cycle.log
+demo_*.log
+training_*.log
+
+# Archivos temporales y de respaldo
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+
+# ============================================
+# CACHÉ Y ARCHIVOS GENERADOS
+# ============================================
+# MLflow runs - archivos generados
+mlruns/
+.mlflow/
+
+# Cache directories
+.cache/
+*.cache
+data/cache/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+dist/
+build/
+*.egg-info/
+
+# ============================================
+# NODE MODULES Y DEPENDENCIAS
+# ============================================
+node_modules/
+.npm/
+.yarn/
+.pnp/
+.next/
+out/
+.nuxt/
+.vite/
+
+# ============================================
+# ENTORNOS VIRTUALES
+# ============================================
+venv/
+.venv/
+env/
+.env/
+ENV/
+venv_memory_test/
+sheily_lora_env/
+.conda/
+
+# ============================================
+# ARCHIVOS DEL IDE Y CONFIGURACIÓN LOCAL
+# ============================================
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+*.sublime-*
+
+# ============================================
+# ARCHIVOS DE SEGURIDAD Y SECRETOS
+# ============================================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.cert
+*.encrypted
+config/**/*.encrypted
+secrets/
+.secrets/
+
+# ============================================
+# ARCHIVOS DE TESTING Y RESULTADOS
+# ============================================
+test_backups/
+audit_results/
+tests/results/
+test-results/
+coverage/
+.pytest_cache/
+.mypy_cache/
+
+# ============================================
+# ARCHIVOS DE DEPLOYMENT Y DOCKER
+# ============================================
+.dockerignore
+docker-compose.override.yml
+*.dockerfile.local
+
+# ============================================
+# ARCHIVOS DE DOCUMENTACIÓN GENERADOS
+# ============================================
+docs/_build/
+docs/.doctrees/
+*.pdf
+*.epub
+
+# ============================================
+# ARCHIVOS ESPECÍFICOS DEL PROYECTO
+# ============================================
+# Archivos de análisis y reportes generados
+analysis_results.json
+el_amanecer_analysis_report.json
+ciclo_completo_real_reporte.json
+
+# Archivos de configuración de desarrollo local
+.vscode/settings.json
+.agent/
+
+# Archivos de seguridad logs
+security_logs_*/
+
+# ============================================
+# MANTENER INDEXADOS (NO EXCLUIR)
+# ============================================
+# Estos archivos SÍ deben ser indexados:
+# - *.py (código fuente Python)
+# - *.ts, *.tsx (código TypeScript/React)
+# - *.js, *.jsx (código JavaScript)
+# - *.md (documentación)
+# - *.json (configuraciones, schemas)
+# - *.yaml, *.yml (configuraciones)
+# - *.toml (configuraciones)
+# - *.sql (scripts SQL)
+# - *.proto (definiciones gRPC)
+# - *.graphql, *.gql (queries GraphQL)
+

@@ -1,0 +1,169 @@
+{
+  "training_id": "smart_20251201_030347",
+  "system": "smart_training_system",
+  "completed_at": "2025-12-01T03:04:03.137194",
+  "total_qa_processed": 100,
+  "components_analyzed": 7,
+  "components_trained": 3,
+  "successful_components": [
+    "llm_service",
+    "unified_consciousness",
+    "rag_system"
+  ],
+  "total_estimated_improvement": 0.8999999999999999,
+  "training_strategy": "selective_intelligent_training",
+  "estimated_time_saved": "60-75% vs sistema anterior",
+  "data_quality": {
+    "llm_service": 0.7,
+    "unified_consciousness": 0.7,
+    "rag_system": 0.6999999999999998,
+    "autonomous_controller": 0.6999999999999998
+  },
+  "detailed_results": {
+    "llm_service": {
+      "component": "llm_service",
+      "trainer_type": "llm_finetuning",
+      "data_used": 57,
+      "strategy": {
+        "level": "standard",
+        "epochs": 2,
+        "intensity": "medium"
+      },
+      "result": {
+        "method": "real_fine_tuning",
+        "status": "success",
+        "examples_used": 50,
+        "final_loss": "unknown",
+        "model_updated": true
+      },
+      "improvement": {
+        "overall": 0.3
+      },
+      "duration_seconds": 12.7669,
+      "status": "success",
+      "timestamp": "2025-12-01T03:04:00.442097"
+    },
+    "unified_consciousness": {
+      "component": "unified_consciousness",
+      "trainer_type": "consciousness_update",
+      "data_used": 20,
+      "strategy": {
+        "level": "standard",
+        "epochs": 2,
+        "intensity": "medium"
+      },
+      "result": {
+        "method": "conscious_experience_processing",
+        "status": "unknown",
+        "experiences_processed": 20,
+        "system_updated": true
+      },
+      "improvement": {
+        "overall": 0.3
+      },
+      "duration_seconds": 0.050327,
+      "status": "success",
+      "timestamp": "2025-12-01T03:04:00.492649"
+    },
+    "rag_system": {
+      "component": "rag_system",
+      "trainer_type": "knowledge_expansion",
+      "data_used": 12,
+      "strategy": {
+        "level": "light",
+        "epochs": 1,
+        "intensity": "low"
+      },
+      "result": {
+        "method": "incremental_indexing",
+        "status": "unknown",
+        "documents_added": 12,
+        "index_updated": true
+      },
+      "improvement": {
+        "overall": 0.3
+      },
+      "duration_seconds": 2.644105,
+      "status": "success",
+      "timestamp": "2025-12-01T03:04:03.137156"
+    }
+  },
+  "component_plan": {
+    "llm_service": {
+      "needs_training": true,
+      "data_count": 57,
+      "strategy": {
+        "level": "standard",
+        "epochs": 2,
+        "intensity": "medium"
+      },
+      "expected_time": "14.2 min",
+      "trainer_type": "llm_finetuning",
+      "reason": "",
+      "avg_quality_score": 0.7,
+      "avg_relevance_score": 2.88
+    },
+    "unified_consciousness": {
+      "needs_training": true,
+      "data_count": 20,
+      "strategy": {
+        "level": "standard",
+        "epochs": 2,
+        "intensity": "medium"
+      },
+      "expected_time": "2.0 min",
+      "trainer_type": "consciousness_update",
+      "reason": "",
+      "avg_quality_score": 0.7,
+      "avg_relevance_score": 3.8
+    },
+    "meta_cognition": {
+      "needs_training": false,
+      "data_count": 0,
+      "strategy": {},
+      "expected_time": "N/A",
+      "trainer_type": "unknown",
+      "reason": "Insuficientes datos relevantes (0 < 10)"
+    },
+    "rag_system": {
+      "needs_training": true,
+      "data_count": 12,
+      "strategy": {
+        "level": "light",
+        "epochs": 1,
+        "intensity": "low"
+      },
+      "expected_time": "2.4 min",
+      "trainer_type": "knowledge_expansion",
+      "reason": "",
+      "avg_quality_score": 0.7,
+      "avg_relevance_score": 3.67
+    },
+    "semantic_search": {
+      "needs_training": false,
+      "data_count": 0,
+      "strategy": {},
+      "expected_time": "N/A",
+      "trainer_type": "unknown",
+      "reason": "Insuficientes datos relevantes (0 < 10)"
+    },
+    "autonomous_controller": {
+      "needs_training": false,
+      "data_count": 3,
+      "strategy": {},
+      "expected_time": "N/A",
+      "trainer_type": "unknown",
+      "reason": "Insuficientes datos relevantes (3 < 10)",
+      "avg_quality_score": 0.7,
+      "avg_relevance_score": 3.0
+    },
+    "continual_learning": {
+      "needs_training": false,
+      "data_count": 0,
+      "strategy": {},
+      "expected_time": "N/A",
+      "trainer_type": "unknown",
+      "reason": "Insuficientes datos relevantes (0 < 10)"
+    }
+  }
+}

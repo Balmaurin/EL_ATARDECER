@@ -1,0 +1,14 @@
+{
+  "id": "ffb6c46a-2928-4679-850a-97a7c4baae60",
+  "question_id": "71d31dd4-ef3c-4324-a830-49f282ff95fd",
+  "session_id": "928f3bee-a594-458a-bce8-53f043069338",
+  "model_id": "gemma-2b",
+  "prompt": "Describe los mecanismos de plasticidad sináptica Hebbiana, anti-Hebbiana y homeostática. Explica cómo implementarías estos mecanismos en redes neuronales artificiales para aprendizaje continuo.",
+  "response": "## Mecanismos de Plasticidad Sináptica\n\nLa plasticidad sináptica es la capacidad de las conexiones entre las neuronas para cambiar su fuerza a lo largo del tiempo.  Estos cambios permiten a las redes neuronales adaptarse al aprendizaje.\n\n**1. Plasticidad Hebbiana:**\n\n* **Mecanismo:** Se basa en la idea de que las conexiones entre dos neuronas se fortalecerán si ambas son activadas juntas (excitación conjunta).  \n* **Simbologia:**  \n    * Neuronas A y B\n    * Neuronas A y B son activadas juntas (excitación conjunta)\n    * Aumenta la fuerza de la conexión entre A y B (plasticidad)\n* **Implementación en redes neuronales:** Se usa en redes neuronales artificiales para implementar la función de aprendizaje por retropropagación.  \n\n**2. Plasticidad Anti-Hebbian:**\n\n* **Mecanismo:** Se basa en la idea de que las conexiones se debilitan si no se usan (desutilización).  \n* **Simbologia:**\n    * Neuronas A y B\n    * Neuronas A y B no son activadas juntas (excitación no conjunta) \n    * La fuerza de la conexión entre A y B disminuye (plasticidad) \n* **Implementación en redes neuronales:** Se usa en redes neuronales artificiales para implementar la función de aprendizaje por selección de patrones.\n\n**3. Plasticidad Homeostática:**\n\n* **Mecanismo:** Se basa en la idea de que las conexiones se ajustan para mantener una actividad neural constante a largo plazo.  \n* **Simbologia:**\n    * Neuronas A y B\n    * Las neuronas A y B no son activadas juntas\n    * La fuerza de la conexión entre A y B es ajustada para mantener una actividad neural constante (plasticidad)\n* **Implementación en redes neuronales:**  Se usa en redes neuronales artificiales para implementar la función de aprendizaje por ajuste de la energía.\n\n\n## Aprendizaje continuo en redes neuronales artificiales\n\nPara implementar estos mecanismos en redes neuronales artificiales, se pueden utilizar técnicas como:\n\n**1. Backpropagation:**  Este algoritmo se utiliza para ajustar la fuerza de las conexiones entre las neuronas. Se basa en la plasticidad Hebbian para fortalecer las conexiones que se usan con frecuencia.\n **2.  Recurrent Neural Networks (RNNs):** RNN",
+  "tokens_used": 552,
+  "llm_meta": {},
+  "pii_flag": false,
+  "accepted_for_training": true,
+  "human_annotation": "",
+  "created_at": "2025-11-30T17:23:36.565318"
+}

@@ -1,0 +1,37 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: consciousness-pubsub
+  namespace: default
+spec:
+  type: pubsub.nats
+  version: v1
+  metadata:
+    - name: natsURL
+      value: "nats://nats:4222"
+    - name: jwtFile
+      value: ""
+    - name: seedFile
+      value: ""
+    - name: subjectWildcardPattern
+      value: "consciousness"
+    - name: subscriptionType
+      value: "jetstream"
+    - name: streamName
+      value: "consciousness-events"
+    - name: maxReconnect
+      value: "10"
+    - name: reconnectWait
+      value: "2s"
+    - name: maxInFlight
+      value: "100"
+    - name: duplicateWindow
+      value: "5m"
+# Topics for consciousness communication
+scopes:
+  - consciousness.thoughts
+  - consciousness.emotions
+  - consciousness.memory
+  - consciousness.reflection
+  - frontend.updates
+  - workflow.events

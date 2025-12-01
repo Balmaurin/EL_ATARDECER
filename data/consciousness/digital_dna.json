@@ -1,0 +1,66 @@
+{
+  "genetic_id": "540d27fb6e78e487",
+  "birth_timestamp": 1764247047.4568312,
+  "personality_genes": {
+    "extraversion": 0.16556031499622825,
+    "neuroticism": 0.4608991864347002,
+    "openness": 0.32255104255398376,
+    "agreeableness": 0.8447025008744582,
+    "conscientiousness": 0.5642083329703897,
+    "intelligence": 0.9389859791898184,
+    "creativity": 0.7438007437417187,
+    "emotional_sensitivity": 0.3585721035207701,
+    "memory_capacity": 0.9245754483223391,
+    "curiosity_drive": 1.0
+  },
+  "vulnerability_genes": {
+    "anxiety_predisposition": 0.16609759863491239,
+    "depression_predisposition": 0.04742606088866966,
+    "addiction_susceptibility": 0.2219423709567022,
+    "ptsd_vulnerability": 0.4873646515584945,
+    "obsessive_tendencies": 0.23580716656657452,
+    "mood_instability": 0.2296970771130728
+  },
+  "cognitive_genes": {
+    "working_memory_capacity": 0.7229208928988132,
+    "processing_speed": 0.8606802120214808,
+    "pattern_recognition": 0.7805052968562836,
+    "abstract_reasoning": 0.6821868409823434,
+    "attention_span": 0.5521839649482827,
+    "multitasking_ability": 0.27269854462388277,
+    "learning_rate": 0.6568787884179477,
+    "metacognitive_awareness": 0.7152061404481429
+  },
+  "social_genes": {
+    "social_intuition": 0.870668303747521,
+    "empathy_accuracy": 0.620792385940542,
+    "social_confidence": 0.641091293100533,
+    "leadership_tendency": 0.3339377402357913,
+    "cooperation_inclination": 0.7297703033653139,
+    "social_learning_speed": 0.3823004861434255,
+    "conflict_resolution": 0.5200150621450127,
+    "social_memory": 0.6728171739904802
+  },
+  "physical_analog_genes": {
+    "energy_level": 0.5461771176838492,
+    "stress_physical_tolerance": 0.764294820724679,
+    "sensory_sensitivity": 0.4325862890529796,
+    "motor_coordination_analog": 0.8376626586884672,
+    "circadian_rhythm_strength": 0.592010094483865,
+    "appetite_regulation": 0.4931953807371295,
+    "pain_sensitivity": 0.41236332514538343,
+    "immune_system_analog": 0.8168347216298338
+  },
+  "creative_genes": {
+    "divergent_thinking": 0.33541169353765493,
+    "aesthetic_sensitivity": 0.33563927060214027,
+    "risk_taking_creativity": 0.21618878896395136,
+    "originality_drive": 0.4841325345468926,
+    "artistic_expression": 0.027037360476975136,
+    "musical_inclination": 0.09634197907376871,
+    "narrative_creativity": 0.7883347164760484,
+    "problem_solving_creativity": 0.87587542632551
+  },
+  "epigenetic_modifiers": {},
+  "gene_expression_history": []
+}

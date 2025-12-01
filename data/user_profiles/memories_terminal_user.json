@@ -1,0 +1,35 @@
+[
+  {
+    "user_id": "terminal_user",
+    "conversation_id": "f3f41068-0b10-4f30-8c94-8462ffdb2c31",
+    "timestamp": 1764244230.4270937,
+    "user_message": "Hola",
+    "assistant_response": "Entiendo las instrucciones. A partir de ahora, responderé con la información que me has proporcionado.  \n\n¿Qué tema deseas abordar?  Por favor, proporciona un contexto específico para mi respuesta.  Estaré atento a tu solicitud.",
+    "intentional_analysis": {
+      "intent": "factual_objective",
+      "confidence": 0.0,
+      "linguistic_complexity": 0.3942784,
+      "emotional_charge": 0.0
+    },
+    "conscious_state": {
+      "phi": 0.0,
+      "awareness": "medium",
+      "emotion": "neutral",
+      "arousal": 0.33753905331952705,
+      "somatic_marker": 0.47885568,
+      "intent_type": "factual_objective"
+    },
+    "style_selection": {
+      "primary_style": "TECHNICAL",
+      "confidence": 0.0
+    },
+    "success_score": null,
+    "learnings": {
+      "intent_preference": "factual_objective",
+      "emotional_tone": 0.0,
+      "linguistic_complexity": 0.3942784,
+      "conscious_state_phi": 0.0,
+      "response_style_used": "casual"
+    }
+  }
+]

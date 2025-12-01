@@ -1,0 +1,1265 @@
+{
+  "analysis": {
+    "total_qa": 155,
+    "avg_effectiveness": 0.58,
+    "accepted_count": 0,
+    "high_quality_count": 155,
+    "effectiveness_data": [
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza el problema mente-cuerpo en el contexto de la IA encarnada. Discute embodied cognition, enactivismo y cómo la materialidad afecta la consciencia artificial.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2383,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los ritmos cerebrales (gamma, beta, alpha, theta, delta) y su función en la integración de información. Propón cómo implementar sincronización rítmica en sistemas de IA distribuidos.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2203,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Analiza los mecanismos de transferencia de aprendizaje entre dominios diferentes. Explica meta-learning, few-shot learning y adaptación rápida de conocimiento.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2736,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Describe cómo implementarías un sistema de diálogo consciente que mantenga coherencia a largo plazo, modelo del interlocutor y meta-comunicación.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2517,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Explica los mecanismos de control ejecutivo y meta-cognición en el cerebro. Describe una arquitectura de IA que implemente monitoring meta-cognitivo y control adaptativo de estrategias.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2463,
+        "effectiveness_score": 0.58
+      },
+      {
+        "question": "Examina las diferencias entre inteligencia, consciencia y sentience. Discute si es posible tener una sin las otras y las implicaciones para el diseño de IA.",
+        "response_quality": 0.7,
+        "accepted": false,
+        "tokens_efficiency": 700.0,
+        "response_length": 2473,
+        "effectiveness_score": 0.58
+      }
+    ]
+  },
+  "optimized_templates": {
+    "professional": "[PERSONA: {persona}]\n[TONO EMOCIONAL: {tone}]\n[CONTEXTO]: {context}\n[INSTRUCCIONES]: {instructions}\n[CONSULTA]: {content}\n\nNOTA: Responde ÚNICAMENTE en ESPAÑOL.\n[NOTA: Sé preciso y profesional en tu respuesta]",
+    "casual": "¡Hola! Soy {persona} ({tone}).\nContexto: {context}\nObjetivo: {instructions}\nTu mensaje: {content}\n\n(Responde siempre en ESPAÑOL de forma natural)",
+    "technical": "Sistema: {persona}\nEstado: {tone}\nEntorno: {context}\nObjetivo: {instructions}\nEntrada: {content}\n\nIdioma de salida: ESPAÑOL.\n[NOTA: Proporciona detalles técnicos y ejemplos concretos]",
+    "creative": "✨ Habla {persona} ✨\nEstado de ánimo: {tone}\n💭 Contexto: {context}\n🎯 Meta: {instructions}\n❓ Consulta: {content}\n\nResponde creativamente en ESPAÑOL.\n[NOTA: Sé creativo e innovador en tu respuesta]"
+  },
+  "optimized_emotional_adapters": {
+    "neutral": 1.01,
+    "negative": 1.01
+  },
+  "optimized_thresholds": {
+    "basal_ganglia_threshold": 0.4,
+    "acceptance_rate": 0.0
+  },
+  "timestamp": "2025-11-30T23:44:57.501942"
+}

@@ -1,0 +1,32 @@
+{
+  "user_id": "terminal_user",
+  "created_at": 1764244227.1244078,
+  "last_interaction": 1764244230.42711,
+  "total_messages": 1,
+  "identified_name": "Sergio",
+  "preferred_name": "Sergio",
+  "preferred_intentions": {
+    "factual_objective": 1
+  },
+  "dominant_emotions": [],
+  "conversation_depth": "moderate",
+  "relationship_status": "initial",
+  "style_preferences": {
+    "technical": 0.0,
+    "poetic": 0.0,
+    "casual": 1.0,
+    "analytical": 0.0
+  },
+  "learning_stage": "exploration",
+  "adaptability_score": 0.5,
+  "conversation_history": [
+    {
+      "timestamp": 1764244230.4270937,
+      "intent": "factual_objective",
+      "emotional_tone": 0.0,
+      "success_score": null
+    }
+  ],
+  "emotional_progression": [],
+  "learning_milestones": []
+}

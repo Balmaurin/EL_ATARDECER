@@ -10,6 +10,7 @@ starlette>=0.37,<0.41
 uvicorn[standard]>=0.23,<0.29
 httpx>=0.25,<0.29
 aiohttp>=3.9,<4
+strawberry-graphql[fastapi]>=0.235,<1
 
 # --- Configuración/Validación ---
 pydantic>=2.6,<3
@@ -51,15 +52,21 @@ requests>=2.31,<3
 transformers>=4.41,<5
 sentence-transformers>=2.7,<3
 chromadb>=0.5,<2
-llama-cpp-python>=0.2.20,<0.3
+faiss-cpu>=1.7.4,<2  # Búsqueda semántica vectorial (RealSemanticSearch)
+rank-bm25>=0.2.2,<1  # BM25 para RAG metrics
+llama-cpp-python>=0.2.0,<0.3
 InstructorEmbedding>=1.0.1,<2
 scipy>=1.12,<2
 xgboost>=2.0,<3
 
 # PyTorch - version compatible con Windows
-torch>=2.6.0
-torchvision>=0.21.0
-torchaudio>=2.6.0
+# Nota: Versiones disponibles: 2.6.0, 2.7.0, 2.7.1, 2.8.0, 2.9.0, 2.9.1
+torch>=2.6.0,<3.0.0
+torchvision>=0.21.0,<0.23.0
+torchaudio>=2.6.0,<3.0.0
+datasets>=2.14,<3
+peft>=0.7,<1
+accelerate>=0.26,<1
 
 ###############################################
 # GOOGLE ADK y dependencias enterprise (simuladas pero funcionales)
@@ -91,7 +98,12 @@ pytz>=2023.3,<2024
 tzlocal>=5.0,<6
 APScheduler>=3.10,<4
 gunicorn>=21,<22  # Para production deployment
-huggingface-hub>=0.20,<1  # Para descargar modelos LLM
+huggingface-hub>=0.20.0  # Para descargar modelos LLM
+
+# --- Blockchain (Solana) ---
+solders>=0.27.0  # SDK moderno de Solana (Rust-based)
+solana>=0.36.0   # Cliente RPC para Solana blockchain
+base58>=2.1.0    # Codificación base58 para claves Solana
 
 # --- Added during MCP Integration ---
 passlib[bcrypt]>=1.7.4
@@ -108,10 +120,11 @@ pytest==7.4.3
 pytest-html==4.1.1
 pytest-json-report==1.5.0
 pytest-cov==4.0.0
-numpy==1.24.3
-psutil==5.9.6
-typing-extensions==4.8.0
+# numpy==1.24.3  # CONFLICT: Handled by Batch 2 (numpy>=2.1)
+# psutil==5.9.6  # Handled by Observability section
+typing-extensions>=4.8.0
 
 # Development tools
-black==23.11.0
-pylint==3.0.3
+black>=23.11.0,<24
+pylint>=3.0.3,<4
+pytest-asyncio>=0.21.0,<1  # Para tests asíncronos

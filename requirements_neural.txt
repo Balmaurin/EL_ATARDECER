@@ -1,0 +1,27 @@
+# Dependencias para Sistema de Consciencia Neural
+# ================================================
+
+# PyTorch - Framework de deep learning
+torch>=2.0.0
+
+# Transformers - Modelos pre-entrenados y LoRA
+transformers>=4.30.0
+
+# PEFT - Parameter-Efficient Fine-Tuning (LoRA)
+peft>=0.4.0
+
+# FAISS - Búsqueda de vectores rápida (CPU)
+faiss-cpu>=1.7.4
+
+# Accelerate - Optimización para CPU
+accelerate>=0.20.0
+
+# BitsAndBytes - Quantization (opcional, para optimización)
+# bitsandbytes>=0.41.0  # Descomentar si se necesita quantization
+
+# Requests - Para llamadas HTTP al LLM service
+requests>=2.31.0
+
+# NumPy - Operaciones numéricas
+numpy>=1.24.0
+

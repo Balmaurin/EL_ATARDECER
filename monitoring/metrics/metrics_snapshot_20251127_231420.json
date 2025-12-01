@@ -1,0 +1,256 @@
+{
+  "snapshot_time": "2025-11-27T23:14:20.991684",
+  "metrics_count": 10,
+  "metrics": [
+    {
+      "timestamp": "2025-11-27T23:05:00.945460",
+      "system": {
+        "cpu_percent": 6.0,
+        "memory_percent": 31.3,
+        "memory_used_gb": 18.712722778320312,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.78446197509766,
+        "network_connections": 207,
+        "load_average": [
+          0.0,
+          0.01,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.58984375
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:06:02.950424",
+      "system": {
+        "cpu_percent": 12.3,
+        "memory_percent": 31.0,
+        "memory_used_gb": 18.54256820678711,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.7839698791504,
+        "network_connections": 149,
+        "load_average": [
+          0.0,
+          0.01,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.62109375
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:07:04.955552",
+      "system": {
+        "cpu_percent": 2.8,
+        "memory_percent": 30.8,
+        "memory_used_gb": 18.40869903564453,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.7836380004883,
+        "network_connections": 107,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.546875
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:08:06.959303",
+      "system": {
+        "cpu_percent": 24.9,
+        "memory_percent": 31.5,
+        "memory_used_gb": 18.841690063476562,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.6932373046875,
+        "network_connections": 129,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.578125
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:09:08.963512",
+      "system": {
+        "cpu_percent": 4.1,
+        "memory_percent": 31.3,
+        "memory_used_gb": 18.716053009033203,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.69298934936523,
+        "network_connections": 142,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.56640625
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:10:10.968530",
+      "system": {
+        "cpu_percent": 28.4,
+        "memory_percent": 31.6,
+        "memory_used_gb": 18.879337310791016,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.6925849914551,
+        "network_connections": 156,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.56640625
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:11:12.973723",
+      "system": {
+        "cpu_percent": 10.6,
+        "memory_percent": 31.5,
+        "memory_used_gb": 18.840301513671875,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.6923294067383,
+        "network_connections": 155,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.5390625
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:12:14.978821",
+      "system": {
+        "cpu_percent": 4.2,
+        "memory_percent": 31.5,
+        "memory_used_gb": 18.861007690429688,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.69099044799805,
+        "network_connections": 163,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.55078125
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:13:16.982915",
+      "system": {
+        "cpu_percent": 3.9,
+        "memory_percent": 31.7,
+        "memory_used_gb": 18.95374298095703,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.6907081604004,
+        "network_connections": 164,
+        "load_average": [
+          0.0,
+          0.0,
+          0.01
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.57421875
+      },
+      "alerts": []
+    },
+    {
+      "timestamp": "2025-11-27T23:14:18.987868",
+      "system": {
+        "cpu_percent": 4.5,
+        "memory_percent": 31.7,
+        "memory_used_gb": 18.976394653320312,
+        "memory_total_gb": 59.78614044189453,
+        "disk_usage_percent": 65.7,
+        "disk_free_gb": 326.69058990478516,
+        "network_connections": 142,
+        "load_average": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "application": {
+        "active_connections": 0,
+        "requests_per_second": 0,
+        "error_rate_percent": 0,
+        "response_time_avg_ms": 0,
+        "memory_usage_mb": 34.58203125
+      },
+      "alerts": []
+    }
+  ]
+}

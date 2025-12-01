@@ -1,0 +1,61 @@
+{
+  "user_id": "Sergio",
+  "created_at": 1764244230.4337418,
+  "last_interaction": 1764244290.0433185,
+  "total_messages": 5,
+  "identified_name": null,
+  "preferred_name": "Sergio",
+  "preferred_intentions": {
+    "personal_introduction": 1,
+    "factual_objective": 2,
+    "emotional_personal": 1,
+    "ethical_philosophical": 1
+  },
+  "dominant_emotions": [
+    "neutral"
+  ],
+  "conversation_depth": "moderate",
+  "relationship_status": "developing",
+  "style_preferences": {
+    "technical": 0.0,
+    "poetic": 0.0,
+    "casual": 1.0,
+    "analytical": 0.0
+  },
+  "learning_stage": "exploration",
+  "adaptability_score": 0.5,
+  "conversation_history": [
+    {
+      "timestamp": 1764244232.060829,
+      "intent": "personal_introduction",
+      "emotional_tone": 0.0,
+      "success_score": null
+    },
+    {
+      "timestamp": 1764244246.3334744,
+      "intent": "factual_objective",
+      "emotional_tone": 0.0,
+      "success_score": null
+    },
+    {
+      "timestamp": 1764244255.1848502,
+      "intent": "emotional_personal",
+      "emotional_tone": 0.0,
+      "success_score": null
+    },
+    {
+      "timestamp": 1764244269.0046966,
+      "intent": "ethical_philosophical",
+      "emotional_tone": 0.0,
+      "success_score": null
+    },
+    {
+      "timestamp": 1764244290.043308,
+      "intent": "factual_objective",
+      "emotional_tone": 0.0,
+      "success_score": null
+    }
+  ],
+  "emotional_progression": [],
+  "learning_milestones": []
+}

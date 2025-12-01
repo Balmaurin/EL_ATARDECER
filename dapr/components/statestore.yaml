@@ -1,0 +1,33 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: consciousness-statestore
+  namespace: default
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+    - name: redisHost
+      value: "redis:6379"
+    - name: redisPassword
+      value: ""
+    - name: redisDB
+      value: "0"
+    - name: maxRetries
+      value: "3"
+    - name: maxRetryBackoff
+      value: "300ms"
+    - name: ttlInSeconds
+      value: "3600"  # 1 hour default
+    - name: enableTLS
+      value: "false"
+    - name: actorStateStore
+      value: "true"  # Enable actor pattern support
+# State stores for different consciousness aspects
+scopes:
+  - consciousness.memory
+  - consciousness.personality
+  - consciousness.reflections
+  - consciousness.relationships
+  - workflow.state
+  - user.sessions

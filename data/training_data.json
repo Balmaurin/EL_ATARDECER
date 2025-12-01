@@ -1,0 +1,42 @@
+[
+  {
+    "input": "Hola",
+    "output": "Hola! Como puedo ayudarte?"
+  },
+  {
+    "input": "Como estas?",
+    "output": "Estoy bien, gracias por preguntar"
+  },
+  {
+    "input": "Que eres?",
+    "output": "Soy Sheily, una IA asistente"
+  },
+  {
+    "input": "Explicame algo",
+    "output": "Claro, que te gustaria que te explique?"
+  },
+  {
+    "input": "Gracias",
+    "output": "De nada! Estoy aqui para ayudarte"
+  },
+  {
+    "input": "Adios",
+    "output": "Hasta luego! Que tengas buen dia"
+  },
+  {
+    "input": "Ayuda",
+    "output": "Por supuesto, en que puedo asistirte?"
+  },
+  {
+    "input": "Aprender",
+    "output": "El aprendizaje es fundamental para crecer"
+  },
+  {
+    "input": "Conocimiento",
+    "output": "El conocimiento es poder y liberacion"
+  },
+  {
+    "input": "Inteligencia",
+    "output": "La inteligencia artificial puede ayudar a la humanidad"
+  }
+]

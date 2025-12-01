@@ -1,0 +1,32 @@
+services:
+  # Backend usando imagen Python local o alternativa
+  backend:
+    image: python:3.11-alpine
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      sh -c "
+      pip install --no-cache-dir -r requirements.txt &&
+      python -m uvicorn apps.backend.run_federation:app --host 0.0.0.0 --port 8000 --reload
+      "
+    environment:
+      - PYTHONPATH=/app
+      - ADK_ENABLED=true
+      - HACK_MEMORI_AUTO_MODE=true
+    networks:
+      - elamanecer
+
+  # Redis local
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+    networks:
+      - elamanecer
+
+networks:
+  elamanecer:
+    driver: bridge

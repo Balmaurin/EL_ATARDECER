@@ -1,0 +1,12 @@
+[
+  {
+    "timestamp": "2025-12-01T02:23:04.278267",
+    "files_available": 100,
+    "trigger_reason": "Threshold alcanzado: 100 archivos totales, 100 nuevos",
+    "training_result": {
+      "status": "failed",
+      "error": "invalid syntax (smart_training_system.py, line 180)"
+    },
+    "status": "failed"
+  }
+]

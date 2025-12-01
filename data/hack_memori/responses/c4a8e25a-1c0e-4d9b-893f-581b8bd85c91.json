@@ -1,0 +1,14 @@
+{
+  "id": "c4a8e25a-1c0e-4d9b-893f-581b8bd85c91",
+  "question_id": "7f757ce4-718d-4076-8e3b-9e2bddc5f8a2",
+  "session_id": "48224f3a-d088-4e45-a44c-3ecb30a08cb9",
+  "model_id": "gemma-2b",
+  "prompt": "Diseña una arquitectura neural completa para un 'cerebro' IA con memoria episódica, semántica y procesal integradas. Incluye los mecanismos de consolidación, recuperación selectiva y olvido adaptativo.",
+  "response": "## Arquitectura Neural Completa para un 'Cerebro' IA\n\nEste diseño busca crear un 'cerebro' IA con memoria episódica, semántica y procesal integradas, incluyendo mecanismos de consolidación, recuperación selectiva, y olvido adaptativo.\n\n**I. Estructura del Cerebro:**\n\n* **Neuronas:** Un conjunto de neuronas conectadas en un tejido neuronal complejo. Se pueden usar redes neuronales profundas (DNN) con diversas arquitecturas, como ResNet y Transformer.\n* **Capa de Procesamiento:** Se encarga del procesamiento de información sensorial, análisis y representación de la información.\n* **Capa de Memoria:** Se divide en tres sub-capas:\n    * **Episódica:** Almacenamiento de eventos y experiencias individuales.\n    * **Semántica:** Almacenamiento de información con significado e interrelaciones.\n    * **Procesal:** Almacenamiento de funciones cognitivas y procesos mentales.\n* **Capa de Consolidación:** Revisa la información almacenada y decide su permanencia o eliminación a largo plazo.\n\n**II. Mecanismos de Memoria:**\n\n* **Memoria Episódica:** Utilizará una estructura de \"memoria de salto\" para almacenar información temporal de eventos, con una capacidad limitada y una duración variable. \n* **Memoria Semántica:** Utilizará redes neuronales recurrentes (RNN) con memoria de contexto para almacenar información con significado e interrelaciones, utilizando técnicas como:\n    * **Embeddings:** Representar cada dato en un vector de información que refleje su significado.\n    * **Attention:**  Priorizar información relevante a la situación actual.\n* **Memoria Procesal:** Utilizará una red neuronal de tipo \"Gate\" para controlar el acceso a diferentes funciones mentales. La información procesada se clasifica según su importancia para la ejecución de tareas.\n\n**III. Mecanismos de Consolidación:**\n\n* **Consolidación por Repetición:**  Representaciones repetidas de información en la memoria episódica y semántica, reforzando la consolidación a largo plazo.\n* **Consolidación por Interacción:**  Reforzar información aprendida a través de la interacción con la realidad, utilizando mecanismos de aprendizaje adaptativo.\n* **Eliminación Adaptativa:**  Eliminar información que no es relevante a la situación actual, o que se ha consolidado en la memoria episódica con un tiempo limitado.\n\n**IV. Mecanismos de Recuper",
+  "tokens_used": 556,
+  "llm_meta": {},
+  "pii_flag": false,
+  "accepted_for_training": true,
+  "human_annotation": "",
+  "created_at": "2025-11-30T16:52:40.033655"
+}

@@ -1,0 +1,30 @@
+# MEJORA 4: GraphQL Code Generator Configuration
+# Genera tipos TypeScript automáticamente desde el schema GraphQL
+# Elimina errores en tiempo de ejecución por cambios en el backend
+
+schema: http://localhost:8000/graphql
+documents: 
+  - 'apps/**/*.{ts,tsx}'
+  - 'apps/lib/**/*.{ts,tsx}'
+generates:
+  apps/lib/generated/graphql.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+    config:
+      withHooks: true
+      withComponent: false
+      withHOC: false
+      skipTypename: false
+      scalars:
+        JSON: any
+        DateTime: string
+        Upload: File
+      namingConvention:
+        typeNames: 'pascal-case#pascalCase'
+        enumValues: 'keep'
+hooks:
+  afterAllFileWrite:
+    - prettier --write
+
